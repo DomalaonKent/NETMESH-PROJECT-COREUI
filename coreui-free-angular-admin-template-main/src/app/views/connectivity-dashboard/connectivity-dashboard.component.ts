@@ -2,30 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; 
 
-interface ConnectivityData {
-  id: number;
-  province: string;
-  cityMunicipality: string;
-  barangay: string;
-  location: string;
-  validationDate: string;
-  validationTime: string;
-  technology: string;
-  serviceProvider: string;
-  upload: number;
-  download: number;
-  signalStrength: string | null;
-}
+// ✅ Import your service and interface from the service file
+import { ConnectivityService, ConnectivityData } from './connectivity.service';
 
 @Component({
   selector: 'app-connectivity-dashboard',
   standalone: true,
-  imports: [CommonModule, 
-    FormsModule,
-    CommonModule,
-],
+  imports: [CommonModule, FormsModule],  // ← removed duplicate CommonModule
   templateUrl: './connectivity-dashboard.component.html',
   styleUrls: ['./connectivity-dashboard.component.scss']
 })
@@ -34,34 +18,21 @@ export class ConnectivityDashboardComponent implements OnInit {
   allData: ConnectivityData[] = [];
   filteredData: ConnectivityData[] = [];
   searchTerm: string = '';
-  sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
   selectedItems: number[] = [];
   selectAll: boolean = false;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  // ✅ Inject the SERVICE, not HttpClient directly
+  constructor(private router: Router, private connectivityService: ConnectivityService) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    this.http.get<any[]>('assets/data/validation.data.json').subscribe({
+    // ✅ Call the service method
+    this.connectivityService.getData().subscribe({
       next: (data) => {
-        this.allData = data.map(item => ({
-          id: item.ID ?? item.id,
-          province: item.Province ?? item.province,
-          cityMunicipality: item.CityMunicipality ?? item.cityMunicipality,
-          barangay: item.Barangay ?? item.barangay,
-          location: item.Location ?? item.location,
-          validationDate: item.ValidationDate ?? item.validationDate,
-          validationTime: item.ValidationTime ?? item.validationTime,
-          technology: item.Technology ?? item.technology,
-          serviceProvider: item.ServiceProvider ?? item.serviceProvider,
-          upload: item.Upload ?? item.upload,
-          download: item.Download ?? item.download,
-          signalStrength: item.SignalStrength ?? item.signalStrength ?? null
-        }));
+        this.allData = data;
         this.filteredData = [...this.allData];
       },
       error: (err) => {
@@ -70,9 +41,7 @@ export class ConnectivityDashboardComponent implements OnInit {
     });
   }
 
-  goBack(): void {
-    this.router.navigate(['/task3']);
-  }
+  goBack(): void { this.router.navigate(['/task3']); }
 
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
@@ -95,9 +64,7 @@ export class ConnectivityDashboardComponent implements OnInit {
     this.updateSelectAll();
   }
 
-  isSelected(id: number): boolean {
-    return this.selectedItems.includes(id);
-  }
+  isSelected(id: number): boolean { return this.selectedItems.includes(id); }
 
   onSelectAll(): void {
     this.selectedItems = this.selectAll ? this.filteredData.map(item => item.id) : [];
