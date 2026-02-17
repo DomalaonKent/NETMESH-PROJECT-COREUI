@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http'; 
 
 interface ConnectivityData {
   id: number;
@@ -38,14 +39,35 @@ export class ConnectivityDashboardComponent implements OnInit {
   selectedItems: number[] = [];
   selectAll: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    
+    this.http.get<any[]>('assets/data/validation.data.json').subscribe({
+      next: (data) => {
+        this.allData = data.map(item => ({
+          id: item.ID ?? item.id,
+          province: item.Province ?? item.province,
+          cityMunicipality: item.CityMunicipality ?? item.cityMunicipality,
+          barangay: item.Barangay ?? item.barangay,
+          location: item.Location ?? item.location,
+          validationDate: item.ValidationDate ?? item.validationDate,
+          validationTime: item.ValidationTime ?? item.validationTime,
+          technology: item.Technology ?? item.technology,
+          serviceProvider: item.ServiceProvider ?? item.serviceProvider,
+          upload: item.Upload ?? item.upload,
+          download: item.Download ?? item.download,
+          signalStrength: item.SignalStrength ?? item.signalStrength ?? null
+        }));
+        this.filteredData = [...this.allData];
+      },
+      error: (err) => {
+        console.error('Failed to load data:', err);
+      }
+    });
   }
 
   goBack(): void {

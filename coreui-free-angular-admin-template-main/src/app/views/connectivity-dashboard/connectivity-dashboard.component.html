@@ -28,7 +28,7 @@
 
   <div class="selection-bar" *ngIf="selectedItems.length > 0">
     <span>{{ selectedItems.length }} selected</span>
-    <button class="btn-edit"> Edit </button>
+    <button class="btn-edit"> Edit</button>
   </div>
 
   <div class="table-container">
@@ -53,6 +53,26 @@
         </tr>
       </thead>
       <tbody>
+        <tr
+          *ngFor="let item of filteredData"
+          [class.selected]="isSelected(item.id)"
+          (click)="toggleSelection(item.id)">
+          <td (click)="$event.stopPropagation()">
+            <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleSelection(item.id)">
+          </td>
+          <td>{{ item.id }}</td>
+          <td>{{ item.province }}</td>
+          <td>{{ item.cityMunicipality }}</td>
+          <td>{{ item.barangay }}</td>
+          <td>{{ item.location }}</td>
+          <td>{{ item.validationDate }}</td>
+          <td>{{ item.validationTime }}</td>
+          <td>{{ item.technology }}</td>
+          <td>{{ item.serviceProvider }}</td>
+          <td>{{ item.upload }}</td>
+          <td>{{ item.download }}</td>
+          <td>{{ item.signalStrength }}</td>
+        </tr>
       </tbody>
     </table>
   </div>
