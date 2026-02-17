@@ -1,119 +1,60 @@
-<div class="page-container">
-  <!-- First Navigation Panel -->
-  <div class="simple-nav-panel">
-    <div class="nav-title">Navigation Panel</div>
-    <div class="nav-links">
-      <div class="nav-link" (click)="navigateToView('dashboard')">Dashboard</div>
-      <div class="nav-link active">Connectivity Datas</div>
-      <div class="nav-link" (click)="navigateToView('settings')">Settings</div>
+<div class="connectivity-dashboard">
+ <div class="page-header">
+    <div class="page-title">
+      <h2>Connectivity Data</h2>
+      <span class="subtitle">Manage and view all connectivity records</span>
+    </div>
+    <div class="header-buttons">
+      <button class="btn-back" (click)="goBack()">← Back</button>
+      <button class="btn-add" (click)="onAddNew()">+ Add New</button>
     </div>
   </div>
-
-  <!-- Second Navigation Panel -->
-  <div class="simple-nav-panel second-nav">
-    <div class="nav-title">Navigation Panel</div>
-    <div class="nav-links">
-      <div class="nav-link" (click)="navigateToView('dashboard')">Dashboard</div>
-      <div class="nav-link active">Connectivity Datas</div>
+  
+  <div class="toolbar">
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search users"
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()">
     </div>
+    <button class="btn-filters" (click)="onFilter()">
+      <span>☰</span> Filters
+    </button>
+    
   </div>
 
-  <div class="connectivity-dashboard">
-    <!-- Rest of your dashboard content remains the same -->
-    <div class="dashboard-header">
-      <div class="search-container">
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Search users"
-          [(ngModel)]="searchTerm"
-          (input)="onSearch()">
-        <i class="search-icon">🔍</i>
-      </div>
-      
-      <div class="header-actions">
-        <button class="btn-add">
-          <span class="icon">+</span> Add New
-        </button>
-        <button class="btn-filters">
-          <span class="icon">☰</span> Filters
-        </button>
-      </div>
-    </div>
-
-    <div class="selection-bar" *ngIf="selectedItems.length > 0">
-      <div class="selection-info">
-        {{ selectedItems.length }} selected
-      </div>
-      <div class="selection-actions">
-        <button class="btn-edit">
-          <span class="icon">✏️</span> Edit
-        </button>
-      </div>
-    </div>
-
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>
-              <input 
-                type="checkbox" 
-                [(ngModel)]="selectAll"
-                (change)="onSelectAll()">
-            </th>
-            <th (click)="sortBy('id')">
-              ID
-              <span class="sort-icon" *ngIf="sortColumn === 'id'">
-                {{ sortDirection === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th (click)="sortBy('province')">
-              Province
-              <span class="sort-icon" *ngIf="sortColumn === 'province'">
-                {{ sortDirection === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th (click)="sortBy('cityMunicipality')">
-              City/Municipality
-              <span class="sort-icon" *ngIf="sortColumn === 'cityMunicipality'">
-                {{ sortDirection === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th (click)="sortBy('barangay')">
-              Barangay
-              <span class="sort-icon" *ngIf="sortColumn === 'barangay'">
-                {{ sortDirection === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of filteredData" 
-              [class.selected]="isSelected(item.id)"
-              (click)="toggleSelection(item.id)">
-            <td (click)="$event.stopPropagation()">
-              <input 
-                type="checkbox" 
-                [checked]="isSelected(item.id)"
-                (change)="toggleSelection(item.id)">
-            </td>
-            <td>{{ item.id }}</td>
-            <td>{{ item.province }}</td>
-            <td>{{ item.cityMunicipality }}</td>
-            <td>{{ item.barangay }}</td>
-          </tr>
-          
-          <tr *ngIf="filteredData.length === 0">
-            <td colspan="5" class="empty-state">
-              <div class="empty-message">
-                <p></p>
-                <small></small>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="selection-bar" *ngIf="selectedItems.length > 0">
+    <span>{{ selectedItems.length }} selected</span>
+    <button class="btn-edit"> Edit </button>
   </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" [(ngModel)]="selectAll" (change)="onSelectAll()">
+          </th>
+          <th>ID</th>
+          <th>Province</th>
+          <th>City / Municipality</th>
+          <th>Barangay</th>
+          <th>Location </th>
+          <th>Validation Date ></th>
+          <th>Validation Time </th>
+          <th>Technology </th>
+          <th>Service Provider </th>
+          <th>Upload </th>
+          <th>Download </th>
+          <th>Signal Strength </th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
 </div>

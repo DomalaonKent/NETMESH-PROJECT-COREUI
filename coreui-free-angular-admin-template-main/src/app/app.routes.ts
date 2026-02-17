@@ -22,7 +22,13 @@ export const routes: Routes = [
       {
       path: 'task3',
       loadComponent: () => import('./views/task3/task3.component').then(m => m.Task3Component),
-      data: { title: 'Connectivity Dashboard' }
+      data: { title: 'Task3' }
+      },
+      {
+      path: 'connectivity-dashboard',
+      loadComponent: () => import('./views/connectivity-dashboard/connectivity-dashboard.component')
+        .then(m => m.ConnectivityDashboardComponent),
+      data: { title: 'Connectivity Datas' }
       },
       {
       path: 'dashboard',

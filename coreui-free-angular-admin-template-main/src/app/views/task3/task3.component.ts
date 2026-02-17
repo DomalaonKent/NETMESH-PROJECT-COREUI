@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import {
   CardComponent,
   CardHeaderComponent,
@@ -44,6 +44,7 @@ interface OJTData {
   styleUrls: ['./task3.component.scss']
 })
 export class Task3Component implements OnInit {
+  [x: string]: any;
 
   @ViewChild('horizontalBarCanvas') horizontalBarCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -83,6 +84,7 @@ export class Task3Component implements OnInit {
   ngOnInit(): void {
     this.totalHours = this.ojtData.reduce((sum, item) => sum + item.hours, 0);
   }
+  constructor(private router: Router) {}
 
   ngAfterViewInit(): void {
     // Only create chart if on dashboard view
@@ -93,6 +95,11 @@ export class Task3Component implements OnInit {
 
   getPercentage(hours: number): string {
     return ((hours / this.totalHours) * 100).toFixed(1) + '%';
+  }
+
+   goToConnectivity(): void {
+    this.router.navigate(['/connectivity-dashboard']);
+    // ⚠️ Change '/connectivity-dashboard' to match your route in app.routes.ts
   }
 
   // NEW: View switching method

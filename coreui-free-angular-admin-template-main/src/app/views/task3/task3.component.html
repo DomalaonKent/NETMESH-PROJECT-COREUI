@@ -1,16 +1,13 @@
 <div class="page-container">
-  <!-- Simple Left Navigation Panel - UPDATED: Added click handlers -->
   <div class="simple-nav-panel">
     <div class="nav-title">Navigation Panel</div>
     <div class="nav-links">
-      <div class="nav-link" [class.active]="currentView === 'dashboard'" (click)="switchView('dashboard')">Dashboard</div>
-      <div class="nav-link" [class.active]="currentView === 'connectivity'" (click)="switchView('connectivity')">Connectivity Datas</div>
-      <div class="nav-link" [class.active]="currentView === 'settings'" (click)="switchView('settings')">Settings</div>
+      <div class="nav-link">Dashboard</div>
+      <div class="nav-link">Settings</div>
     </div>
   </div>
 
-  <!-- WRAPPED: Your existing main area in conditional div -->
-  <div class="main-area" *ngIf="currentView === 'dashboard'">
+  <div class="main-area">
     <div class="welcome-banner">
       <h1> Welcome to Internship Performance Overview </h1>
       <p> Reviewing trainee milestones and historical task completion data. • CoreUI Theme Components</p>
@@ -24,6 +21,9 @@
             Reviewing trainee milestones and historical task completion data.
           </p>
         </div>
+        <button class="btn-connectivity" (click)="goToConnectivity()">
+             Connectivity Datas
+          </button>
         <a routerLink="/dashboard" cButton color="primary" variant="outline">
           Other Charts →
         </a>
@@ -113,23 +113,6 @@
         </c-col>
       </c-row>
 
-    </div>
-  </div>
-
-  <!-- NEW: Connectivity Dashboard View -->
-  <div class="main-area" *ngIf="currentView === 'connectivity'">
-    <app-connectivity-dashboard></app-connectivity-dashboard>
-  </div>
-
-  <!-- NEW: Settings View -->
-  <div class="main-area" *ngIf="currentView === 'settings'">
-    <div class="settings-placeholder">
-      <c-card>
-        <c-card-header><strong>Settings</strong></c-card-header>
-        <c-card-body>
-          <p>Settings page coming soon...</p>
-        </c-card-body>
-      </c-card>
     </div>
   </div>
 </div>
