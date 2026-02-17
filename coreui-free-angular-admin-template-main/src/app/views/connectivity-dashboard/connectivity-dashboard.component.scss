@@ -1,0 +1,260 @@
+.page-container {
+  display: flex;
+}
+.simple-nav-panel {
+  width: 250px;
+  background: white;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.nav-title {
+  background: #5856d6;
+  color: white;
+  padding: 15px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 12px 15px;
+  color: #5856d6;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  background: #f0f0ff;
+  padding-left: 20px;
+}
+
+.nav-link.active {
+  background: #5856d6;
+  color: white;
+  font-weight: 600;
+}
+
+.connectivity-dashboard {
+  justify-content: center;
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 50px;
+  font-size: 14px;
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4db8c5;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #999;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.header-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-add {
+  background: #4db8c5;
+  color: white;
+}
+
+.btn-add:hover {
+  background: #3da5b1;
+}
+
+.btn-filters {
+  background: white;
+  color: #4db8c5;
+  border: 1px solid #4db8c5;
+}
+
+.btn-filters:hover {
+  background: #f0f9fa;
+}
+
+.selection-bar {
+  background: #4db8c5;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.selection-actions button {
+  padding: 8px 16px;
+  border: 1px solid white;
+  background: transparent;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.selection-actions button:hover {
+  background: white;
+  color: #4db8c5;
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.data-table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+}
+
+.data-table th:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.data-table th:hover {
+  background: #e9ecef;
+}
+
+.sort-icon {
+  margin-left: 6px;
+  font-size: 12px;
+  color: #4db8c5;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+}
+
+.data-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.data-table tbody tr.selected {
+  background: #e8f5f7;
+}
+
+.data-table td {
+  padding: 14px 12px;
+  color: #495057;
+}
+
+.data-table td:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-message p {
+  font-size: 16px;
+  color: #6c757d;
+  margin-bottom: 8px;
+}
+
+.empty-message small {
+  font-size: 13px;
+  color: #adb5bd;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4db8c5;
+}
+
+@media (max-width: 768px) {
+  .simple-nav-panel {
+    position: relative;
+    width: 100%;
+  }
+  
+  .connectivity-dashboard {
+    margin-left: 0;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+  }
+  
+  .search-container {
+    max-width: 100%;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    min-width: 800px;
+  }
+}

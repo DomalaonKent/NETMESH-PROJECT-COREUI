@@ -1,0 +1,136 @@
+<div class="animated fadeIn">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <div>
+      <h2 class="mb-1">OJT Accomplishment Overview</h2>
+      <p class="text-medium-emphasis mb-1">Reviewing trainee milestones and historical task completion data.</p>
+    </div>
+    <div>
+      <a routerLink="/task3" cButton color="primary" variant="outline">
+        ← View Chart
+      </a>
+    </div>
+  </div>
+
+  <c-row class="mb-1">
+    <c-col xs="12" sm="6" lg="3">
+      <c-card class="mb-2" style="min-height: 100px;">
+        <c-card-body class="pb-3 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ totalHours }}</div>
+            <div class="text-medium-emphasis text-uppercase fw-semibold small">Total Hours</div>
+          </div>
+          <div class="bg-primary text-white p-3 rounded" style="background: linear-gradient(135deg, #5856d6 0%, #4745b3 100%) !important;">
+            <svg cIcon name="cilClock" size="xl"></svg>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3">
+      <c-card class="mb-2" style="min-height: 100px;">
+        <c-card-body class="pb-3 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ averageHours }}</div>
+            <div class="text-medium-emphasis text-uppercase fw-semibold small">Average Hours</div>
+          </div>
+          <div class="bg-success text-white p-3 rounded" style="background: linear-gradient(135deg, #2eb85c 0%, #1e7e34 100%) !important;">
+            <svg cIcon name="cilChartLine" size="xl"></svg>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3">
+      <c-card class="mb-2" style="min-height: 100px;">
+        <c-card-body class="pb-3 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ ojtData.length }}</div>
+            <div class="text-medium-emphasis text-uppercase fw-semibold small">OJT Members</div>
+          </div>
+          <div class="bg-warning text-white p-3 rounded" style="background: linear-gradient(135deg, #f9b115 0%, #c87f0a 100%) !important;">
+            <svg cIcon name="cilPeople" size="xl"></svg>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3">
+      <c-card class="mb-2" style="min-height: 100px;">
+        <c-card-body class="pb-3 d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fs-4 fw-semibold">{{ ojtData[0].name }}</div>
+            <div class="text-medium-emphasis text-uppercase fw-semibold small">Top Performer</div>
+          </div>
+          <div class="bg-danger text-white p-3 rounded" style="background: linear-gradient(135deg, #e55353 0%, #b21f1f 100%) !important;">
+            <svg cIcon name="cilStar" size="xl"></svg>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <c-row class="mb-1" style="margin-left: -8px; margin-right: -8px;">
+    <c-col xs="12" lg="6" class="mb-2" style="padding-left: 8px; padding-right: 8px;">
+      <c-card class="h-55">
+        <c-card-header class="d-flex justify-content-between align-items-center py-2">
+          <strong>Horizontal Bar Chart</strong>
+          <c-badge color="success">Quadrant 1</c-badge>
+        </c-card-header>
+        <c-card-body class="py-1 px-2">
+          <p class="text-medium-emphasis mb-2 small">Total Hours per Trainee</p>
+          <div class="chart-wrapper" style="height: 220px; position: relative;">
+            <canvas #horizontalBarCanvas></canvas>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" lg="6" class="mb-1" style="padding-left: 8px; padding-right: 8px;">
+      <c-card class="h-55">
+        <c-card-header class="d-flex justify-content-between align-items-center py-2">
+          <strong>Pie Chart</strong>
+          <c-badge color="warning">Quadrant 2</c-badge>
+        </c-card-header>
+        <c-card-body class="py-1 px-2">
+          <p class="text-medium-emphasis mb-2 small">Team Hours Distribution</p>
+          <div class="chart-wrapper" style="height: 220px; position: relative;">
+            <canvas #pieChartCanvas></canvas>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <c-row class="mb-1" style="margin-left: -8px; margin-right: -8px;">
+    <c-col xs="12" lg="6" class="mb-1" style="padding-left: 8px; padding-right: 8px;">
+      <c-card class="h-55">
+        <c-card-header class="d-flex justify-content-between align-items-center py-2">
+          <strong>Line Chart</strong>
+          <c-badge color="info">Quadrant 3</c-badge>
+        </c-card-header>
+        <c-card-body class="py-2 px-3">
+          <p class="text-medium-emphasis mb-2 small">Hours Progress Trend</p>
+          <div class="chart-wrapper" style="height: 260px; position: relative;">
+            <canvas #lineChartCanvas></canvas>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" lg="6" class="mb-1" style="padding-left: 8px; padding-right: 8px;">
+      <c-card class="h-55">
+        <c-card-header class="d-flex justify-content-between align-items-center py-2">
+          <strong>Gauge Chart</strong>
+          <c-badge color="danger">Quadrant 4</c-badge>
+        </c-card-header>
+        <c-card-body class="py-2 px-3">
+          <p class="text-medium-emphasis mb-2 small">Overall Progress</p>
+          <div class="chart-wrapper" style="height: 260px; position: relative;">
+            <canvas #gaugeCanvas></canvas>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+</div>
