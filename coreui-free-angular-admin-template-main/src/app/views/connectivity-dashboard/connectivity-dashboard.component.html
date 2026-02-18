@@ -66,6 +66,62 @@
         </div>
       </div>
     </div>
+
+    <div class="summary-card card-dito">
+      <div class="card-header">
+        <span class="card-logo dito-logo">DITO</span>
+      </div>
+      <div class="card-stats">
+        <div class="stat-row">
+          <span class="stat-label">Total Tests Performed</span>
+          <span class="stat-value">{{ ditoStats.totalTests }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Upload</span>
+          <span class="stat-value">{{ ditoStats.avgUpload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Download</span>
+          <span class="stat-value">{{ ditoStats.avgDownload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Barangays without signal</span>
+          <span class="stat-value neutral">{{ ditoStats.noSignal }}</span>
+        </div>
+        <div class="stat-row warn">
+          <span class="stat-label">Barangays weak signal / Download</span>
+          <span class="stat-value warn">{{ ditoStats.weakSignal }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card card-all">
+      <div class="card-header">
+        <span class="card-logo all-logo">All Telcos</span>
+      </div>
+      <div class="card-stats">
+        <div class="stat-row">
+          <span class="stat-label">Total Tests Performed</span>
+          <span class="stat-value">{{ allStats.totalTests }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Upload</span>
+          <span class="stat-value">{{ allStats.avgUpload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Download</span>
+          <span class="stat-value">{{ allStats.avgDownload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Barangays without signal</span>
+          <span class="stat-value neutral">{{ allStats.noSignal }}</span>
+        </div>
+        <div class="stat-row warn">
+          <span class="stat-label">Barangays weak signal / Download</span>
+          <span class="stat-value warn">{{ allStats.weakSignal }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="toolbar">

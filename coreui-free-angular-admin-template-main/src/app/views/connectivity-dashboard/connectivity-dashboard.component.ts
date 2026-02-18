@@ -28,7 +28,9 @@ export class ConnectivityDashboardComponent implements OnInit {
   selectAll: boolean = false;
 
   smartStats: ProviderStats = this.emptyStats();
-  globeStats: ProviderStats = this.emptyStats(); 
+  globeStats: ProviderStats = this.emptyStats();
+  ditoStats:  ProviderStats = this.emptyStats();
+  allStats:   ProviderStats = this.emptyStats();
 
   constructor(private router: Router, private connectivityService: ConnectivityService) {}
 
@@ -56,10 +58,15 @@ export class ConnectivityDashboardComponent implements OnInit {
   computeStats(): void {
     const smartRows = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'smart');
     this.smartStats = this.calcStats(smartRows);
+
     const globeRows = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'globe');
     this.globeStats = this.calcStats(globeRows);
+
+    const ditoRows = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito');
+    this.ditoStats = this.calcStats(ditoRows);
+
+    this.allStats = this.calcStats(this.allData);
   }
-  
 
   private calcStats(rows: ConnectivityData[]): ProviderStats {
     if (!rows.length) return this.emptyStats();
@@ -68,6 +75,7 @@ export class ConnectivityDashboardComponent implements OnInit {
     const toNum = (v: any) => parseFloat(v) || 0;
     const avgUpload   = rows.reduce((s, r) => s + toNum(r.upload),   0) / totalTests;
     const avgDownload = rows.reduce((s, r) => s + toNum(r.download), 0) / totalTests;
+
     const noSignalBarangays = new Set(
       rows.filter(r => !r.signalStrength || Number(r.signalStrength) === 0)
           .map(r => r.barangay)
