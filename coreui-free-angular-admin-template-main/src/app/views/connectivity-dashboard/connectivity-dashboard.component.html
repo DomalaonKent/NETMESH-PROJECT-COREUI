@@ -10,6 +10,64 @@
     </div>
   </div>
 
+  <div class="summary-cards summary-cards--two">
+    <div class="summary-card card-smart">
+      <div class="card-header">
+        <span class="card-logo smart-logo">▲ Smart</span>
+      </div>
+      <div class="card-stats">
+        <div class="stat-row">
+          <span class="stat-label">Total Tests Performed</span>
+          <span class="stat-value">{{ smartStats.totalTests }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Upload</span>
+          <span class="stat-value">{{ smartStats.avgUpload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Download</span>
+          <span class="stat-value">{{ smartStats.avgDownload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Barangays without signal</span>
+          <span class="stat-value neutral">{{ smartStats.noSignal }}</span>
+        </div>
+        <div class="stat-row warn">
+          <span class="stat-label">Barangays weak signal / Download</span>
+          <span class="stat-value warn">{{ smartStats.weakSignal }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card card-globe">
+      <div class="card-header">
+        <span class="card-logo globe-logo">Globe</span>
+      </div>
+      <div class="card-stats">
+        <div class="stat-row">
+          <span class="stat-label">Total Tests Performed</span>
+          <span class="stat-value">{{ globeStats.totalTests }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Upload</span>
+          <span class="stat-value">{{ globeStats.avgUpload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Download</span>
+          <span class="stat-value">{{ globeStats.avgDownload | number:'1.2-2' }} Mbps</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Barangays without signal</span>
+          <span class="stat-value neutral">{{ globeStats.noSignal }}</span>
+        </div>
+        <div class="stat-row warn">
+          <span class="stat-label">Barangays weak signal / Download</span>
+          <span class="stat-value warn">{{ globeStats.weakSignal }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toolbar">
     <div class="search-container">
       <span class="search-icon">🔍</span>
@@ -42,7 +100,7 @@
           <th>City / Municipality</th>
           <th>Barangay</th>
           <th>Location</th>
-          <th>Validation Date ></th>
+          <th>Validation Date</th>
           <th>Validation Time</th>
           <th>Technology</th>
           <th>Service Provider</th>
@@ -52,38 +110,28 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container>
-          <tr
-            *ngFor="let item of filteredData"
-            [class.selected]="isSelected(item.id)"
-            (click)="toggleSelection(item.id)">
-            <td (click)="$event.stopPropagation()">
-              <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleSelection(item.id)">
-            </td>
-            <td>{{ item.id }}</td>
-            <td>{{ item.province }}</td>
-            <td>{{ item.cityMunicipality }}</td>
-            <td>{{ item.barangay }}</td>
-            <td>{{ item.location }}</td>
-            <td>{{ item.validationDate }}</td>
-            <td>{{ item.validationTime }}</td>
-            <td>{{ item.technology }}</td>
-            <td [ngClass]="'provider-' + item.serviceProvider.toLowerCase()">{{ item.serviceProvider }}</td>
-            <td>{{ item.upload }}</td>
-            <td>{{ item.download }}</td>
-            <td>{{ item.signalStrength }}</td>
-          </tr>
-        </ng-container>
-        <ng-template #emptyState>
-          <tr>
-            <td colspan="13">
-              <div class="empty-state">
-                <p></p>
-                <small></small>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
+        <tr
+          *ngFor="let item of filteredData"
+          [class.selected]="isSelected(item.id)"
+          (click)="toggleSelection(item.id)">
+          <td (click)="$event.stopPropagation()">
+            <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleSelection(item.id)">
+          </td>
+          <td>{{ item.id }}</td>
+          <td>{{ item.province }}</td>
+          <td>{{ item.cityMunicipality }}</td>
+          <td>{{ item.barangay }}</td>
+          <td>{{ item.location }}</td>
+          <td>{{ item.validationDate }}</td>
+          <td>{{ item.validationTime }}</td>
+          <td>{{ item.technology }}</td>
+          <td [ngClass]="'provider-' + item.serviceProvider.toLowerCase()">{{ item.serviceProvider }}</td>
+          <td>{{ item.upload }}</td>
+          <td>{{ item.download }}</td>
+          <td>{{ item.signalStrength }}</td>
+        </tr>
+        <tr *ngIf="filteredData.length === 0">
+        </tr>
       </tbody>
     </table>
   </div>

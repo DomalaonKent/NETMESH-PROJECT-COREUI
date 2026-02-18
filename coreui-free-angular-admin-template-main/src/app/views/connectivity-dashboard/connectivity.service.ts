@@ -18,14 +18,10 @@ export interface ConnectivityData {
   signalStrength: string | null;
 }
 
-@Injectable({
-  providedIn: 'root'   
-})
+@Injectable({ providedIn: 'root' })
 export class ConnectivityService {
-
   private dataUrl = 'assets/data/validation.data.json';
-
-  constructor(private http: HttpClient) {}  
+  constructor(private http: HttpClient) {}
 
   getData(): Observable<ConnectivityData[]> {
     return this.http.get<any[]>(this.dataUrl).pipe(
