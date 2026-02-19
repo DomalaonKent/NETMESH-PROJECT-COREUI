@@ -148,7 +148,7 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>
+          <th class="th-check">
             <input type="checkbox" [(ngModel)]="selectAll" (change)="onSelectAll()">
           </th>
           <th>ID</th>
@@ -167,7 +167,7 @@
       </thead>
       <tbody>
         <tr
-          *ngFor="let item of filteredData"
+          *ngFor="let item of pagedData"
           [class.selected]="isSelected(item.id)"
           (click)="toggleSelection(item.id)">
           <td (click)="$event.stopPropagation()">
@@ -186,9 +186,28 @@
           <td>{{ item.download }}</td>
           <td>{{ item.signalStrength }}</td>
         </tr>
-        <tr *ngIf="filteredData.length === 0">
-        </tr>
       </tbody>
     </table>
   </div>
+
+  <div class="pagination-bar">
+    <div class="pagination-info">
+      <span>Rows per page:</span>
+      <select class="page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+        <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+      </select>
+      <span class="record-count">{{ pageStart }}–{{ pageEnd }} of {{ filteredData.length }}</span>
+    </div>
+    <div class="pagination-controls">
+      <button class="page-btn" (click)="goToPage(1)" [disabled]="currentPage === 1" title="First">«</button>
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1" title="Previous">‹</button>
+      <ng-container *ngFor="let p of pageNumbers">
+        <span *ngIf="p === -1" class="page-ellipsis">…</span>
+        <button *ngIf="p !== -1" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+      </ng-container>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages" title="Next">›</button>
+      <button class="page-btn" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages" title="Last">»</button>
+    </div>
+  </div>
+
 </div>
