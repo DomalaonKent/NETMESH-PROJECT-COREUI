@@ -85,7 +85,6 @@ export class ConnectivityDashboardComponent implements OnInit {
         this.buildDateList();
         this.buildProviderList();
         this.applyFilterAndSort();
-        this.computeStats();
       },
       error: (err: unknown) => {
         console.error('Failed to load data:', err);
@@ -205,13 +204,13 @@ export class ConnectivityDashboardComponent implements OnInit {
   }
 
   computeStats(): void {
-    const smartRows = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'smart');
+    const smartRows = this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'smart');
     this.smartStats = this.calcStats(smartRows);
-    const globeRows = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'globe');
+    const globeRows = this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'globe');
     this.globeStats = this.calcStats(globeRows);
-    const ditoRows  = this.allData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito');
+    const ditoRows  = this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito');
     this.ditoStats  = this.calcStats(ditoRows);
-    this.allStats   = this.calcStats(this.allData);
+    this.allStats   = this.calcStats(this.filteredData);
   }
 
   private calcStats(rows: ConnectivityData[]): ProviderStats {
@@ -290,6 +289,7 @@ export class ConnectivityDashboardComponent implements OnInit {
 
     this.filteredData = result;
     this.applyPagination();
+    this.computeStats();
   }
 
   private extractPeriod(timeStr: string): string {
