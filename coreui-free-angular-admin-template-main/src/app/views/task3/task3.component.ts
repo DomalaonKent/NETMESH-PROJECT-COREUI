@@ -48,10 +48,7 @@ export class Task3Component implements OnInit {
 
   @ViewChild('horizontalBarCanvas') horizontalBarCanvas!: ElementRef<HTMLCanvasElement>;
 
-  // NEW: View switching property
   currentView: string = 'dashboard';
-
-  // ⭐ FILTER DATA
   provinces: string[] = [
     'Albay','Camarines Norte','Camarines Sur',
     'Catanduanes','Masbate','Sorsogon'
@@ -68,26 +65,25 @@ export class Task3Component implements OnInit {
   selectedMonth: string = '';
   selectedYear: number | '' = '';
 
-  // ⭐ OJT DATA
   ojtData: OJTData[] = [
-    { name: 'Karl', hours: 76, color: '#5856d6' },
-    { name: 'Kenji', hours: 62, color: '#9333ea' },
-    { name: 'Lester', hours: 54, color: '#39f' },
-    { name: 'Emmelie', hours: 42, color: '#f9b115' },
+    { name: 'Karl',      hours: 76, color: '#5856d6' },
+    { name: 'Kenji',     hours: 62, color: '#9333ea' },
+    { name: 'Lester',    hours: 54, color: '#39f'    },
+    { name: 'Emmelie',   hours: 42, color: '#f9b115' },
     { name: 'Christian', hours: 42, color: '#e55353' },
-    { name: 'Kent', hours: 36, color: '#2eb85c' }
+    { name: 'Kent',      hours: 36, color: '#2eb85c' }
   ];
 
   totalHours: number = 0;
   private horizontalChart?: Chart;
 
+  constructor(private router: Router) {}
+
   ngOnInit(): void {
     this.totalHours = this.ojtData.reduce((sum, item) => sum + item.hours, 0);
   }
-  constructor(private router: Router) {}
 
   ngAfterViewInit(): void {
-    // Only create chart if on dashboard view
     if (this.currentView === 'dashboard') {
       setTimeout(() => this.createHorizontalBarChart(), 100);
     }
@@ -97,21 +93,17 @@ export class Task3Component implements OnInit {
     return ((hours / this.totalHours) * 100).toFixed(1) + '%';
   }
 
-   goToConnectivity(): void {
+  goToConnectivity(): void {
     this.router.navigate(['/connectivity-dashboard']);
-    // ⚠️ Change '/connectivity-dashboard' to match your route in app.routes.ts
   }
-
-  // NEW: View switching method
+  goToCallSign(): void {
+    this.router.navigate(['/call-sign']);
+  }
   switchView(view: string): void {
     this.currentView = view;
-    
-    // Recreate chart if switching back to dashboard
     if (view === 'dashboard' && this.horizontalBarCanvas) {
       setTimeout(() => this.createHorizontalBarChart(), 100);
     }
-    
-    // Smooth scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -119,8 +111,8 @@ export class Task3Component implements OnInit {
     const ctx = this.horizontalBarCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
 
-    const names = this.ojtData.map(item => item.name);
-    const hours = this.ojtData.map(item => item.hours);
+    const names  = this.ojtData.map(item => item.name);
+    const hours  = this.ojtData.map(item => item.hours);
     const colors = this.ojtData.map(item => item.color);
 
     this.horizontalChart = new Chart(ctx, {

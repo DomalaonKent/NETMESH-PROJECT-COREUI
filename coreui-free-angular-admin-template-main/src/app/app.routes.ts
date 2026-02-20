@@ -39,10 +39,17 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./views/dashboard/dashboard.component').then(m => m.DashboardComponent),
         data: 
-  {
+      {
         title: 'OJT Dashboard'
       }
-    },
+      },
+      {
+      path: 'call-sign',
+      loadComponent: () =>
+        import('./views/call-sign/call-sign.component')
+          .then(m => m.CallSignComponent),
+      data: { title: 'Call Sign' }
+      },
       {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)

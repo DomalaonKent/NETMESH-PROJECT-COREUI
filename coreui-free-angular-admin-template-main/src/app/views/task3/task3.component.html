@@ -21,12 +21,19 @@
             Reviewing trainee milestones and historical task completion data.
           </p>
         </div>
-        <button class="btn-connectivity" (click)="goToConnectivity()">
-             Connectivity Datas
+
+        <div class="action-buttons">
+          <button class="btn-connectivity" (click)="goToConnectivity()">
+            Connectivity Datas
           </button>
-        <a routerLink="/dashboard" cButton color="primary" variant="outline">
-          Other Charts →
-        </a>
+          <button class="btn-call-sign" (click)="goToCallSign()">
+             Call Sign
+          </button>
+
+          <a routerLink="/dashboard" cButton color="primary" variant="outline">
+            Other Charts →
+          </a>
+        </div>
       </div>
 
       <c-row class="mb-4">
