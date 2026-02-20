@@ -247,7 +247,6 @@ export class ConnectivityDashboardComponent implements OnInit {
         this.extractPeriod(item.validationTime) === this.activePeriod
       );
     }
-
     if (this.activeProvider) {
       result = result.filter(item =>
         item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase()
@@ -276,14 +275,17 @@ export class ConnectivityDashboardComponent implements OnInit {
       const col = this.sortColumn;
       const dir = this.sortDirection === 'asc' ? 1 : -1;
       result.sort((a, b) => {
+        if (col === 'id') {
+          return (Number(a.id) - Number(b.id)) * dir;
+        }
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
         const aNum = parseFloat(aVal);
         const bNum = parseFloat(bVal);
-        if (isNaN(aNum) && isNaN(bNum)) return 0;
-        if (isNaN(aNum)) return 1;
-        if (isNaN(bNum)) return -1;
-        return (aNum - bNum) * dir;
+        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
+        if (!aVal && bVal) return 1;
+        if (aVal && !bVal) return -1;
+        return aVal.localeCompare(bVal) * dir;
       });
     }
 
@@ -297,6 +299,7 @@ export class ConnectivityDashboardComponent implements OnInit {
     const match = timeStr.trim().toLowerCase().match(/\b(am|pm)$/);
     return match ? match[1].toUpperCase() : '';
   }
+
   formatTime(timeStr: string): { hour: string; minute: string; period: string } {
     if (!timeStr) return { hour: '--', minute: '--', period: '' };
     const match = timeStr.trim().toLowerCase().match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/);
@@ -311,7 +314,7 @@ export class ConnectivityDashboardComponent implements OnInit {
   onServiceProviderClick(): void {
     this.activeProviderIndex++;
     if (this.activeProviderIndex >= this.providerList.length) {
-      this.activeProviderIndex = -1; 
+      this.activeProviderIndex = -1;
     }
     this.currentPage = 1;
     this.applyFilterAndSort();
@@ -320,7 +323,7 @@ export class ConnectivityDashboardComponent implements OnInit {
   onValidationDateClick(): void {
     this.activeDateIndex++;
     if (this.activeDateIndex >= this.dateList.length) {
-      this.activeDateIndex = -1; 
+      this.activeDateIndex = -1;
     }
     this.currentPage = 1;
     this.applyFilterAndSort();
@@ -329,7 +332,7 @@ export class ConnectivityDashboardComponent implements OnInit {
   onValidationTimeClick(): void {
     this.activePeriodIndex++;
     if (this.activePeriodIndex >= this.periodList.length) {
-      this.activePeriodIndex = -1; 
+      this.activePeriodIndex = -1;
     }
     this.currentPage = 1;
     this.applyFilterAndSort();
@@ -359,12 +362,13 @@ export class ConnectivityDashboardComponent implements OnInit {
         }
       } else {
         this.sortColumn    = column;
-        this.sortDirection = 'desc'; 
+        this.sortDirection = 'desc';
       }
       this.currentPage = 1;
       this.applyFilterAndSort();
       return;
     }
+
     if (this.sortColumn === column) {
       if (this.sortDirection === 'asc') {
         this.sortDirection = 'desc';
@@ -413,6 +417,7 @@ export class ConnectivityDashboardComponent implements OnInit {
   }
 
   onPageSizeChange(): void {
+    this.pageSize = Number(this.pageSize);
     this.currentPage = 1;
     this.applyPagination();
   }

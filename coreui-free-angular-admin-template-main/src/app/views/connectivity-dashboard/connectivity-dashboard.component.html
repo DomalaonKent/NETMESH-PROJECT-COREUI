@@ -13,6 +13,7 @@
   <div class="summary-cards summary-cards--two">
     <div class="summary-card card-smart">
       <div class="card-header">
+        <img src="assets/images/smart.png" class="card-provider-logo" alt="Smart" />
         <span class="card-logo smart-logo">Smart</span>
       </div>
       <div class="card-stats">
@@ -41,6 +42,7 @@
 
     <div class="summary-card card-globe">
       <div class="card-header">
+        <img src="assets/images/globe.png" class="card-provider-logo" alt="Globe" />
         <span class="card-logo globe-logo">Globe</span>
       </div>
       <div class="card-stats">
@@ -69,6 +71,7 @@
 
     <div class="summary-card card-dito">
       <div class="card-header">
+        <img src="assets/images/dito.png" class="card-provider-logo" alt="DITO" />
         <span class="card-logo dito-logo">DITO</span>
       </div>
       <div class="card-stats">
@@ -97,6 +100,7 @@
 
     <div class="summary-card card-all">
       <div class="card-header">
+        <img src="assets/images/alltelco.png" class="card-provider-logo card-provider-logo--tower" alt="All Telcos" />
         <span class="card-logo all-logo">All Telcos</span>
       </div>
       <div class="card-stats">
@@ -319,7 +323,9 @@
             <span class="time-period-plain">{{ formatTime(item.validationTime).period }}</span>
           </td>
           <td>{{ item.technology }}</td>
+
           <td [ngClass]="'provider-' + item.serviceProvider.toLowerCase()">{{ item.serviceProvider }}</td>
+
           <td>{{ item.upload }}</td>
           <td>{{ item.download }}</td>
           <td>{{ item.signalStrength }}</td>
