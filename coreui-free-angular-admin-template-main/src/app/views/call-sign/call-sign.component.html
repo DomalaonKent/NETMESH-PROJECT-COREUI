@@ -30,45 +30,18 @@
       </div>
     </div>
 
-    <div class="summary-card card-icom">
+    <div class="summary-card card-provinces">
       <div class="card-header">
-        <span class="card-logo icom-logo">ICOM</span>
+        <span class="card-logo provinces-logo">Provinces</span>
       </div>
-      <div class="card-stats">
-        <div class="stat-row">
-          <span class="stat-label">Total Units</span>
-          <span class="stat-value">{{ icomStats.totalUnits }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg. TX Freq (MHz)</span>
-          <span class="stat-value">{{ icomStats.avgTxFreq }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg. RX Freq (MHz)</span>
-          <span class="stat-value">{{ icomStats.avgRxFreq }}</span>
+      <div class="province-grid">
+        <div class="province-row" *ngFor="let p of provinceStats">
+          <span class="province-name">{{ p.name }}</span>
+          <span class="province-count">{{ p.count }}</span>
         </div>
       </div>
     </div>
 
-    <div class="summary-card card-kenwood">
-      <div class="card-header">
-        <span class="card-logo kenwood-logo">KENWOOD</span>
-      </div>
-      <div class="card-stats">
-        <div class="stat-row">
-          <span class="stat-label">Total Units</span>
-          <span class="stat-value">{{ kenwoodStats.totalUnits }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg. TX Freq (MHz)</span>
-          <span class="stat-value">{{ kenwoodStats.avgTxFreq }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg. RX Freq (MHz)</span>
-          <span class="stat-value">{{ kenwoodStats.avgRxFreq }}</span>
-        </div>
-      </div>
-    </div>
 
     <div class="summary-card card-licensee">
       <div class="card-header">
@@ -138,7 +111,7 @@
           <th colspan="2" class="freq-group-header">
             <span class="th-inner">FREQUENCY(IES)</span>
           </th>
-          
+
           <th rowspan="2" (click)="sortBy('location')" [class.col-active]="getColSort('location')" [class.col-asc]="getColSort('location') === 'asc'" [class.col-desc]="getColSort('location') === 'desc'">
             <span class="th-inner">Location
               <span class="sort-caret">

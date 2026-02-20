@@ -4,12 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CallSignService, CallSignData } from './call-sign.service';
 
-interface EquipmentStats {
-  totalUnits: number;
-  avgTxFreq: string;
-  avgRxFreq: string;
-}
-
 interface AllStats {
   totalRegistered: number;
   withFrequency: number;
@@ -21,6 +15,11 @@ interface LicenseeStats {
   lguUnits: number;
   municipalities: number;
   uniqueLocations: number;
+}
+
+interface ProvinceStats {
+  name: string;
+  count: number;
 }
 
 @Component({
@@ -47,9 +46,17 @@ export class CallSignComponent implements OnInit {
   sortDirection: 'asc' | 'desc' | null = null;
 
   allStats: AllStats = { totalRegistered: 0, withFrequency: 0, withoutFrequency: 0, uniqueLocations: 0 };
-  icomStats: EquipmentStats = { totalUnits: 0, avgTxFreq: 'N/A', avgRxFreq: 'N/A' };
-  kenwoodStats: EquipmentStats = { totalUnits: 0, avgTxFreq: 'N/A', avgRxFreq: 'N/A' };
+  provinceStats: ProvinceStats[] = [];
   licenseeStats: LicenseeStats = { lguUnits: 0, municipalities: 0, uniqueLocations: 0 };
+
+  private readonly PROVINCES: string[] = [
+    'Albay',
+    'Camarines Norte',
+    'Camarines Sur',
+    'Catanduanes',
+    'Masbate',
+    'Sorsogon'
+  ];
 
   constructor(private router: Router, private callSignService: CallSignService) {}
 
@@ -80,20 +87,13 @@ export class CallSignComponent implements OnInit {
       withoutFrequency: withoutFreq.length,
       uniqueLocations: uniqueLocs.size
     };
-
-    const icomRows = data.filter(d => d.equipment?.toLowerCase().includes('icom'));
-    this.icomStats = {
-      totalUnits: icomRows.length,
-      avgTxFreq: this.avgFreq(icomRows.map(r => r.txFreq ?? '')),
-      avgRxFreq: this.avgFreq(icomRows.map(r => r.rxFreq ?? ''))
-    };
-
-    const kenwoodRows = data.filter(d => d.equipment?.toLowerCase().includes('kenwood'));
-    this.kenwoodStats = {
-      totalUnits: kenwoodRows.length,
-      avgTxFreq: this.avgFreq(kenwoodRows.map(r => r.txFreq ?? '')),
-      avgRxFreq: this.avgFreq(kenwoodRows.map(r => r.rxFreq ?? ''))
-    };
+    
+    this.provinceStats = this.PROVINCES.map(province => ({
+      name: province,
+      count: this.filteredData.filter(d =>
+        (d.location ?? '').toLowerCase().includes(province.toLowerCase())
+      ).length
+    }));
 
     const lguRows = data.filter(d => d.licensee?.toLowerCase().startsWith('lgu'));
     const munRows = data.filter(d => d.licensee?.toLowerCase().startsWith('municipality'));
@@ -102,15 +102,6 @@ export class CallSignComponent implements OnInit {
       municipalities: munRows.length,
       uniqueLocations: uniqueLocs.size
     };
-  }
-
-  private avgFreq(freqs: string[]): string {
-    const nums = freqs
-      .map(f => parseFloat(f?.replace(/[^\d.]/g, '') ?? ''))
-      .filter(n => !isNaN(n) && n > 0);
-    if (!nums.length) return 'N/A';
-    const avg = nums.reduce((a, b) => a + b, 0) / nums.length;
-    return avg.toFixed(3);
   }
 
   private applyFilterAndSort(): void {
@@ -127,7 +118,6 @@ export class CallSignComponent implements OnInit {
         (item.serviceArea ?? '').toLowerCase().includes(term) ||
         (item.equipment ?? '').toLowerCase().includes(term) ||
         (item.serialNumber ?? '').toLowerCase().includes(term) ||
-        (item.source ?? '').toLowerCase().includes(term) ||
         (item.issued ?? '').toLowerCase().includes(term)
       );
     }
