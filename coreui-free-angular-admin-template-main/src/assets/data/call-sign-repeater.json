@@ -1,0 +1,122 @@
+[
+  {
+    "callSign": "DXH-300R",
+    "licensee": "NTC Regional Office V",
+    "txFreq": "146.76 MHz",
+    "rxFreq": "146.16 MHz",
+    "location": "Mt. Mayon, Albay",
+    "serviceArea": "Albay / Sorsogon",
+    "equipment": "ICOM IC-FR3000",
+    "serialNumber": "R001122",
+    "source": "Albay",
+    "issued": "2010-06-15"
+  },
+  {
+    "callSign": "DXH-301R",
+    "licensee": "DICT Bicol Region",
+    "txFreq": "147.36 MHz",
+    "rxFreq": "146.76 MHz",
+    "location": "Mt. Isarog, Camarines Sur",
+    "serviceArea": "Cam Sur / Cam Norte",
+    "equipment": "KENWOOD TKR-750",
+    "serialNumber": "R002233",
+    "source": "Camarines Sur",
+    "issued": "2010-07-20"
+  },
+  {
+    "callSign": "DXH-302R",
+    "licensee": "DOST Sorsogon",
+    "txFreq": "147.96 MHz",
+    "rxFreq": "147.36 MHz",
+    "location": "Bulusan Volcano, Sorsogon",
+    "serviceArea": "Sorsogon",
+    "equipment": "ICOM IC-FR3000",
+    "serialNumber": "R003344",
+    "source": "Sorsogon",
+    "issued": "2010-08-10"
+  },
+  {
+    "callSign": "DXH-303R",
+    "licensee": "PHIVOLCS Bicol",
+    "txFreq": "146.52 MHz",
+    "rxFreq": "145.92 MHz",
+    "location": "Catanduanes Island",
+    "serviceArea": "Catanduanes",
+    "equipment": "MOTOROLA MTR2000",
+    "serialNumber": "R004455",
+    "source": "Catanduanes",
+    "issued": "2010-09-05"
+  },
+  {
+    "callSign": "DXH-304R",
+    "licensee": "PAGASA Masbate",
+    "txFreq": "147.12 MHz",
+    "rxFreq": "146.52 MHz",
+    "location": "Masbate Island Peak",
+    "serviceArea": "Masbate",
+    "equipment": "KENWOOD TKR-850",
+    "serialNumber": "R005566",
+    "source": "Masbate",
+    "issued": "2010-10-01"
+  },
+  {
+    "callSign": "DXH-305R",
+    "licensee": "NTC Camarines Norte",
+    "txFreq": "147.72 MHz",
+    "rxFreq": "147.12 MHz",
+    "location": "Mt. Labo, Camarines Norte",
+    "serviceArea": "Camarines Norte",
+    "equipment": "ICOM IC-FR3100",
+    "serialNumber": "R006677",
+    "source": "Camarines Norte",
+    "issued": "2010-11-18"
+  },
+  {
+    "callSign": "DXH-306R",
+    "licensee": "DICT Sorsogon",
+    "txFreq": "148.32 MHz",
+    "rxFreq": "147.72 MHz",
+    "location": "Juban Peak, Sorsogon",
+    "serviceArea": "Sorsogon / Masbate",
+    "equipment": "KENWOOD TKR-750",
+    "serialNumber": "R007788",
+    "source": "Sorsogon",
+    "issued": "2011-01-24"
+  },
+  {
+    "callSign": "DXH-307R",
+    "licensee": "PHIVOLCS Mayon Station",
+    "txFreq": "148.92 MHz",
+    "rxFreq": "148.32 MHz",
+    "location": "Mayon Volcano Observatory, Albay",
+    "serviceArea": "Albay Province",
+    "equipment": "MOTOROLA MTR2000",
+    "serialNumber": "R008899",
+    "source": "Albay",
+    "issued": "2011-03-07"
+  },
+  {
+    "callSign": "DXH-308R",
+    "licensee": "NTC Catanduanes",
+    "txFreq": "146.88 MHz",
+    "rxFreq": "146.28 MHz",
+    "location": "Mt. Buhi, Catanduanes",
+    "serviceArea": "Catanduanes Island",
+    "equipment": "ICOM IC-FR3000",
+    "serialNumber": "R009900",
+    "source": "Catanduanes",
+    "issued": "2011-05-15"
+  },
+  {
+    "callSign": "DXH-309R",
+    "licensee": "PAGASA Albay Station",
+    "txFreq": "147.48 MHz",
+    "rxFreq": "146.88 MHz",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Albay / Camarines Sur",
+    "equipment": "KENWOOD TKR-850",
+    "serialNumber": "R010011",
+    "source": "Albay",
+    "issued": "2011-07-30"
+  }
+]

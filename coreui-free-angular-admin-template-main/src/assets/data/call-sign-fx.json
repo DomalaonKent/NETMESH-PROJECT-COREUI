@@ -1,0 +1,122 @@
+[
+  {
+    "callSign": "DXH-200F",
+    "licensee": "Provincial Capitol Albay",
+    "txFreq": "161.25 MHz",
+    "rxFreq": "161.25 MHz",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Albay Province",
+    "equipment": "ICOM IC-F221",
+    "serialNumber": "F001122",
+    "source": "Albay",
+    "issued": "2011-08-20"
+  },
+  {
+    "callSign": "DXH-201F",
+    "licensee": "Provincial Capitol Camarines Sur",
+    "txFreq": "162.00 MHz",
+    "rxFreq": "162.00 MHz",
+    "location": "Pili, Camarines Sur",
+    "serviceArea": "Cam Sur Province",
+    "equipment": "ICOM IC-F221",
+    "serialNumber": "F002233",
+    "source": "Camarines Sur",
+    "issued": "2011-09-15"
+  },
+  {
+    "callSign": "DXH-202F",
+    "licensee": "NDRRMC Sorsogon",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Sorsogon City, Sorsogon",
+    "serviceArea": "Sorsogon Province",
+    "equipment": "MOTOROLA GM338",
+    "serialNumber": "F003344",
+    "source": "",
+    "issued": "2011-10-10"
+  },
+  {
+    "callSign": "DXH-203F",
+    "licensee": "PAGASA Masbate",
+    "txFreq": "163.50 MHz",
+    "rxFreq": "163.50 MHz",
+    "location": "Masbate City, Masbate",
+    "serviceArea": "Masbate Province",
+    "equipment": "KENWOOD TK-8180",
+    "serialNumber": "F004455",
+    "source": "Masbate",
+    "issued": "2011-11-05"
+  },
+  {
+    "callSign": "DXH-204F",
+    "licensee": "OCD Regional Office V",
+    "txFreq": "164.25 MHz",
+    "rxFreq": "164.25 MHz",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Bicol Region",
+    "equipment": "ICOM IC-F221",
+    "serialNumber": "F005566",
+    "source": "Catanduanes",
+    "issued": "2011-12-01"
+  },
+  {
+    "callSign": "DXH-205F",
+    "licensee": "Provincial Capitol Camarines Norte",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Daet, Camarines Norte",
+    "serviceArea": "Cam Norte Province",
+    "equipment": "ICOM IC-F221",
+    "serialNumber": "F006677",
+    "source": "",
+    "issued": "2012-01-18"
+  },
+  {
+    "callSign": "DXH-206F",
+    "licensee": "PHIVOLCS Albay Observatory",
+    "txFreq": "165.75 MHz",
+    "rxFreq": "165.75 MHz",
+    "location": "Lignon Hill, Legazpi City, Albay",
+    "serviceArea": "Albay Province",
+    "equipment": "MOTOROLA GM338",
+    "serialNumber": "F007788",
+    "source": "Albay",
+    "issued": "2012-02-22"
+  },
+  {
+    "callSign": "DXH-207F",
+    "licensee": "NTC Region V Main Office",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Bicol Region",
+    "equipment": "KENWOOD TK-8180",
+    "serialNumber": "F008899",
+    "source": "",
+    "issued": "2012-03-10"
+  },
+  {
+    "callSign": "DXH-208F",
+    "licensee": "Provincial Capitol Catanduanes",
+    "txFreq": "167.25 MHz",
+    "rxFreq": "167.25 MHz",
+    "location": "Virac, Catanduanes",
+    "serviceArea": "Catanduanes Province",
+    "equipment": "ICOM IC-F221",
+    "serialNumber": "F009900",
+    "source": "Catanduanes",
+    "issued": "2012-04-05"
+  },
+  {
+    "callSign": "DXH-209F",
+    "licensee": "DOST Bicol Regional Office",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Bicol Region",
+    "equipment": "MOTOROLA GM360",
+    "serialNumber": "F010011",
+    "source": "",
+    "issued": "2012-05-14"
+  }
+]

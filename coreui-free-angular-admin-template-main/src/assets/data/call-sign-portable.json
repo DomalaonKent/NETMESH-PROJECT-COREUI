@@ -1,0 +1,122 @@
+[
+  {
+    "callSign": "DXH-001P",
+    "licensee": "LGU Legazpi City",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "City Hall, Legazpi City, Albay",
+    "serviceArea": "",
+    "equipment": "ICOM IC-V80",
+    "serialNumber": "P001234",
+    "source": "",
+    "issued": "2012-03-15"
+  },
+  {
+    "callSign": "DXH-002P",
+    "licensee": "LGU Tabaco City",
+    "txFreq": "145.50 MHz",
+    "rxFreq": "145.50 MHz",
+    "location": "Tabaco City, Albay",
+    "serviceArea": "",
+    "equipment": "KENWOOD TH-K20A",
+    "serialNumber": "P002345",
+    "source": "Albay",
+    "issued": "2012-04-20"
+  },
+  {
+    "callSign": "DXH-003P",
+    "licensee": "LGU Daraga",
+    "txFreq": "146.00 MHz",
+    "rxFreq": "146.00 MHz",
+    "location": "Daraga, Albay",
+    "serviceArea": "",
+    "equipment": "ICOM IC-V80",
+    "serialNumber": "P003456",
+    "source": "Camarines Sur",
+    "issued": "2012-05-10"
+  },
+  {
+    "callSign": "DXH-004P",
+    "licensee": "LGU Oas",
+    "txFreq": "147.25 MHz",
+    "rxFreq": "147.25 MHz",
+    "location": "Oas, Albay",
+    "serviceArea": "",
+    "equipment": "BAOFENG UV-5R",
+    "serialNumber": "P004567",
+    "source": "Sorsogon",
+    "issued": "2012-06-05"
+  },
+  {
+    "callSign": "DXH-005P",
+    "licensee": "MDRRMO Polangui",
+    "txFreq": "148.00 MHz",
+    "rxFreq": "148.00 MHz",
+    "location": "Polangui, Albay",
+    "serviceArea": "",
+    "equipment": "KENWOOD TH-D72A",
+    "serialNumber": "P005678",
+    "source": "Masbate",
+    "issued": "2012-07-01"
+  },
+  {
+    "callSign": "DXH-006P",
+    "licensee": "LGU Ligao City",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Ligao City, Albay",
+    "serviceArea": "",
+    "equipment": "ICOM IC-V80",
+    "serialNumber": "P006789",
+    "source": "",
+    "issued": "2012-08-14"
+  },
+  {
+    "callSign": "DXH-007P",
+    "licensee": "LGU Pioduran",
+    "txFreq": "146.50 MHz",
+    "rxFreq": "146.50 MHz",
+    "location": "Pioduran, Albay",
+    "serviceArea": "",
+    "equipment": "BAOFENG UV-82",
+    "serialNumber": "P007890",
+    "source": "Albay",
+    "issued": "2012-09-03"
+  },
+  {
+    "callSign": "DXH-008P",
+    "licensee": "MDRRMO Camalig",
+    "txFreq": "147.75 MHz",
+    "rxFreq": "147.75 MHz",
+    "location": "Camalig, Albay",
+    "serviceArea": "",
+    "equipment": "KENWOOD TH-K40A",
+    "serialNumber": "P008901",
+    "source": "Albay",
+    "issued": "2012-10-11"
+  },
+  {
+    "callSign": "DXH-009P",
+    "licensee": "LGU Guinobatan",
+    "txFreq": "",
+    "rxFreq": "",
+    "location": "Guinobatan, Albay",
+    "serviceArea": "",
+    "equipment": "ICOM IC-T70A",
+    "serialNumber": "P009012",
+    "source": "",
+    "issued": "2012-11-22"
+  },
+  {
+    "callSign": "DXH-010P",
+    "licensee": "LGU Malilipot",
+    "txFreq": "145.00 MHz",
+    "rxFreq": "145.00 MHz",
+    "location": "Malilipot, Albay",
+    "serviceArea": "",
+    "equipment": "BAOFENG UV-5R",
+    "serialNumber": "P010123",
+    "source": "Sorsogon",
+    "issued": "2012-12-05"
+  }
+]
