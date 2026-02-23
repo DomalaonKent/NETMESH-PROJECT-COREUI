@@ -9,25 +9,37 @@
     </div>
   </div>
 
+  <div class="carousel-wrapper">
+    <button class="carousel-arrow" (click)="prevTab()" [disabled]="tabIndex === 0">&#8249;</button>
 
-  <div class="tab-nav">
-    <button class="tab-btn" [class.active]="activeTab === 'portable'" (click)="onTabChange('portable')">
-      Portable Government
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'fb'" (click)="onTabChange('fb')">
-      FB Government
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'mobile'" (click)="onTabChange('mobile')">
-      Mobile Government
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'fx'" (click)="onTabChange('fx')">
-      FX Government
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'repeater'" (click)="onTabChange('repeater')">
-      Repeater
-    </button>
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'portable'" (click)="onTabChange('portable')">
+        Portable Government
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'fb'" (click)="onTabChange('fb')">
+        FB Government
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'mobile'" (click)="onTabChange('mobile')">
+        Mobile Government
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'fx'" (click)="onTabChange('fx')">
+        FX Government
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'repeater'" (click)="onTabChange('repeater')">
+        Repeater
+      </button>
+    </div>
+
+    <button class="carousel-arrow" (click)="nextTab()" [disabled]="tabIndex === tabs.length - 1">&#8250;</button>
   </div>
 
+  <div class="carousel-dots">
+    <span class="dot" [class.active]="tabIndex === 0" (click)="goToTab(0)"></span>
+    <span class="dot" [class.active]="tabIndex === 1" (click)="goToTab(1)"></span>
+    <span class="dot" [class.active]="tabIndex === 2" (click)="goToTab(2)"></span>
+    <span class="dot" [class.active]="tabIndex === 3" (click)="goToTab(3)"></span>
+    <span class="dot" [class.active]="tabIndex === 4" (click)="goToTab(4)"></span>
+  </div>
   <div class="summary-cards">
     <div class="summary-card card-all">
       <div class="card-header">

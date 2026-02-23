@@ -36,13 +36,14 @@ interface TabDef {
 })
 export class CallSignComponent implements OnInit {
   tabs: TabDef[] = [
-    { key: 'portable',  label: 'Portable Govt'},
+    { key: 'portable',  label: 'Portable Govt',},
     { key: 'fb',        label: 'FB Govt'},
     { key: 'mobile',    label: 'Mobile Govt'},
     { key: 'fx',        label: 'FX Govt'},
     { key: 'repeater',  label: 'Repeater'},
   ];
   activeTab: string = 'fb';
+  tabIndex: number = 1;
 
   private allDataByTab: Record<string, CallSignData[]> = {
     portable: [],
@@ -90,7 +91,6 @@ export class CallSignComponent implements OnInit {
       this.callSignService.getDataByType(tab.key).subscribe({
         next: (data: CallSignData[]) => {
           this.allDataByTab[tab.key] = data;
-          // If this is the active tab, apply filter
           if (tab.key === this.activeTab) {
             this.allData = data;
             this.applyFilterAndSort();
@@ -256,6 +256,25 @@ export class CallSignComponent implements OnInit {
     if (eq.includes('icom')) return 'equip-icom';
     if (eq.includes('kenwood')) return 'equip-kenwood';
     return '';
+  }
+
+  prevTab(): void {
+    if (this.tabIndex > 0) {
+      this.tabIndex--;
+      this.onTabChange(this.tabs[this.tabIndex].key);
+    }
+  }
+
+  nextTab(): void {
+    if (this.tabIndex < this.tabs.length - 1) {
+      this.tabIndex++;
+      this.onTabChange(this.tabs[this.tabIndex].key);
+    }
+  }
+
+  goToTab(index: number): void {
+    this.tabIndex = index;
+    this.onTabChange(this.tabs[index].key);
   }
 
   goBack(): void { this.router.navigate(['/task3']); }
