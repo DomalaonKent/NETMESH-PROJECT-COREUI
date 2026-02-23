@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 export interface CallSignData {
   id: number;
@@ -19,25 +20,44 @@ export interface CallSignData {
 
 @Injectable({ providedIn: 'root' })
 export class CallSignService {
-  private dataUrl = 'assets/data/call-sign.json';
 
   constructor(private http: HttpClient) {}
 
-  getData(): Observable<CallSignData[]> {
-    return this.http.get<any[]>(this.dataUrl).pipe(
-      map(data => data.map((item, i) => ({
-        id: i + 1,
-        callSign: item.callSign ?? '',
-        licensee: item.licensee ?? '',
-        txFreq: item.txFreq ?? null,
-        rxFreq: item.rxFreq ?? null,
-        location: item.location ?? '',
-        serviceArea: item.serviceArea ?? '',
-        equipment: item.equipment ?? null,
-        serialNumber: item.serialNumber ?? null,
-        source: item.source ?? '',
-        issued: item.issued ?? null,
-      })))
+  getDataByType(type: string): Observable<CallSignData[]> {
+    const url = `assets/data/call-sign-${type}.json`;
+    const fallbackUrl = `assets/data/call-sign.json`;
+
+    return this.http.get<any[]>(url).pipe(
+      map(data => this.mapData(data)),
+      catchError(() => {
+        if (type === 'fb') {
+          return this.http.get<any[]>(fallbackUrl).pipe(
+            map(data => this.mapData(data)),
+            catchError(() => of([]))
+          );
+        }
+        return of([]);
+      })
     );
+  }
+
+  getData(): Observable<CallSignData[]> {
+    return this.getDataByType('fb');
+  }
+
+  private mapData(data: any[]): CallSignData[] {
+    return data.map((item, i) => ({
+      id: i + 1,
+      callSign: item.callSign ?? '',
+      licensee: item.licensee ?? '',
+      txFreq: item.txFreq ?? null,
+      rxFreq: item.rxFreq ?? null,
+      location: item.location ?? '',
+      serviceArea: item.serviceArea ?? '',
+      equipment: item.equipment ?? null,
+      serialNumber: item.serialNumber ?? null,
+      source: item.source ?? '',
+      issued: item.issued ?? null,
+    }));
   }
 }

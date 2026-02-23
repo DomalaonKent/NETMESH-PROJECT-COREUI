@@ -2,11 +2,30 @@
   <div class="page-header">
     <div class="page-title">
       <h2>Call Sign Overview</h2>
-      <span class="subtitle">Registry of Issued Call Signs — NTC Regional Office (FB Government)</span>
+      <span class="subtitle">Registry of Issued Call Signs — NTC Regional Office (Gov't)</span>
     </div>
     <div class="header-buttons">
       <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
     </div>
+  </div>
+
+
+  <div class="tab-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'portable'" (click)="onTabChange('portable')">
+      Portable Government
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'fb'" (click)="onTabChange('fb')">
+      FB Government
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'mobile'" (click)="onTabChange('mobile')">
+      Mobile Government
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'fx'" (click)="onTabChange('fx')">
+      FX Government
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'repeater'" (click)="onTabChange('repeater')">
+      Repeater
+    </button>
   </div>
 
   <div class="summary-cards">
@@ -41,7 +60,6 @@
         </div>
       </div>
     </div>
-
 
     <div class="summary-card card-licensee">
       <div class="card-header">
@@ -107,11 +125,9 @@
               </span>
             </span>
           </th>
-
           <th colspan="2" class="freq-group-header">
             <span class="th-inner">FREQUENCY(IES)</span>
           </th>
-
           <th rowspan="2" (click)="sortBy('location')" [class.col-active]="getColSort('location')" [class.col-asc]="getColSort('location') === 'asc'" [class.col-desc]="getColSort('location') === 'desc'">
             <span class="th-inner">Location
               <span class="sort-caret">
@@ -158,7 +174,6 @@
             </span>
           </th>
         </tr>
-
         <tr class="thead-row-2">
           <th (click)="sortBy('txFreq')" [class.col-active]="getColSort('txFreq')" [class.col-asc]="getColSort('txFreq') === 'asc'" [class.col-desc]="getColSort('txFreq') === 'desc'">
             <span class="th-inner">TX
@@ -219,5 +234,4 @@
       <button class="page-btn" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages" title="Last">»</button>
     </div>
   </div>
-
 </div>

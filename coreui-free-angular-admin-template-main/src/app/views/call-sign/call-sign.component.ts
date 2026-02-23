@@ -22,6 +22,11 @@ interface ProvinceStats {
   count: number;
 }
 
+interface TabDef {
+  key: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-call-sign',
   standalone: true,
@@ -30,6 +35,22 @@ interface ProvinceStats {
   styleUrls: ['./call-sign.component.scss']
 })
 export class CallSignComponent implements OnInit {
+  tabs: TabDef[] = [
+    { key: 'portable',  label: 'Portable Govt'},
+    { key: 'fb',        label: 'FB Govt'},
+    { key: 'mobile',    label: 'Mobile Govt'},
+    { key: 'fx',        label: 'FX Govt'},
+    { key: 'repeater',  label: 'Repeater'},
+  ];
+  activeTab: string = 'fb';
+
+  private allDataByTab: Record<string, CallSignData[]> = {
+    portable: [],
+    fb: [],
+    mobile: [],
+    fx: [],
+    repeater: [],
+  };
 
   allData: CallSignData[] = [];
   filteredData: CallSignData[] = [];
@@ -65,13 +86,36 @@ export class CallSignComponent implements OnInit {
   }
 
   loadData(): void {
-    this.callSignService.getData().subscribe({
-      next: (data: CallSignData[]) => {
-        this.allData = data;
-        this.applyFilterAndSort();
-      },
-      error: (err: unknown) => { console.error('Failed to load data:', err); }
+    this.tabs.forEach(tab => {
+      this.callSignService.getDataByType(tab.key).subscribe({
+        next: (data: CallSignData[]) => {
+          this.allDataByTab[tab.key] = data;
+          // If this is the active tab, apply filter
+          if (tab.key === this.activeTab) {
+            this.allData = data;
+            this.applyFilterAndSort();
+          }
+        },
+        error: (err: unknown) => {
+          console.warn(`No data found for tab "${tab.key}":`, err);
+          this.allDataByTab[tab.key] = [];
+          if (tab.key === this.activeTab) {
+            this.allData = [];
+            this.applyFilterAndSort();
+          }
+        }
+      });
     });
+  }
+
+  onTabChange(tabKey: string): void {
+    this.activeTab = tabKey;
+    this.allData = this.allDataByTab[tabKey] ?? [];
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.sortColumn = null;
+    this.sortDirection = null;
+    this.applyFilterAndSort();
   }
 
   private computeStats(): void {
@@ -87,7 +131,7 @@ export class CallSignComponent implements OnInit {
       withoutFrequency: withoutFreq.length,
       uniqueLocations: uniqueLocs.size
     };
-    
+
     this.provinceStats = this.PROVINCES.map(province => ({
       name: province,
       count: this.filteredData.filter(d =>

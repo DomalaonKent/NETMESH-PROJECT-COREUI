@@ -39,6 +39,50 @@
   &:hover { border-color: #38bdf8; color: #38bdf8; background: rgba(56,189,248,0.07); }
 }
 
+.tab-nav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: #111827;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 16px;
+  background: transparent;
+  color: #4e6880;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+
+  &:hover:not(.active) {
+    color: #94a3b8;
+    background: rgba(56, 189, 248, 0.05);
+    border-color: rgba(56, 189, 248, 0.15);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(14,165,233,0.1));
+    color: #38bdf8;
+    border-color: rgba(56,189,248,0.4);
+    box-shadow: 0 2px 12px rgba(56,189,248,0.15);
+  }
+}
+
 .summary-cards {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
@@ -272,4 +316,6 @@ td.equip-kenwood { color: #fb923c !important; font-weight: 700; }
   .search-container { max-width: 100%; min-width: unset; width: 100%; }
   .data-table { font-size: 10px; }
   .pagination-bar { flex-direction: column; align-items: flex-start; }
+  .tab-nav { gap: 4px; padding: 4px; }
+  .tab-btn { min-width: 90px; padding: 8px 10px; font-size: 11px; }
 }
