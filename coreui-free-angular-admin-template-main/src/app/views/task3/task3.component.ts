@@ -99,6 +99,9 @@ export class Task3Component implements OnInit {
   goToCallSign(): void {
     this.router.navigate(['/call-sign']);
   }
+  goToNonGovCallSign(): void {
+  this.router.navigate(['/non-gov-call-sign']);
+  }
   switchView(view: string): void {
     this.currentView = view;
     if (view === 'dashboard' && this.horizontalBarCanvas) {

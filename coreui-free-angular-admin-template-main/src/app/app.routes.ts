@@ -51,6 +51,13 @@ export const routes: Routes = [
       data: { title: 'Call Sign' }
       },
       {
+        path: 'non-gov-call-sign',
+        loadComponent: () =>
+          import('./views/non-gov-call-sign/non-gov-call-sign.component')
+            .then(m => m.NonGovCallSignComponent),
+        data: { title: "Non-Gov't Call Sign" }
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
       },

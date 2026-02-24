@@ -1,8 +1,8 @@
-<div class="callsign-dashboard">
+<div class="non-gov-callsign-dashboard">
   <div class="page-header">
     <div class="page-title">
-      <h2>Government Call Sign Overview</h2>
-      <span class="subtitle">Registry of Issued Call Signs — NTC Regional Office (Gov't)</span>
+      <h2>Non Government Call Sign Overview</h2>
+      <span class="subtitle">Registry of Issued Call Signs — NTC Regional Office (Non-Gov't)</span>
     </div>
     <div class="header-buttons">
       <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
@@ -14,19 +14,19 @@
 
     <div class="tab-nav">
       <button class="tab-btn" [class.active]="activeTab === 'portable'" (click)="onTabChange('portable')">
-        Portable Government
+        Portable Commercial
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'fb'" (click)="onTabChange('fb')">
-        FB Government
+        FB Commercial
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'mobile'" (click)="onTabChange('mobile')">
-        Mobile Government
+        Mobile Commercial
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'fx'" (click)="onTabChange('fx')">
-        FX Government
+        FX Commercial
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'repeater'" (click)="onTabChange('repeater')">
-        Repeater
+        Repeater Commercial
       </button>
     </div>
 
@@ -40,6 +40,7 @@
     <span class="dot" [class.active]="tabIndex === 3" (click)="goToTab(3)"></span>
     <span class="dot" [class.active]="tabIndex === 4" (click)="goToTab(4)"></span>
   </div>
+
   <div class="summary-cards">
     <div class="summary-card card-all">
       <div class="card-header">
@@ -79,11 +80,11 @@
       </div>
       <div class="card-stats">
         <div class="stat-row">
-          <span class="stat-label">LGU Units</span>
+          <span class="stat-label">Private / Individual</span>
           <span class="stat-value">{{ licenseeStats.lguUnits }}</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Municipalities</span>
+          <span class="stat-label">Corporations / Coops</span>
           <span class="stat-value">{{ licenseeStats.municipalities }}</span>
         </div>
         <div class="stat-row">

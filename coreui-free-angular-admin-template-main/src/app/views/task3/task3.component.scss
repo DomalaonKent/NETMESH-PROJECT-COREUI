@@ -173,3 +173,21 @@ c-card {
   background: #5856d6;
   color: white;
 }
+
+.btn-nongov-call-sign{
+  padding: 8px 10px;
+  background: white;
+  color: #5856d6;
+  border: 1px solid #5856d6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.btn-nongov-call-sign:hover {
+  background: #5856d6;
+  color: white;
+}
