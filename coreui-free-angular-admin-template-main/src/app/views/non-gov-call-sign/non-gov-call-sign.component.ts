@@ -36,14 +36,14 @@ interface TabDef {
 })
 export class NonGovCallSignComponent implements OnInit {
   tabs: TabDef[] = [
-    { key: 'portable', label: 'Portable Commercial'},
-    { key: 'fb',       label: 'FB Commercial'},
-    { key: 'mobile',   label: 'Mobile Commercial'},
-    { key: 'fx',       label: 'FX Commercial'},
-    { key: 'repeater', label: 'Repeater Commercial'},
+    { key: 'portable', label: 'Portable Commercial' },
+    { key: 'fb',       label: 'FB Commercial'       },
+    { key: 'mobile',   label: 'Mobile Commercial'   },
+    { key: 'fx',       label: 'FX Commercial'       },
+    { key: 'repeater', label: 'Repeater Commercial' },
   ];
-  activeTab: string = 'portable';
-  tabIndex: number = 0;
+  activeTab: string = 'fb';
+  tabIndex: number = 1;
 
   private allDataByTab: Record<string, NonGovCallSignData[]> = {
     portable: [],
@@ -87,27 +87,19 @@ export class NonGovCallSignComponent implements OnInit {
   }
 
   loadData(): void {
-    const loaders: [string, () => any][] = [
-      ['portable', () => this.nonGovService.getPortableCommercial()],
-      ['fb',       () => this.nonGovService.getFBCommercial()],
-      ['mobile',   () => this.nonGovService.getMobileCommercial()],
-      ['fx',       () => this.nonGovService.getFXCommercial()],
-      ['repeater', () => this.nonGovService.getRepeaterCommercial()],
-    ];
-
-    loaders.forEach(([key, loader]) => {
-      loader().subscribe({
+    this.tabs.forEach(tab => {
+      this.nonGovService.getDataByType(tab.key).subscribe({
         next: (data: NonGovCallSignData[]) => {
-          this.allDataByTab[key] = data;
-          if (key === this.activeTab) {
+          this.allDataByTab[tab.key] = data;
+          if (tab.key === this.activeTab) {
             this.allData = data;
             this.applyFilterAndSort();
           }
         },
         error: (err: unknown) => {
-          console.warn(`No data found for tab "${key}":`, err);
-          this.allDataByTab[key] = [];
-          if (key === this.activeTab) {
+          console.warn(`No data found for tab "${tab.key}":`, err);
+          this.allDataByTab[tab.key] = [];
+          if (tab.key === this.activeTab) {
             this.allData = [];
             this.applyFilterAndSort();
           }
@@ -117,9 +109,8 @@ export class NonGovCallSignComponent implements OnInit {
   }
 
   onTabChange(tabKey: string): void {
-    this.activeTab = tabKey;
-    this.tabIndex  = this.tabs.findIndex(t => t.key === tabKey);
-    this.allData   = this.allDataByTab[tabKey] ?? [];
+    this.activeTab     = tabKey;
+    this.allData       = this.allDataByTab[tabKey] ?? [];
     this.searchTerm    = '';
     this.currentPage   = 1;
     this.sortColumn    = null;
@@ -135,29 +126,24 @@ export class NonGovCallSignComponent implements OnInit {
     const uniqueLocs  = new Set(data.map(d => d.location).filter(Boolean));
 
     this.allStats = {
-      totalRegistered: data.length,
-      withFrequency:   withFreq.length,
+      totalRegistered:  data.length,
+      withFrequency:    withFreq.length,
       withoutFrequency: withoutFreq.length,
-      uniqueLocations: uniqueLocs.size
+      uniqueLocations:  uniqueLocs.size
     };
 
     this.provinceStats = this.PROVINCES.map(province => ({
       name:  province,
-      count: data.filter(d =>
-        (d.location ?? '').toLowerCase().includes(province.toLowerCase()) ||
-        (d.source   ?? '').toLowerCase().includes(province.toLowerCase())
+      count: this.filteredData.filter(d =>
+        (d.location ?? '').toLowerCase().includes(province.toLowerCase())
       ).length
     }));
 
-    const corpRows = data.filter(d =>
-      /corp|inc\.|co\.|enterprise|coop|network|services|group|agency|cooperative/i.test(d.licensee ?? '')
-    );
-    const privRows = data.filter(d =>
-      !/corp|inc\.|co\.|enterprise|coop|network|services|group|agency|cooperative/i.test(d.licensee ?? '')
-    );
+    const lguRows = data.filter(d => d.licensee?.toLowerCase().startsWith('lgu'));
+    const munRows = data.filter(d => d.licensee?.toLowerCase().startsWith('municipality'));
     this.licenseeStats = {
-      lguUnits:        privRows.length,
-      municipalities:  corpRows.length,
+      lguUnits:        lguRows.length,
+      municipalities:  munRows.length,
       uniqueLocations: uniqueLocs.size
     };
   }

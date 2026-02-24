@@ -1,0 +1,122 @@
+[
+  {
+    "callSign": "DYA-001C",
+    "licensee": "Albay Trading Corporation",
+    "txFreq": "155.00 MHz",
+    "rxFreq": "155.00 MHz",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Albay",
+    "equipment": "KENWOOD TK-2360",
+    "serialNumber": "P001001",
+    "source": "Albay",
+    "issued": "2015-03-10"
+  },
+  {
+    "callSign": "DYA-002C",
+    "licensee": "Sur Enterprises Inc.",
+    "txFreq": "157.45 MHz",
+    "rxFreq": "157.45 MHz",
+    "location": "Naga City, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "MOTOROLA CP200",
+    "serialNumber": "P002001",
+    "source": "Camarines Sur",
+    "issued": "2016-06-22"
+  },
+  {
+    "callSign": "DYA-003C",
+    "licensee": "Catanduanes Construction Co.",
+    "txFreq": "160.00 MHz",
+    "rxFreq": "160.00 MHz",
+    "location": "Virac, Catanduanes",
+    "serviceArea": "Catanduanes",
+    "equipment": "ICOM IC-F3003",
+    "serialNumber": "P003001",
+    "source": "Catanduanes",
+    "issued": "2017-01-15"
+  },
+  {
+    "callSign": "DYA-004C",
+    "licensee": "Masbate Agricultural Products",
+    "txFreq": "162.50 MHz",
+    "rxFreq": "162.50 MHz",
+    "location": "Masbate City, Masbate",
+    "serviceArea": "Masbate",
+    "equipment": "KENWOOD TK-3360",
+    "serialNumber": "P004001",
+    "source": "Masbate",
+    "issued": "2018-04-05"
+  },
+  {
+    "callSign": "DYA-005C",
+    "licensee": "Sorsogon Fishing Corp.",
+    "txFreq": "164.00 MHz",
+    "rxFreq": "164.00 MHz",
+    "location": "Sorsogon City, Sorsogon",
+    "serviceArea": "Sorsogon",
+    "equipment": "MOTOROLA DP1400",
+    "serialNumber": "P005001",
+    "source": "Sorsogon",
+    "issued": "2019-07-20"
+  },
+  {
+    "callSign": "DYA-006C",
+    "licensee": "Norte Freight Services",
+    "txFreq": "166.25 MHz",
+    "rxFreq": "166.25 MHz",
+    "location": "Daet, Camarines Norte",
+    "serviceArea": "Camarines Norte",
+    "equipment": "ICOM IC-F4003",
+    "serialNumber": "P006001",
+    "source": "Camarines Norte",
+    "issued": "2020-02-14"
+  },
+  {
+    "callSign": "DYA-007C",
+    "licensee": "Pili Logistics Group",
+    "txFreq": "168.75 MHz",
+    "rxFreq": "168.75 MHz",
+    "location": "Pili, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "KENWOOD TK-2170",
+    "serialNumber": "P007001",
+    "source": "Camarines Sur",
+    "issued": "2021-09-30"
+  },
+  {
+    "callSign": "DYA-008C",
+    "licensee": "Albay Mining Ventures Inc.",
+    "txFreq": "170.00 MHz",
+    "rxFreq": "170.00 MHz",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Albay",
+    "equipment": "MOTOROLA CP185",
+    "serialNumber": "P008001",
+    "source": "Albay",
+    "issued": "2022-05-18"
+  },
+  {
+    "callSign": "DYA-009C",
+    "licensee": "Naga Transport Cooperative",
+    "txFreq": "171.50 MHz",
+    "rxFreq": "171.50 MHz",
+    "location": "Naga City, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "ICOM IC-F3103D",
+    "serialNumber": "P009001",
+    "source": "Camarines Sur",
+    "issued": "2021-03-15"
+  },
+  {
+    "callSign": "DYA-010C",
+    "licensee": "Masbate Island Trading Co.",
+    "txFreq": "173.00 MHz",
+    "rxFreq": "173.00 MHz",
+    "location": "Masbate City, Masbate",
+    "serviceArea": "Masbate",
+    "equipment": "KENWOOD TK-2402",
+    "serialNumber": "P010001",
+    "source": "Masbate",
+    "issued": "2022-08-09"
+  }
+]
