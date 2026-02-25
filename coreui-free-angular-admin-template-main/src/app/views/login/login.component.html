@@ -1,79 +1,74 @@
-<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
-  <c-container>
-    <c-row class="justify-content-center">
-      <c-col md="6" lg="5" xl="4">
-        <c-card class="p-4 shadow-sm">
-          <c-card-body>
+<div class="container">
+  <mat-card class="card logo-container">
+    <div class="logo-wrapper">
+      <img src="../../assets/ntclogov2.jpg" alt="Logo" class="logo-image" />
+    </div>
+    <form [formGroup]="loginForm" class="form">
+      <mat-card-content>
+        <div class="form-group">
+          <mat-form-field class="full-width">
+            <mat-label>NTC ID No:</mat-label>
+            <input
+              type="text"
+              matInput
+              placeholder="ID Number"
+              formControlName="ntcnoid"
+              (input)="convertToUpperCase($event)"
+            />
+            <mat-error
+              *ngIf="loginForm.controls['ntcnoid'].hasError('required')"
+              >ID Number is <strong>required</strong></mat-error
+            >
+          </mat-form-field>
+        </div>
 
-            <div class="text-center mb-4">
-              <h4 class="mt-3 mb-1 fw-bold">NTC Portal</h4>
-              <p class="text-medium-emphasis small">Sign in to your account</p>
-            </div>
+        <div class="form-group">
+          <mat-form-field class="full-width">
+            <mat-label>Password:</mat-label>
+            <input
+              type="password"
+              matInput
+              placeholder="Password"
+              formControlName="password"
+            />
+            <mat-error
+              *ngIf="loginForm.controls['password'].hasError('required')"
+              >Password is <strong>required</strong></mat-error
+            >
+          </mat-form-field>
+        </div>
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+        <!-- Buttons -->
+        <div class="button-group">
+          <button
+            mat-button
+            mat-raised-button
+            color="accent"
+            type="submit"
+            (click)="oRegister()"
+          >
+            Register
+          </button>
 
-            <c-alert color="danger" *ngIf="errorMessage">
-              {{ errorMessage }}
-            </c-alert>
+          <!-- Spacer -->
+          <div class="spacer"></div>
 
-            <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-
-              <div class="mb-3">
-                <label cFormLabel for="idNumber" class="fw-semibold">NTC ID No.</label>
-                <c-input-group>
-                  <span cInputGroupText>
-                    <svg cIcon name="cilUser"></svg>
-                  </span>
-                  <input
-                    cFormControl
-                    id="idNumber"
-                    type="text"
-                    placeholder="ID Number"
-                    formControlName="idNumber"
-                    [class.is-invalid]="isFieldInvalid('idNumber')"
-                  />
-                  <c-form-feedback [valid]="false" *ngIf="isFieldInvalid('idNumber')">
-                    ID Number is <strong>required</strong>
-                  </c-form-feedback>
-                </c-input-group>
-              </div>
-
-              <div class="mb-4">
-                <label cFormLabel for="password" class="fw-semibold">Password</label>
-                <c-input-group>
-                  <span cInputGroupText>
-                    <svg cIcon name="cilLockLocked"></svg>
-                  </span>
-                  <input
-                    cFormControl
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    formControlName="password"
-                    [class.is-invalid]="isFieldInvalid('password')"
-                  />
-                  <c-form-feedback [valid]="false" *ngIf="isFieldInvalid('password')">
-                    Password is <strong>required</strong>
-                  </c-form-feedback>
-                </c-input-group>
-              </div>
-
-              <c-row>
-                <c-col xs="6">
-                  <button cButton color="primary" type="submit" class="w-100">
-                    Login
-                  </button>
-                </c-col>
-                <c-col xs="6">
-                  <button cButton color="secondary" variant="outline" type="button" class="w-100" routerLink="/register">
-                    Register
-                  </button>
-                </c-col>
-              </c-row>
-
-            </form>
-
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
-  </c-container>
+          <button
+            mat-button
+            color="primary"
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loginForm.invalid"
+            (click)="onSubmit()"
+          >
+            Login
+          </button>
+        </div>
+        <div class="overlay-spinner" *ngIf="showProgressSpinner">
+          <mat-spinner class="spinner" diameter="50"></mat-spinner>
+        </div>
+      </mat-card-content>
+    </form>
+  </mat-card>
 </div>

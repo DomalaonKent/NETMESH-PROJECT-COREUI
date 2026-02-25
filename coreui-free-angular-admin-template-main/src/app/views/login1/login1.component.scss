@@ -1,0 +1,51 @@
+:host { display: block; }
+
+.bg-body-tertiary {
+  background: linear-gradient(135deg, #e8edf5 0%, #f5f7fa 100%);
+}
+
+c-card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10) 
+}
+
+.text-center h4 {
+  color: #1a3c6e;
+  font-weight: 800;
+}
+
+label[cFormLabel] {
+  font-size: 0.80rem;
+  font-weight: 600;
+  color: #1a3c6e;
+}
+
+span[cInputGroupText] {
+  background-color: #1a3c6e;
+  border: none;
+  color: white;
+}
+
+input[cFormControl] {
+  border-left: none;
+  background: #f9fafb;
+  &:focus {
+    background: #fff;
+    border-color: #1a3c6e;
+    box-shadow: 0 0 0 2px rgba(26, 60, 110, 0.15);
+  }
+  &.is-invalid { border-color: #dc3545 ; }
+}
+
+button[cButton] {
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+  &[color='primary'] {
+    background: #1a3c6e;
+    border-color: #1a3c6e;
+  }
+}

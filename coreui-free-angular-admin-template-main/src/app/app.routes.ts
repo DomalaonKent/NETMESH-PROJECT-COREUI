@@ -124,6 +124,12 @@ export const routes: Routes = [
     data: { title: 'NTC Login' }
   },
   {
+    path: 'login1',                                          
+    loadComponent: () =>
+      import('./views/login1/login1.component').then(m => m.Login1Component),
+    data: { title: 'NTC Login v2' }
+  },
+  {
     path: 'register',
     loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),
     data: {
