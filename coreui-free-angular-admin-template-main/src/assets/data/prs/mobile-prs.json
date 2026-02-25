@@ -1,0 +1,62 @@
+[
+  {
+    "callSign": "DYC4001",
+    "licensee": "Sur Enterprises Inc",
+    "txFreq": "460.150",
+    "rxFreq": "460.150",
+    "location": "Naga City, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "ICOM IC-F5022",
+    "serialNumber": "SN-IC-07711",
+    "source": "Camarines Sur",
+    "issued": "2023-05-09"
+  },
+  {
+    "callSign": "DYC4002",
+    "licensee": "Albay Truckers Cooperative",
+    "txFreq": "461.000",
+    "rxFreq": "461.000",
+    "location": "Tabaco City, Albay",
+    "serviceArea": "Albay",
+    "equipment": "KENWOOD TM-V71A",
+    "serialNumber": "SN-KW-05540",
+    "source": "Albay",
+    "issued": "2023-06-25"
+  },
+  {
+    "callSign": "DYC4003",
+    "licensee": "Sur Transport Group",
+    "txFreq": null,
+    "rxFreq": null,
+    "location": "San Jose, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "ICOM IC-F6022",
+    "serialNumber": "SN-IC-08890",
+    "source": "Camarines Sur",
+    "issued": "2023-09-12"
+  },
+  {
+    "callSign": "DYC4004",
+    "licensee": "Sorsogon State University",
+    "txFreq": "462.500",
+    "rxFreq": "462.500",
+    "location": "Bulan, Sorsogon",
+    "serviceArea": "Sorsogon",
+    "equipment": "KENWOOD TM-D710G",
+    "serialNumber": "SN-KW-06678",
+    "source": "Sorsogon",
+    "issued": "2023-11-03"
+  },
+  {
+    "callSign": "DYC4005",
+    "licensee": "Masbate Transport Cooperative",
+    "txFreq": "463.000",
+    "rxFreq": "463.000",
+    "location": "Masbate City, Masbate",
+    "serviceArea": "Masbate",
+    "equipment": "ICOM IC-F1721D",
+    "serialNumber": "SN-IC-09234",
+    "source": "Masbate",
+    "issued": "2024-02-11"
+  }
+]

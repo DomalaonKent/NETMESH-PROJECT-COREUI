@@ -1,0 +1,62 @@
+[
+  {
+    "callSign": "DYB3001",
+    "licensee": "LGU Legazpi City",
+    "txFreq": "153.200",
+    "rxFreq": "153.200",
+    "location": "Legazpi City, Albay",
+    "serviceArea": "Albay",
+    "equipment": "ICOM IC-F1000",
+    "serialNumber": "SN-IC-03301",
+    "source": "Albay",
+    "issued": "2022-11-10"
+  },
+  {
+    "callSign": "DYB3002",
+    "licensee": "Municipality of Pili",
+    "txFreq": "154.000",
+    "rxFreq": "154.000",
+    "location": "Pili, Camarines Sur",
+    "serviceArea": "Camarines Sur",
+    "equipment": "KENWOOD TK-7360",
+    "serialNumber": "SN-KW-02210",
+    "source": "Camarines Sur",
+    "issued": "2022-12-01"
+  },
+  {
+    "callSign": "DYB3003",
+    "licensee": "Bicol Electric Cooperative",
+    "txFreq": null,
+    "rxFreq": null,
+    "location": "Daet, Camarines Norte",
+    "serviceArea": "Camarines Norte",
+    "equipment": "ICOM IC-F110",
+    "serialNumber": "SN-IC-04455",
+    "source": "Camarines Norte",
+    "issued": "2023-02-18"
+  },
+  {
+    "callSign": "DYB3004",
+    "licensee": "Sorsogon State University",
+    "txFreq": "155.500",
+    "rxFreq": "155.500",
+    "location": "Sorsogon City, Sorsogon",
+    "serviceArea": "Sorsogon",
+    "equipment": "KENWOOD TK-8360",
+    "serialNumber": "SN-KW-03387",
+    "source": "Sorsogon",
+    "issued": "2023-04-14"
+  },
+  {
+    "callSign": "DYB3005",
+    "licensee": "LGU Masbate City",
+    "txFreq": "156.000",
+    "rxFreq": "156.000",
+    "location": "Masbate City, Masbate",
+    "serviceArea": "Masbate",
+    "equipment": "ICOM IC-F2000",
+    "serialNumber": "SN-IC-05120",
+    "source": "Masbate",
+    "issued": "2023-07-30"
+  }
+]

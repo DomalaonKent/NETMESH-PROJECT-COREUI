@@ -58,6 +58,13 @@ export const routes: Routes = [
         data: { title: "Non-Gov't Call Sign" }
       },
       {
+        path: 'prs',
+        loadComponent: () =>
+          import('./views/prs/prs.component')
+            .then(m => m.PrsComponent),
+        data: { title: "Prs" }
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
       },
