@@ -14,6 +14,16 @@
         <div class="step-circle">01</div>
         <div><b>Details</b><small>Personal info</small></div>
       </div>
+      <div class="step-line"></div>
+      <div class="step-item active">
+        <div class="step-circle">02</div>
+        <div><b>Schedule</b><small>Visit time</small></div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item active">
+        <div class="step-circle">03</div>
+        <div><b>Confirm</b><small>Review</small></div>
+      </div>
     </div>
   </header>
 
@@ -23,34 +33,58 @@
         <div class="section-heading">
           <span class="section-number">01</span> Personal Information
         </div>
+        <div class="name-priority-row">
+          <div class="name-col">
+            <div class="form-field">
+              <label>Full Name <span class="required-mark">*</span></label>
+              <input type="text" formControlName="fullName" placeholder="e.g. Juan dela Cruz" />
+              <span class="error-message"
+                *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('required')">
+                Full name is required.
+              </span>
+              <span class="error-message"
+                *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('minlength')">
+                Name must be at least 2 characters.
+              </span>
+            </div>
 
-        <div class="form-field">
-          <label>Full Name <span class="required-mark">*</span></label>
-          <input type="text" formControlName="fullName" placeholder="e.g. Juan dela Cruz" />
-          <span class="error-message"
-            *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('required')">
-            Full name is required.
-          </span>
-          <span class="error-message"
-            *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('minlength')">
-            Name must be at least 2 characters.
-          </span>
-        </div>
+            <div class="form-field">
+              <label>Applicant's Name / Letter From</label>
+              <input type="text" formControlName="applicantName"
+                     placeholder="Applicant's Name or Letter from" />
+            </div>
 
-        <div class="form-field">
-          <label>Sex <span class="required-mark">*</span></label>
-          <div class="sex-options">
-            <button type="button"
-              *ngFor="let o of sexOptions"
-              [class.active]="visitorForm.get('sex')?.value === o.value"
-              (click)="setSex(o.value)">
-              {{ o.symbol }} {{ o.label }}
-            </button>
+            <div class="form-field no-margin-bottom">
+              <label>Sex <span class="required-mark">*</span></label>
+              <div class="sex-options">
+                <button type="button"
+                  *ngFor="let o of sexOptions"
+                  [class.active]="visitorForm.get('sex')?.value === o.value"
+                  (click)="setSex(o.value)">
+                  {{ o.symbol }} {{ o.label }}
+                </button>
+              </div>
+              <span class="error-message"
+                *ngIf="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.hasError('required')">
+                Please select a sex option.
+              </span>
+            </div>
           </div>
-          <span class="error-message"
-            *ngIf="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.hasError('required')">
-            Please select a sex option.
-          </span>
+
+          <div class="priority-panel">
+            <div class="priority-title">Our Priority List</div>
+            <div class="priority-icons">
+              <div class="priority-item"
+                *ngFor="let p of priorityList"
+                [class.selected]="selectedPriority === p.key"
+                (click)="selectPriority(p.key)"
+                [attr.title]="p.label">
+                <img [src]="p.img" [alt]="p.label" />
+                <span>{{ p.label }}</span>
+                <div class="priority-check" *ngIf="selectedPriority === p.key">✓</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="two-column">
@@ -59,7 +93,7 @@
             <input type="number" formControlName="age" placeholder="18" min="1" max="120" />
             <span class="error-message"
               *ngIf="visitorForm.get('age')?.touched && visitorForm.get('age')?.invalid">
-              Please enter a valid age (1-120).
+              Please enter a valid age (1-200).
             </span>
           </div>
           <div class="form-field">
@@ -89,17 +123,41 @@
         <div class="section-heading">
           <span class="section-number">02</span> Visit Schedule
         </div>
+
         <div class="form-field">
           <label>Date of Visit <span class="required-mark">*</span></label>
-          <div class="date-wrapper">
-            <input type="date" formControlName="dateOfVisit" />
-          </div>
+          <input type="date" formControlName="dateOfVisit" />
           <span class="error-message"
             *ngIf="visitorForm.get('dateOfVisit')?.touched && visitorForm.get('dateOfVisit')?.hasError('required')">
             Please select a date of visit.
           </span>
         </div>
+
+        <div class="form-field">
+          <label>Time of Visit <span class="required-mark">*</span></label>
+          <div class="time-picker">
+            <div class="time-input-group">
+              <input type="number" formControlName="visitHour"
+                     placeholder="9" min="1" max="12" />
+              <span class="time-sep">:</span>
+              <input type="number" formControlName="visitMinute"
+                     placeholder="30" min="0" max="59" />
+            </div>
+            <select formControlName="visitAmPm" class="ampm-select">
+              <option value="AM">A.M</option>
+              <option value="PM">P.M</option>
+            </select>
+            <span class="time-hint">Hours / Minutes</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-next" (click)="onNext()">
+            Next 
+          </button>
+        </div>
       </div>
+
     </form>
   </div>
 </div>
