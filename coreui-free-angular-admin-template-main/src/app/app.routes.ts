@@ -65,6 +65,13 @@ export const routes: Routes = [
         data: { title: "Prs" }
       },
       {
+        path: 'visitor-logbook',
+        loadComponent: () =>
+          import('./views/visitor-logbook/visitor-logbook.component')
+            .then(m => m.VisitorLogbookComponent),
+        data: { title: "Visitor's Logbook" }
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
       },

@@ -105,6 +105,9 @@ export class Task3Component implements OnInit {
   goToPrs(): void {
   this.router.navigate(['/prs']);
   }
+  goToVl(): void {
+  this.router.navigate(['/visitor-logbook']);
+  }
   switchView(view: string): void {
     this.currentView = view;
     if (view === 'dashboard' && this.horizontalBarCanvas) {

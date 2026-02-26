@@ -1,0 +1,105 @@
+<div class="visitor-logbook">
+  <div class="logbook-bg" aria-hidden="true">
+    <div class="orb-blue"></div>
+    <div class="orb-purple"></div>
+  </div>
+
+  <header class="logbook-hero">
+    <div class="hero-left">
+      <h1>Visitor's<br><em>Logbook</em></h1>
+      <p>Fill in your details to register your visit.</p>
+    </div>
+    <div class="step-indicator">
+      <div class="step-item active">
+        <div class="step-circle">01</div>
+        <div><b>Details</b><small>Personal info</small></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="logbook-body">
+    <form [formGroup]="visitorForm">
+      <div class="form-section">
+        <div class="section-heading">
+          <span class="section-number">01</span> Personal Information
+        </div>
+
+        <div class="form-field">
+          <label>Full Name <span class="required-mark">*</span></label>
+          <input type="text" formControlName="fullName" placeholder="e.g. Juan dela Cruz" />
+          <span class="error-message"
+            *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('required')">
+            Full name is required.
+          </span>
+          <span class="error-message"
+            *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('minlength')">
+            Name must be at least 2 characters.
+          </span>
+        </div>
+
+        <div class="form-field">
+          <label>Sex <span class="required-mark">*</span></label>
+          <div class="sex-options">
+            <button type="button"
+              *ngFor="let o of sexOptions"
+              [class.active]="visitorForm.get('sex')?.value === o.value"
+              (click)="setSex(o.value)">
+              {{ o.symbol }} {{ o.label }}
+            </button>
+          </div>
+          <span class="error-message"
+            *ngIf="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.hasError('required')">
+            Please select a sex option.
+          </span>
+        </div>
+
+        <div class="two-column">
+          <div class="form-field">
+            <label>Age <span class="required-mark">*</span></label>
+            <input type="number" formControlName="age" placeholder="18" min="1" max="120" />
+            <span class="error-message"
+              *ngIf="visitorForm.get('age')?.touched && visitorForm.get('age')?.invalid">
+              Please enter a valid age (1-120).
+            </span>
+          </div>
+          <div class="form-field">
+            <label>Mobile No.</label>
+            <input type="tel" formControlName="mobileNo" placeholder="09XXXXXXXXX" />
+            <span class="error-message"
+              *ngIf="visitorForm.get('mobileNo')?.touched && visitorForm.get('mobileNo')?.hasError('pattern')">
+              Enter a valid PH number (e.g. 09XXXXXXXXX).
+            </span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Town / Province <span class="required-mark">*</span></label>
+          <select formControlName="townProvince">
+            <option value="" disabled>Select Province</option>
+            <option *ngFor="let p of provinces" [value]="p">{{ p }}</option>
+          </select>
+          <span class="error-message"
+            *ngIf="visitorForm.get('townProvince')?.touched && visitorForm.get('townProvince')?.hasError('required')">
+            Please select your province.
+          </span>
+        </div>
+      </div>
+
+      <div class="form-section last">
+        <div class="section-heading">
+          <span class="section-number">02</span> Visit Schedule
+        </div>
+        <div class="form-field">
+          <label>Date of Visit <span class="required-mark">*</span></label>
+          <div class="date-wrapper">
+            <input type="date" formControlName="dateOfVisit" />
+          </div>
+          <span class="error-message"
+            *ngIf="visitorForm.get('dateOfVisit')?.touched && visitorForm.get('dateOfVisit')?.hasError('required')">
+            Please select a date of visit.
+          </span>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
