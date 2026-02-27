@@ -83,6 +83,117 @@
       </div>
 
     </div>
+
+    <div class="vl2-expanded-panel vl2-panel-green" *ngIf="checkedOffices['cwapu']">
+      <div class="vl2-panel-header">
+        <div class="vl2-panel-tag">🛡️ CWaPu</div>
+        <h3 class="vl2-panel-title">Choose the service you require</h3>
+        <p class="vl2-panel-sub">Select all services that apply to your visit</p>
+      </div>
+
+      <div class="vl2-service-grid">
+        <div class="vl2-service-tile"
+             *ngFor="let svc of cwapuServices"
+             [class.vl2-tile-selected]="svc.selected"
+             (click)="toggleCwapuService(svc)">
+          <div class="vl2-tile-icon">
+            <img [attr.src]="svc.icon" [attr.alt]="svc.name">
+          </div>
+          <div class="vl2-tile-name">{{ svc.name }}</div>
+          <div class="vl2-tile-check" *ngIf="svc.selected">✓</div>
+        </div>
+      </div>
+
+      <div class="vl2-inquiry-strip">
+        <span class="vl2-inq-icon">🔍</span>
+        <strong>For Inquiries:</strong>
+        <span class="vl2-inq-item">📧 Email: <span class="vl2-inq-val"></span></span>
+        <span class="vl2-inq-item">📞 Phone: <span class="vl2-inq-val"></span></span>
+        <span class="vl2-inq-item">🌐 Website: <span class="vl2-inq-val"></span></span>
+      </div>
+    </div>
+
+    <div class="vl2-expanded-panel vl2-panel-red" *ngIf="checkedOffices['eod']">
+      <div class="vl2-panel-header">
+        <div class="vl2-panel-tag">🏛️ EOD</div>
+        <h3 class="vl2-panel-title">Citizen Charter Services</h3>
+        <p class="vl2-panel-sub">Select a service to view details and requirements</p>
+
+        <div class="vl2-eod-quick-links">
+          <span class="vl2-quick-link"
+                [class.vl2-quick-link-active]="eodMode === 'inquiry'"
+                (click)="setEodMode('inquiry')">
+            For Inquiry
+          </span>
+          <span class="vl2-quick-link"
+                [class.vl2-quick-link-active]="eodMode === 'assessment'"
+                (click)="setEodMode('assessment')">
+            For Assessment
+          </span>
+        </div>
+      </div>
+
+      <div class="vl2-inquiry-strip" *ngIf="eodMode === 'inquiry'">
+        <span class="vl2-inq-icon">🔍</span>
+        <strong>For Inquiries — EOD:</strong>
+        <span class="vl2-inq-item">📧 Email: <span class="vl2-inq-val"></span></span>
+        <span class="vl2-inq-item">📞 Phone: <span class="vl2-inq-val"></span></span>
+        <span class="vl2-inq-item">🌐 Website: <span class="vl2-inq-val"></span></span>
+      </div>
+
+      <ng-container *ngIf="eodMode === 'assessment'">
+        <div class="vl2-charter-controls">
+          <button class="vl2-ctrl-btn" (click)="expandAll()">
+            <span>▼</span> Expand All
+          </button>
+          <button class="vl2-ctrl-btn" (click)="collapseAll()">
+            <span>▲</span> Collapse All
+          </button>
+        </div>
+
+        <div class="vl2-charter-list">
+          <div class="vl2-charter-row"
+               *ngFor="let charter of citizenCharterServices; let i = index"
+               [class.vl2-charter-open]="charter.open">
+            <div class="vl2-charter-header" (click)="toggleCharter(charter)">
+              <div class="vl2-charter-num">{{ String(i + 1).padStart(2, '0') }}</div>
+              <span class="vl2-charter-name">{{ charter.name }}</span>
+              <button class="vl2-video-pill" (click)="$event.stopPropagation()">
+                ▶ Video Clip Details
+              </button>
+              <button class="vl2-help-circle" (click)="$event.stopPropagation()">?</button>
+              <span class="vl2-chev" [class.vl2-chev-open]="charter.open"> › </span>
+            </div>
+            <div class="vl2-charter-body" *ngIf="charter.open">
+              <div class="vl2-charter-detail">
+                <span class="vl2-detail-icon">📋</span>
+                {{ charter.details }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vl2-eod-submit-row">
+          <button class="vl2-btn-eod-submit" (click)="onSubmit()">
+            ✔ Submit Application
+          </button>
+        </div>
+      </ng-container>
+
+    </div>
+    <div class="vl2-nav-row">
+      <button class="vl2-btn-back" (click)="prevStep()">
+        ← Back
+      </button>
+      <div class="vl2-spacer"></div>
+      <div class="vl2-selection-count" *ngIf="selectedCount > 0">
+        {{ selectedCount }} office{{ selectedCount > 1 ? 's' : '' }} selected
+      </div>
+      <button class="vl2-btn-next">
+        Next →
+      </button>
+    </div>
+
   </div>
 
 </div>

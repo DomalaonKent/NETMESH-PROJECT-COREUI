@@ -106,6 +106,6 @@ export class VisitorLogbookComponent implements OnInit {
     fields.forEach(f => this.visitorForm.get(f)?.markAsTouched());
     if (!fields.every(f => this.visitorForm.get(f)?.valid)) return;
     console.log('Submitted:', this.visitorForm.value, 'Priority:', this.selectedPriority);
-    this.router.navigate(['/visitor-logbook/confirm']);
+    this.router.navigate(['/visitor-logbook2']);
   }
 }
