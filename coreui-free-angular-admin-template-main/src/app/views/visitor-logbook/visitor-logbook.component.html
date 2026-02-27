@@ -1,163 +1,187 @@
-<div class="visitor-logbook">
-  <div class="logbook-bg" aria-hidden="true">
-    <div class="orb-blue"></div>
-    <div class="orb-purple"></div>
+<div class="vlb-wrapper">
+  <div class="vlb-header">
+    <div class="vlb-header-left">
+      <div class="vlb-logo">
+        <span>VisitorLog</span>
+      </div>
+      <div class="vl-header-meta">
+        <div class="vlb-header-step">Step {{ currentStep + 1 }} of {{ steps.length }}</div>
+        <div class="vlb-header-title">{{ stepTitles[currentStep] }}</div>
+      </div>
+    </div>
+
+    <nav class="vlb-horizontal-stepper">
+      <ng-container *ngFor="let s of steps; let i = index; let last = last">
+        <div class="vlb-horizontal-step" [class.active]="currentStep === i" [class.done]="currentStep > i">
+          <div class="vlb-horizontal-bubble">
+            <span *ngIf="currentStep > i">✓</span>
+            <span *ngIf="currentStep <= i">{{ i + 1 }}</span>
+          </div>
+          <span class="vlb-horizontal-label">{{ s }}</span>
+        </div>
+        <div class="vlb-horizontal-line" *ngIf="!last" [class.done]="currentStep > i"></div>
+      </ng-container>
+    </nav>
   </div>
 
-  <header class="logbook-hero">
-    <div class="hero-left">
-      <h1>Visitor's<br><em>Logbook</em></h1>
-      <p>Fill in your details to register your visit.</p>
-    </div>
-    <div class="step-indicator">
-      <div class="step-item active">
-        <div class="step-circle">01</div>
-        <div><b>Details</b><small>Personal info</small></div>
-      </div>
-      <div class="step-line"></div>
-      <div class="step-item active">
-        <div class="step-circle">02</div>
-        <div><b>Schedule</b><small>Visit time</small></div>
-      </div>
-      <div class="step-line"></div>
-      <div class="step-item active">
-        <div class="step-circle">03</div>
-        <div><b>Confirm</b><small>Review</small></div>
-      </div>
-    </div>
-  </header>
+  <div class="visitor-log-card">
+    <div class="vlb-body" *ngIf="currentStep === 0">
+      <h2 class="vlb-heading">Who's visiting?</h2>
+      <p class="vlb-subtitle">Fill in your full name and any accompanying applicant details.</p>
 
-  <div class="logbook-body">
-    <form [formGroup]="visitorForm">
-      <div class="form-section">
-        <div class="section-heading">
-          <span class="section-number">01</span> Personal Information
-        </div>
-        <div class="name-priority-row">
-          <div class="name-col">
-            <div class="form-field">
-              <label>Full Name <span class="required-mark">*</span></label>
-              <input type="text" formControlName="fullName" placeholder="e.g. Juan dela Cruz" />
-              <span class="error-message"
-                *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('required')">
-                Full name is required.
-              </span>
-              <span class="error-message"
-                *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.hasError('minlength')">
-                Name must be at least 2 characters.
-              </span>
-            </div>
-
-            <div class="form-field">
-              <label>Applicant's Name / Letter From</label>
-              <input type="text" formControlName="applicantName"
-                     placeholder="Applicant's Name or Letter from" />
-            </div>
-
-            <div class="form-field no-margin-bottom">
-              <label>Sex <span class="required-mark">*</span></label>
-              <div class="sex-options">
-                <button type="button"
-                  *ngFor="let o of sexOptions"
-                  [class.active]="visitorForm.get('sex')?.value === o.value"
-                  (click)="setSex(o.value)">
-                  {{ o.symbol }} {{ o.label }}
-                </button>
+      <form [formGroup]="visitorForm">
+        <div class="vlb-row">
+          <div class="vlb-column">
+            <div class="vlb-field" [class.err]="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.invalid">
+              <label>Full Name <span class="req">*</span></label>
+              <div class="vlb-input">
+                <input type="text" formControlName="fullName" placeholder="Full Name" />
               </div>
-              <span class="error-message"
-                *ngIf="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.hasError('required')">
-                Please select a sex option.
+              <span class="vlb-error" *ngIf="visitorForm.get('fullName')?.touched && visitorForm.get('fullName')?.invalid">
+                Full name is required (min. 2 characters).
               </span>
+            </div>
+
+            <div class="vlb-field">
+              <label>Applicant's Name / Letter From</label>
+              <div class="vlb-input">
+                <input type="text" formControlName="applicantName" placeholder="Name or reference letter" />
+              </div>
             </div>
           </div>
 
-          <div class="priority-panel">
-            <div class="priority-title">Our Priority List</div>
-            <div class="priority-icons">
-              <div class="priority-item"
-                *ngFor="let p of priorityList"
-                [class.selected]="selectedPriority === p.key"
+          <div class="vlb-priority">
+            <div class="vlb-priority-title">Priority Lane</div>
+            <div class="vlb-priority-grid">
+              <button type="button" class="vlb-priority-item" *ngFor="let p of priorityList"
+                [class.sel]="selectedPriority === p.key"
                 (click)="selectPriority(p.key)"
-                [attr.title]="p.label">
+                [title]="p.label">
                 <img [src]="p.img" [alt]="p.label" />
                 <span>{{ p.label }}</span>
-                <div class="priority-check" *ngIf="selectedPriority === p.key">✓</div>
-              </div>
+                <div class="vlb-priority-check" *ngIf="selectedPriority === p.key">✓</div>
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="two-column">
-          <div class="form-field">
-            <label>Age <span class="required-mark">*</span></label>
-            <input type="number" formControlName="age" placeholder="18" min="1" max="120" />
-            <span class="error-message"
-              *ngIf="visitorForm.get('age')?.touched && visitorForm.get('age')?.invalid">
-              Please enter a valid age (1-200).
-            </span>
-          </div>
-          <div class="form-field">
-            <label>Mobile No.</label>
-            <input type="tel" formControlName="mobileNo" placeholder="09XXXXXXXXX" />
-            <span class="error-message"
-              *ngIf="visitorForm.get('mobileNo')?.touched && visitorForm.get('mobileNo')?.hasError('pattern')">
-              Enter a valid PH number (e.g. 09XXXXXXXXX).
-            </span>
-          </div>
+        <div class="vlb-actions">
+          <button class="vlb-button primary" type="button" (click)="nextStep()">Continue</button>
         </div>
+      </form>
+    </div>
 
-        <div class="form-field">
-          <label>Town / Province <span class="required-mark">*</span></label>
-          <select formControlName="townProvince">
-            <option value="" disabled>Select Province</option>
-            <option *ngFor="let p of provinces" [value]="p">{{ p }}</option>
-          </select>
-          <span class="error-message"
-            *ngIf="visitorForm.get('townProvince')?.touched && visitorForm.get('townProvince')?.hasError('required')">
+    <div class="vlb-body" *ngIf="currentStep === 1">
+      <h2 class="vlb-heading">Where are you from?</h2>
+      <p class="vlb-subtitle">Select your province so we can serve you better.</p>
+
+      <form [formGroup]="visitorForm">
+        <div class="vlb-field" [class.err]="visitorForm.get('townProvince')?.touched && visitorForm.get('townProvince')?.invalid">
+          <label>Town / Province <span class="req">*</span></label>
+          <div class="vlb-input select">
+            <select formControlName="townProvince">
+              <option value="" disabled>Select your province</option>
+              <option *ngFor="let p of provinces" [value]="p">{{ p }}</option>
+            </select>
+          </div>
+          <span class="vlb-error" *ngIf="visitorForm.get('townProvince')?.touched && visitorForm.get('townProvince')?.invalid">
             Please select your province.
           </span>
         </div>
-      </div>
 
-      <div class="form-section last">
-        <div class="section-heading">
-          <span class="section-number">02</span> Visit Schedule
+        <div class="vlb-actions">
+          <button class="vlb-button ghost" type="button" (click)="prevStep()">Back</button>
+          <button class="vlb-button primary" type="button" (click)="nextStep()">Continue</button>
         </div>
+      </form>
+    </div>
 
-        <div class="form-field">
-          <label>Date of Visit <span class="required-mark">*</span></label>
-          <input type="date" formControlName="dateOfVisit" />
-          <span class="error-message"
-            *ngIf="visitorForm.get('dateOfVisit')?.touched && visitorForm.get('dateOfVisit')?.hasError('required')">
-            Please select a date of visit.
+    <div class="vlb-body" *ngIf="currentStep === 2">
+      <h2 class="vlb-heading">Tell us about yourself</h2>
+      <p class="vlb-subtitle">Basic details to complete your visitor profile.</p>
+
+      <form [formGroup]="visitorForm">
+        <div class="vlb-field" [class.err]="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.invalid">
+          <label>Sex <span class="req">*</span></label>
+          <div class="vlb-pills">
+            <button type="button" class="vlb-pill" *ngFor="let o of sexOptions"
+              [class.active]="visitorForm.get('sex')?.value === o.value"
+              (click)="setSex(o.value)">
+              {{ o.symbol }} {{ o.label }}
+            </button>
+          </div>
+          <span class="vlb-error" *ngIf="visitorForm.get('sex')?.touched && visitorForm.get('sex')?.invalid">
+            Please select a sex option.
           </span>
         </div>
 
-        <div class="form-field">
-          <label>Time of Visit <span class="required-mark">*</span></label>
-          <div class="time-picker">
-            <div class="time-input-group">
-              <input type="number" formControlName="visitHour"
-                     placeholder="9" min="1" max="12" />
-              <span class="time-sep">:</span>
-              <input type="number" formControlName="visitMinute"
-                     placeholder="30" min="0" max="59" />
+        <div class="vlb-two-column">
+          <div class="vlb-field" [class.err]="visitorForm.get('age')?.touched && visitorForm.get('age')?.invalid">
+            <label>Age <span class="req">*</span></label>
+            <div class="vlb-input">
+              <input type="number" formControlName="age" placeholder="18" min="1" max="120" />
             </div>
-            <select formControlName="visitAmPm" class="ampm-select">
-              <option value="AM">A.M</option>
-              <option value="PM">P.M</option>
-            </select>
-            <span class="time-hint">Hours / Minutes</span>
+            <span class="vlb-error" *ngIf="visitorForm.get('age')?.touched && visitorForm.get('age')?.invalid">
+              Enter a valid age (1-120).
+            </span>
+          </div>
+          <div class="vlb-field">
+            <label>Mobile No.</label>
+            <div class="vlb-input">
+              <input type="tel" formControlName="mobileNo" placeholder="09XXXXXXXXX" />
+            </div>
+            <span class="vlb-error" *ngIf="visitorForm.get('mobileNo')?.touched && visitorForm.get('mobileNo')?.hasError('pattern')">
+              Enter a valid PH number.
+            </span>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="button" class="btn-next" (click)="onNext()">
-            Next 
-          </button>
+        <div class="vlb-actions">
+          <button class="vlb-button ghost" type="button" (click)="prevStep()">Back</button>
+          <button class="vlb-button primary" type="button" (click)="nextStep()">Continue</button>
         </div>
-      </div>
+      </form>
+    </div>
 
-    </form>
+    <div class="vlb-body" *ngIf="currentStep === 3">
+      <h2 class="vlb-heading">Plan your visit</h2>
+      <p class="vlb-subtitle">Set your preferred date and arrival time.</p>
+
+      <form [formGroup]="visitorForm">
+        <div class="vlb-field" [class.err]="visitorForm.get('dateOfVisit')?.touched && visitorForm.get('dateOfVisit')?.invalid">
+          <label>Date of Visit <span class="req">*</span></label>
+          <div class="vlb-input">
+            <input type="date" formControlName="dateOfVisit" />
+          </div>
+          <span class="vlb-error" *ngIf="visitorForm.get('dateOfVisit')?.touched && visitorForm.get('dateOfVisit')?.invalid">
+            Please select a date.
+          </span>
+        </div>
+
+        <div class="vlb-field">
+          <label>Time of Visit <span class="req">*</span></label>
+          <div class="vlb-timepicker">
+            <div class="vlb-timebox">
+              <input type="number" formControlName="visitHour" placeholder="9" min="1" max="12" />
+              <span class="vlb-time-separator">:</span>
+              <input type="number" formControlName="visitMinute" placeholder="30" min="0" max="59" />
+            </div>
+            <div class="vlb-input vlb-ampm">
+              <select formControlName="visitAmPm">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+            <span class="vlb-time-hint">hrs / min</span>
+          </div>
+        </div>
+
+        <div class="vlb-actions">
+          <button class="vlb-button ghost" type="button" (click)="prevStep()">Back</button>
+          <button class="vlb-button primary" type="button" (click)="onSubmit()">Submit Visit</button>
+        </div>
+      </form>
+    </div>
+
   </div>
 </div>

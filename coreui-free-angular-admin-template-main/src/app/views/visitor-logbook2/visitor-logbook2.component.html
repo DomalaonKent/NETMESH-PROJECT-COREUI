@@ -1,0 +1,88 @@
+<div class="vl2-wrap">
+  <div class="vl2-header">
+    <div>
+      <div class="vl2-badge">STEP 5 OF 5</div>
+      <div class="vl2-title">Your Visit</div>
+      <div class="vl2-sub">Select your preferred office and services</div>
+    </div>
+    <div class="vl2-steps">
+      <div class="vl2-step done">
+        <div class="vl2-dot done-bubble">✓</div>
+            <span>Your Name</span>
+      </div>
+      <div class="vl2-line done"></div>
+      <div class="vl2-step done">
+        <div class="vl2-dot done-bubble">✓</div>
+            <span>Your Address</span>
+      </div>
+      <div class="vl2-line done"></div>
+      <div class="vl2-step done">
+        <div class="vl2-dot done-bubble">✓</div>
+            <span>Your Profile</span>
+      </div>
+      <div class="vl2-line done"></div>
+      <div class="vl2-step done">
+        <div class="vl2-dot done-bubble">✓</div>
+            <span>Purpose</span>
+      </div>
+      <div class="vl2-line done"></div>
+      <div class="vl2-step active">
+        <div class="vl2-dot orange">5</div>
+            <span>Office</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vl2-content">
+    <h2 class="vl2-heading">Select Office to Visit</h2>
+    <p class="vl2-desc">Choose which office you'd like to visit today. You may select multiple offices.</p>
+
+    <div class="vl2-grid">
+
+      <div class="vl2-card" [class.selected]="checkedOffices['ord']" (click)="toggle('ord')">
+        <div class="vl2-icon blue"><img src="assets/images/folder.png" alt="ORD"></div>
+        <div class="vl2-info">
+          <div class="vl2-name">Office of the Regional Director</div>
+          <div class="vl2-abbr">ORD</div>
+        </div>
+        <div class="vl2-check" [class.on]="checkedOffices['ord']">
+          <span *ngIf="checkedOffices['ord']">✓</span>
+        </div>
+      </div>
+
+      <div class="vl2-card" [class.selected]="checkedOffices['legal']" (click)="toggle('legal')">
+        <div class="vl2-icon purple"><img src="assets/images/legal.png" alt="Legal"></div>
+        <div class="vl2-info">
+          <div class="vl2-name">Legal Unit</div>
+        </div>
+        <div class="vl2-check" [class.on]="checkedOffices['legal']">
+          <span *ngIf="checkedOffices['legal']">✓</span>
+        </div>
+      </div>
+
+      <div class="vl2-card" [class.selected]="checkedOffices['cwapu']" (click)="toggle('cwapu')">
+        <div class="vl2-icon green"><img src="assets/images/shield.png" alt="CWaPu"></div>
+        <div class="vl2-info">
+          <div class="vl2-name">Consumer Welfare and Protection Unit</div>
+          <div class="vl2-abbr">CWaPu</div>
+        </div>
+        <div class="vl2-check" [class.on]="checkedOffices['cwapu']">
+          <span *ngIf="checkedOffices['cwapu']">✓</span>
+        </div>
+      </div>
+
+      <div class="vl2-card" [class.selected]="checkedOffices['eod']" (click)="toggle('eod')">
+        <div class="vl2-icon red"><img src="assets/images/enforce.png" alt="EOD"></div>
+        <div class="vl2-info">
+          <div class="vl2-name">Enforcement and Operations Division</div>
+          <div class="vl2-abbr">EOD</div>
+        </div>
+        <div class="vl2-check" [class.on]="checkedOffices['eod']">
+          <span *ngIf="checkedOffices['eod']">✓</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

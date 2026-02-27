@@ -13,6 +13,20 @@ import { RouterModule, Router } from '@angular/router';
 export class VisitorLogbookComponent implements OnInit {
 
   visitorForm!: FormGroup;
+  currentStep = 0;
+  steps = [
+    'Fill out your Name',
+    'Fill out your Address',
+    'Sex, Age & Mobile No.',
+    'Purpose of Visit',
+  ];
+
+  stepTitles = [
+    'Your Identity',
+    'Your Location',
+    'Your Profile',
+    'Your Visit',
+  ];
 
   sexOptions = [
     { label: 'Male',            value: 'Male',            symbol: '♂' },
@@ -21,10 +35,10 @@ export class VisitorLogbookComponent implements OnInit {
   ];
 
   priorityList = [
-    { key: 'pwd', label: 'Persons with Disabilities (PWDs)', img: 'assets/images/PWD.png' },
-    { key: 'ij',  label: 'People with Injuries or Specific Needs', img: 'assets/images/IJ.jpg' },
-    { key: 'sc',  label: 'Senior Citizens',  img: 'assets/images/SC.png' },
-    { key: 'pw',  label: 'Pregnant Women',   img: 'assets/images/PW.jpg' },
+    { key: 'pwd', shortLabel: 'PWD',      label: 'Persons with Disabilities', img: 'assets/images/PWD.png' },
+    { key: 'ij',  shortLabel: 'Injured',  label: 'Injuries / Specific Needs', img: 'assets/images/IJ.jpg'  },
+    { key: 'sc',  shortLabel: 'Senior',   label: 'Senior Citizens',           img: 'assets/images/SC.png'  },
+    { key: 'pw',  shortLabel: 'Pregnant', label: 'Pregnant Women',            img: 'assets/images/PW.jpg'  },
   ];
 
   selectedPriority: string | null = null;
@@ -44,6 +58,13 @@ export class VisitorLogbookComponent implements OnInit {
     'Zamboanga del Norte','Zamboanga del Sur','Zamboanga Sibugay',
   ];
 
+  private stepFields: string[][] = [
+    ['fullName'],
+    ['townProvince'],
+    ['sex', 'age'],
+    ['dateOfVisit', 'visitHour', 'visitMinute'],
+  ];
+
   constructor(private fb: FormBuilder, private router: Router) {}
 
   ngOnInit(): void {
@@ -54,11 +75,9 @@ export class VisitorLogbookComponent implements OnInit {
       age:           ['', [Validators.required, Validators.min(1), Validators.max(120)]],
       mobileNo:      ['', [Validators.pattern(/^09\d{9}$/)]],
       townProvince:  ['', Validators.required],
-
-      
       dateOfVisit:   ['', Validators.required],
-      visitHour:     ['', [Validators.required, Validators.min(1),  Validators.max(12)]],
-      visitMinute:   ['', [Validators.required, Validators.min(0),  Validators.max(59)]],
+      visitHour:     ['', [Validators.required, Validators.min(1), Validators.max(12)]],
+      visitMinute:   ['', [Validators.required, Validators.min(0), Validators.max(59)]],
       visitAmPm:     ['AM', Validators.required],
     });
   }
@@ -72,11 +91,21 @@ export class VisitorLogbookComponent implements OnInit {
     this.selectedPriority = this.selectedPriority === key ? null : key;
   }
 
-  onNext(): void {
-    if (this.visitorForm.invalid) {
-      this.visitorForm.markAllAsTouched();
-      return;
-    }
-    this.router.navigate(['/visitor-logbook/step-2']);
+  nextStep(): void {
+    const fields = this.stepFields[this.currentStep];
+    fields.forEach(f => this.visitorForm.get(f)?.markAsTouched());
+    if (fields.every(f => this.visitorForm.get(f)?.valid)) this.currentStep++;
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 0) this.currentStep--;
+  }
+
+  onSubmit(): void {
+    const fields = this.stepFields[this.currentStep];
+    fields.forEach(f => this.visitorForm.get(f)?.markAsTouched());
+    if (!fields.every(f => this.visitorForm.get(f)?.valid)) return;
+    console.log('Submitted:', this.visitorForm.value, 'Priority:', this.selectedPriority);
+    this.router.navigate(['/visitor-logbook/confirm']);
   }
 }
