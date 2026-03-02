@@ -15,7 +15,9 @@ export interface ConnectivityData {
   serviceProvider: string;
   upload: number;
   download: number;
-  signalStrength: string | null;
+  signalStrength: string;
+  uploadDataSize: number;
+  downloadDataSize: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,7 +39,9 @@ export class ConnectivityService {
         serviceProvider: item.ServiceProvider ?? item.serviceProvider,
         upload: item.Upload ?? item.upload,
         download: item.Download ?? item.download,
-        signalStrength: item.SignalStrength ?? item.signalStrength ?? null
+        signalStrength: item.SignalStrength ?? item.signalStrength ?? null,
+        uploadDataSize: item.UploadDataSize ?? item.uploadDataSize ?? null,
+        downloadDataSize: item.DownloadDataSize ?? item.downloadDataSize ?? null
       })))
     );
   }

@@ -311,6 +311,35 @@
               </span>
             </span>
           </th>
+
+          <th (click)="sortBy('uploadDataSize')"
+              [class.col-active]="getColSort('uploadDataSize')"
+              [class.col-asc]="getColSort('uploadDataSize') === 'asc'"
+              [class.col-desc]="getColSort('uploadDataSize') === 'desc'">
+            <span class="th-inner">
+              Upload Data Size
+              <span class="sort-caret">
+                <svg *ngIf="!getColSort('uploadDataSize')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <svg *ngIf="getColSort('uploadDataSize') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg *ngIf="getColSort('uploadDataSize') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </span>
+          </th>
+
+          <th (click)="sortBy('downloadDataSize')"
+              [class.col-active]="getColSort('downloadDataSize')"
+              [class.col-asc]="getColSort('downloadDataSize') === 'asc'"
+              [class.col-desc]="getColSort('downloadDataSize') === 'desc'">
+            <span class="th-inner">
+              Download Data Size
+              <span class="sort-caret">
+                <svg *ngIf="!getColSort('downloadDataSize')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <svg *ngIf="getColSort('downloadDataSize') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg *ngIf="getColSort('downloadDataSize') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </span>
+          </th>
+
         </tr>
       </thead>
       <tbody>
@@ -323,15 +352,12 @@
             <span class="time-period-plain">{{ formatTime(item.validationTime).period }}</span>
           </td>
           <td>{{ item.technology }}</td>
-
           <td [ngClass]="'provider-' + item.serviceProvider.toLowerCase()">{{ item.serviceProvider }}</td>
-
           <td>{{ item.upload }}</td>
           <td>{{ item.download }}</td>
           <td>{{ item.signalStrength }}</td>
-        </tr>
-        <tr *ngIf="pagedData.length === 0">
-          <td colspan="9" class="empty-cell">No records found.</td>
+          <td>{{ item.uploadDataSize ?? '—' }}</td>
+          <td>{{ item.downloadDataSize ?? '—' }}</td>
         </tr>
       </tbody>
     </table>
