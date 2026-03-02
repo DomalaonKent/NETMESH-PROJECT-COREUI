@@ -200,11 +200,15 @@
   </div>
 
   <div class="carousel-dots">
-    <span *ngFor="let dot of carouselDots; let i = index"
-          class="carousel-dot"
-          [class.active]="i === carouselIndex"
-          (click)="goToCarousel(i)">
-    </span>
+    <div class="carousel-dots-track">
+      <button
+        *ngFor="let dot of carouselDots; let i = index"
+        class="carousel-dot"
+        [class.active]="i === carouselIndex"
+        (click)="goToCarousel(i)"
+        [title]="'Go to slide '">
+      </button>
+    </div>
   </div>
 
   <div class="toolbar">
@@ -253,9 +257,9 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th (click)="sortBy('id')" 
-          [class.col-active]="getColSort('id')" 
-          [class.col-asc]="getColSort('id') === 'asc'" 
+          <th (click)="sortBy('id')"
+          [class.col-active]="getColSort('id')"
+          [class.col-asc]="getColSort('id') === 'asc'"
           [class.col-desc]="getColSort('id') === 'desc'">
             <span class="th-inner">
               ID
@@ -267,9 +271,9 @@
             </span>
           </th>
 
-          <th (click)="sortBy('location')" 
-          [class.col-active]="getColSort('location')" 
-          [class.col-asc]="getColSort('location') === 'asc'" 
+          <th (click)="sortBy('location')"
+          [class.col-active]="getColSort('location')"
+          [class.col-asc]="getColSort('location') === 'asc'"
           [class.col-desc]="getColSort('location') === 'desc'">
             <span class="th-inner">
               Location
@@ -281,8 +285,8 @@
             </span>
           </th>
 
-          <th (click)="sortBy('validationDate')" 
-          [class.col-active]="activeDateIndex >= 0" 
+          <th (click)="sortBy('validationDate')"
+          [class.col-active]="activeDateIndex >= 0"
           [title]="activeDateIndex >= 0 ? 'Showing: ' + activeDate + ' — click for next date' : 'Click to filter by date'">
             <span class="th-inner">
               <span class="city-label">{{ dateHeaderLabel }}</span>
@@ -294,10 +298,10 @@
                 <svg *ngIf="activeDateIndex >= 0" class="caret-active" viewBox="0 0 10 8" fill="none"><circle cx="5" cy="4" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 2v4M3 4h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('validationTime')" 
-          [class.col-active]="activePeriodIndex >= 0" 
+
+          <th (click)="sortBy('validationTime')"
+          [class.col-active]="activePeriodIndex >= 0"
           [title]="activePeriodIndex >= 0 ? 'Showing: ' + activePeriod + ' — click for next' : 'Click to filter by AM/PM'">
             <span class="th-inner">
               <span class="city-label">{{ timeHeaderLabel }}</span>
@@ -307,12 +311,11 @@
                 <svg *ngIf="activePeriodIndex >= 0" class="caret-active" viewBox="0 0 10 8" fill="none"><circle cx="5" cy="4" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 2v4M3 4h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
               </span>
             </span>
-
           </th>
 
-          <th (click)="sortBy('technology')" 
-          [class.col-active]="getColSort('technology')" 
-          [class.col-asc]="getColSort('technology') === 'asc'" 
+          <th (click)="sortBy('technology')"
+          [class.col-active]="getColSort('technology')"
+          [class.col-asc]="getColSort('technology') === 'asc'"
           [class.col-desc]="getColSort('technology') === 'desc'">
             <span class="th-inner">
               Technology
@@ -322,11 +325,10 @@
                 <svg *ngIf="getColSort('technology') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </span>
-
           </th>
 
-          <th (click)="sortBy('serviceProvider')" 
-          [class.col-active]="activeProviderIndex >= 0" 
+          <th (click)="sortBy('serviceProvider')"
+          [class.col-active]="activeProviderIndex >= 0"
           [title]="activeProviderIndex >= 0 ? 'Showing: ' + activeProvider + ' — click for next' : 'Click to filter by provider'">
             <span class="th-inner">
               <span class="city-label">{{ providerHeaderLabel }}</span>
@@ -338,11 +340,11 @@
                 <svg *ngIf="activeProviderIndex >= 0" class="caret-active" viewBox="0 0 10 8" fill="none"><circle cx="5" cy="4" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 2v4M3 4h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('upload')" 
-          [class.col-active]="getColSort('upload')" 
-          [class.col-asc]="getColSort('upload') === 'asc'" 
+
+          <th (click)="sortBy('upload')"
+          [class.col-active]="getColSort('upload')"
+          [class.col-asc]="getColSort('upload') === 'asc'"
           [class.col-desc]="getColSort('upload') === 'desc'">
             <span class="th-inner">
               Upload
@@ -352,11 +354,11 @@
                 <svg *ngIf="getColSort('upload') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('download')" 
-          [class.col-active]="getColSort('download')" 
-          [class.col-asc]="getColSort('download') === 'asc'" 
+
+          <th (click)="sortBy('download')"
+          [class.col-active]="getColSort('download')"
+          [class.col-asc]="getColSort('download') === 'asc'"
           [class.col-desc]="getColSort('download') === 'desc'">
             <span class="th-inner">
               Download
@@ -366,11 +368,11 @@
                 <svg *ngIf="getColSort('download') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('signalStrength')" 
-          [class.col-active]="getColSort('signalStrength')" 
-          [class.col-asc]="getColSort('signalStrength') === 'asc'" 
+
+          <th (click)="sortBy('signalStrength')"
+          [class.col-active]="getColSort('signalStrength')"
+          [class.col-asc]="getColSort('signalStrength') === 'asc'"
           [class.col-desc]="getColSort('signalStrength') === 'desc'">
             <span class="th-inner">
               Signal Strength
@@ -380,11 +382,11 @@
                 <svg *ngIf="getColSort('signalStrength') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('uploadDataSize')" 
-          [class.col-active]="getColSort('uploadDataSize')" 
-          [class.col-asc]="getColSort('uploadDataSize') === 'asc'" 
+
+          <th (click)="sortBy('uploadDataSize')"
+          [class.col-active]="getColSort('uploadDataSize')"
+          [class.col-asc]="getColSort('uploadDataSize') === 'asc'"
           [class.col-desc]="getColSort('uploadDataSize') === 'desc'">
             <span class="th-inner">
               Upload Data Size
@@ -394,11 +396,11 @@
                 <svg *ngIf="getColSort('uploadDataSize') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </span>
-
           </th>
-          <th (click)="sortBy('downloadDataSize')" 
-          [class.col-active]="getColSort('downloadDataSize')" 
-          [class.col-asc]="getColSort('downloadDataSize') === 'asc'" 
+
+          <th (click)="sortBy('downloadDataSize')"
+          [class.col-active]="getColSort('downloadDataSize')"
+          [class.col-asc]="getColSort('downloadDataSize') === 'asc'"
           [class.col-desc]="getColSort('downloadDataSize') === 'desc'">
             <span class="th-inner">
               Download Data Size
@@ -414,7 +416,9 @@
       <tbody>
         <tr *ngFor="let item of pagedData">
           <td>{{ item.id }}</td>
-          <td>{{ item.location }}</td>
+          <td [class.location-fallback]="!item.location?.trim()" class="location-cell">
+            {{ item.location?.trim() || item.barangay || '—' }}
+          </td>
           <td>{{ item.validationDate }}</td>
           <td class="time-cell">
             <span class="time-value">{{ formatTime(item.validationTime).hour }}:{{ formatTime(item.validationTime).minute }}</span>
@@ -427,6 +431,9 @@
           <td>{{ item.signalStrength }}</td>
           <td>{{ item.uploadDataSize ?? '—' }}</td>
           <td>{{ item.downloadDataSize ?? '—' }}</td>
+        </tr>
+        <tr *ngIf="pagedData.length === 0">
+          <td colspan="11" class="empty-cell">No records found.</td>
         </tr>
       </tbody>
     </table>

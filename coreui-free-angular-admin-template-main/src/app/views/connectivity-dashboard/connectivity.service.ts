@@ -18,6 +18,7 @@ export interface ConnectivityData {
   signalStrength: string;
   uploadDataSize: number;
   downloadDataSize: number;
+  collectedBy: string; 
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,7 +42,8 @@ export class ConnectivityService {
         download: item.Download ?? item.download,
         signalStrength: item.SignalStrength ?? item.signalStrength ?? null,
         uploadDataSize: item.UploadDataSize ?? item.uploadDataSize ?? null,
-        downloadDataSize: item.DownloadDataSize ?? item.downloadDataSize ?? null
+        downloadDataSize: item.DownloadDataSize ?? item.downloadDataSize ?? null,
+        collectedBy: item.CollectedBy ?? item.collectedBy ?? 'Unknown' 
       })))
     );
   }

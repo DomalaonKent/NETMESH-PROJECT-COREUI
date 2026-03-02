@@ -271,7 +271,8 @@ export class ConnectivityDashboardComponent implements OnInit {
     const toNum = (v: any) => parseFloat(v) || 0;
 
     for (const row of this.filteredData) {
-      const name = ((row as any).collectedBy ?? (row as any).validator ?? (row as any).enumerator ?? 'Unknown').toString().trim();
+      const name = row.collectedBy || 'Unknown';
+      
       if (!map.has(name)) {
         map.set(name, { name, uploadDataSize: 0, downloadDataSize: 0 });
       }
@@ -322,7 +323,8 @@ export class ConnectivityDashboardComponent implements OnInit {
         (item.serviceProvider      ?? '').toLowerCase().includes(term) ||
         String(item.upload         ?? '').toLowerCase().includes(term) ||
         String(item.download       ?? '').toLowerCase().includes(term) ||
-        String(item.signalStrength ?? '').toLowerCase().includes(term)
+        String(item.signalStrength ?? '').toLowerCase().includes(term) ||
+        (item.collectedBy          ?? '').toLowerCase().includes(term) 
       );
     }
 

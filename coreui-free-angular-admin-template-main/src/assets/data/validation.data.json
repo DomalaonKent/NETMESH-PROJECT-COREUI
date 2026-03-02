@@ -12,7 +12,10 @@
     "Upload": 21.2,
     "Download": 125,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 42.88,
+    "DownloadDataSize": 181.61,
+    "CollectedBy": "Juan dela Cruz"
   },
   {
     "ID": 18442,
@@ -27,7 +30,10 @@
     "Upload": 3.11,
     "Download": 18.4,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 8.4,
+    "DownloadDataSize": 46.68,
+    "CollectedBy": "Maria Maria"
   },
   {
     "ID": 18445,
@@ -42,7 +48,10 @@
     "Upload": 0.31,
     "Download": 6.7,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 8.4,
+    "DownloadDataSize": 46.68,
+    "CollectedBy": "Maria Santos"
   },
   {
     "ID": 18446,
@@ -57,7 +66,10 @@
     "Upload": 29.8,
     "Download": 62.8,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 1.54,
+    "DownloadDataSize": 15.11,
+    "CollectedBy": "Maria Santos"
   },
   {
     "ID": 18449,
@@ -72,7 +84,10 @@
     "Upload": 1.02,
     "Download": 6.52,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 1.49,
+    "DownloadDataSize": 15.3,
+    "CollectedBy": "Qwerty Pouiuy"
   },
   {
     "ID": 18441,
@@ -87,7 +102,10 @@
     "Upload": 26.5,
     "Download": 52.5,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 1.49,
+    "DownloadDataSize": 15.3,
+    "CollectedBy": "Coco Martin"
   },
   {
     "ID": 18444,
@@ -102,7 +120,10 @@
     "Upload": 22.9,
     "Download": 28.8,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 15.92,
+    "DownloadDataSize": 183.66,
+    "CollectedBy": "Marco Marco"
   },
   {
     "ID": 18448,
@@ -117,7 +138,10 @@
     "Upload": 19.7,
     "Download": 10.16,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 16.92,
+    "DownloadDataSize": 182.66,
+    "CollectedBy": "Maro Marc"
   },
   {
     "ID": 18451,
@@ -132,7 +156,10 @@
     "Upload": 22.6,
     "Download": 64.8,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 11.92,
+    "DownloadDataSize": 187.66,
+    "CollectedBy": "Mar Tin"
   },
   {
     "ID": 18440,
@@ -657,7 +684,10 @@
     "Upload": 1.03,
     "Download": 6.08,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 12.36,
+    "DownloadDataSize": 72.96,
+    "CollectedBy": "Juan Cruz"
   },
   {
     "ID": 18506,
@@ -672,7 +702,10 @@
     "Upload": 2.46,
     "Download": 38.3,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 29.52,
+    "DownloadDataSize": 459.60,
+    "CollectedBy": "Jaime Wer"
   },
   {
     "ID": 18518,
@@ -687,7 +720,10 @@
     "Upload": 5.04,
     "Download": 19,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 60.48,
+    "DownloadDataSize": 228.00,
+    "CollectedBy": "Paldo Men"
   },
   {
     "ID": 18521,
@@ -702,7 +738,10 @@
     "Upload": 21.6,
     "Download": 37.9,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 259.20,
+    "DownloadDataSize": 454.80,
+    "CollectedBy": "Maria Osawa"
   },
   {
     "ID": 18524,
@@ -717,7 +756,10 @@
     "Upload": 8.18,
     "Download": 42.36,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 98.16,
+    "DownloadDataSize": 508.32,
+    "CollectedBy": "Santos Santos"
   },
   {
     "ID": 18509,
@@ -732,7 +774,10 @@
     "Upload": 11.4,
     "Download": 21,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 136.80,
+    "DownloadDataSize": 252.00,
+    "CollectedBy": "Pedro Penduko"
   },
   {
     "ID": 18512,
@@ -747,7 +792,10 @@
     "Upload": 10.92,
     "Download": 64.77,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 131.04,
+    "DownloadDataSize": 777.24,
+    "CollectedBy": "Meow Meow"
   },
   {
     "ID": 18515,
@@ -762,7 +810,10 @@
     "Upload": 4.97,
     "Download": 25,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 59.64,
+    "DownloadDataSize": 300.00,
+    "CollectedBy": "Robin Padilla"
   },
   {
     "ID": 18464,
@@ -777,7 +828,10 @@
     "Upload": 15.6,
     "Download": 54.7,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 187.20,
+    "DownloadDataSize": 656.40,
+    "CollectedBy": "Kura Coth"
   },
   {
     "ID": 18467,
@@ -792,7 +846,10 @@
     "Upload": 4.87,
     "Download": 20.7,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 58.44,
+    "DownloadDataSize": 248.40,
+    "CollectedBy": "Flower Girl"
   },
   {
     "ID": 18470,
@@ -807,7 +864,10 @@
     "Upload": 0.29,
     "Download": 4.71,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 3.48,
+    "DownloadDataSize": 56.52,
+    "CollectedBy": "Nye Mew"
   },
   {
     "ID": 18473,
@@ -822,7 +882,10 @@
     "Upload": 3.92,
     "Download": 10.9,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 47.04,
+    "DownloadDataSize": 130.80,
+    "CollectedBy": "Okay Okay"
   },
   {
     "ID": 18476,
@@ -837,7 +900,10 @@
     "Upload": 19.9,
     "Download": 99.3,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 238.80,
+    "DownloadDataSize": 1191.60,
+    "CollectedBy": "Carlos Mendoza"
   },
   {
     "ID": 18479,
@@ -852,7 +918,10 @@
     "Upload": 0.28,
     "Download": 4.68,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 3.36,
+    "DownloadDataSize": 56.16,
+    "CollectedBy": "Carlos Mendoza 199"
   },
   {
     "ID": 18452,
@@ -867,7 +936,10 @@
     "Upload": 0.32,
     "Download": 5.45,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 3.84,
+    "DownloadDataSize": 65.40,
+    "CollectedBy": "Juan Carlos"
   },
   {
     "ID": 18455,
@@ -882,7 +954,10 @@
     "Upload": 24.2,
     "Download": 68.9,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 290.40,
+    "DownloadDataSize": 826.80,
+    "CollectedBy": "Juan Carlo"
   },
   {
     "ID": 18458,
@@ -897,7 +972,10 @@
     "Upload": 0.42,
     "Download": 7.19,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 5.04,
+    "DownloadDataSize": 86.28,
+    "CollectedBy": "Cong Tv"
   },
   {
     "ID": 18461,
@@ -912,7 +990,10 @@
     "Upload": 0.41,
     "Download": 4.55,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 4.92,
+    "DownloadDataSize": 54.60,
+    "CollectedBy": "Junnie Boy"
   },
   {
     "ID": 18483,
@@ -927,7 +1008,10 @@
     "Upload": 14.7,
     "Download": 58.8,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 176.40,
+    "DownloadDataSize": 705.60,
+    "CollectedBy": "Boss Keng"
   },
   {
     "ID": 18486,
@@ -942,7 +1026,10 @@
     "Upload": 14.7,
     "Download": 82.2,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 176.40,
+    "DownloadDataSize": 986.40,
+    "CollectedBy": "PendukoPedo"
   },
   {
     "ID": 18489,
@@ -957,7 +1044,10 @@
     "Upload": 26.2,
     "Download": 28.5,
     "SignalStrength": null,
-    "Remarks": null
+    "Remarks": null,
+    "UploadDataSize": 314.40,
+    "DownloadDataSize": 342.00,
+    "CollectedBy": "Reyes Reyes"
   },
   {
     "ID": 18492,

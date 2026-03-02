@@ -72,24 +72,29 @@
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 14px;
+  align-items: stretch;
   transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 
   .summary-card {
     flex: 0 0 calc(25% - 11px);
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 320px;
+    overflow: hidden;
   }
 }
 
 .carousel-btn {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: rgba(56,189,248,0.08);
   border: 1.5px solid rgba(56,189,248,0.25);
   border-radius: 50%;
   color: #38bdf8;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -101,7 +106,7 @@
   &:hover:not(:disabled) {
     background: rgba(56,189,248,0.2);
     border-color: #38bdf8;
-    transform: scale(1.08);
+    transform: scale(1.1);
   }
 
   &:disabled {
@@ -114,28 +119,62 @@
 .carousel-dots {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+  padding: 4px 0;
+}
+
+.carousel-dots-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+.carousel-dots-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: rgba(56,189,248,0.15);
+  transform: translateY(-50%);
+  z-index: 0;
 }
 
 .carousel-dot {
-  width: 7px;
-  height: 7px;
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(56,189,248,0.2);
-  border: 1px solid rgba(56,189,248,0.3);
+  background: #0f1d35;
+  border: 2px solid rgba(56,189,248,0.25);
+  color: #4e6880;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-
-  &.active {
-    background: #38bdf8;
-    border-color: #38bdf8;
-    transform: scale(1.3);
-    box-shadow: 0 0 6px rgba(56,189,248,0.5);
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  margin: 0 6px;
+  font-family: inherit;
 
   &:hover:not(.active) {
-    background: rgba(56,189,248,0.4);
+    border-color: #38bdf8;
+    color: #38bdf8;
+    background: rgba(56,189,248,0.08);
+    transform: scale(1.1);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.2), 0 4px 12px rgba(56,189,248,0.4);
+    transform: scale(1.15);
   }
 }
 
@@ -147,13 +186,36 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  .card-stats {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56,189,248,0.3) transparent;
+    padding-right: 2px;
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+  }
 }
 
 .card-dito  { background: linear-gradient(145deg,#7c1c00,#b02a0a); border-color: rgba(251,146,60,0.25); }
 .card-globe { background: linear-gradient(145deg,#0d1f3c,#162e54); border-color: rgba(56,189,248,0.25); }
 .card-smart { background: linear-gradient(145deg,#0d2b1a,#1a4a2a); border-color: rgba(34,197,94,0.25); }
 .card-all   { background: linear-gradient(145deg,#111827,#1e2c42); border-color: rgba(148,163,184,0.2); }
-.card-person { background: linear-gradient(145deg, #1a1040, #2d1a6e); border-color: rgba(167,139,250,0.35); }
+.card-person {
+  background: linear-gradient(145deg, #1a1040, #2d1a6e);
+  border-color: rgba(167,139,250,0.35);
+
+  .card-stats {
+    scrollbar-color: rgba(167,139,250,0.5) transparent !important;
+    &::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.5) !important; }
+  }
+}
 
 .card-header {
   display: flex;
@@ -365,6 +427,16 @@
   }
 }
 
+.location-cell {
+  color: #94a3b8;
+
+  &.location-fallback {
+    color: #64748b;
+    font-style: italic;
+    font-size: 11px;
+  }
+}
+
 .th-inner { display: inline-flex; align-items: center; gap: 5px; line-height: 1; }
 .sort-caret { display: inline-flex; align-items: center; flex-shrink: 0; width: 10px; height: 12px; }
 .caret-idle { width: 10px; height: 12px; color: #4e6880; opacity: 0; transition: opacity 0.15s; }
@@ -455,4 +527,5 @@ td.provider-dito  { color: #fb923c !important; font-weight: 700; }
   .data-table { font-size: 10px; }
   .pagination-bar { flex-direction: column; align-items: flex-start; }
   .summary-cards .summary-card { flex: 0 0 100%; }
+  .carousel-dot { width: 8px; height: 8px; &.active { width: 22px; } }
 }
