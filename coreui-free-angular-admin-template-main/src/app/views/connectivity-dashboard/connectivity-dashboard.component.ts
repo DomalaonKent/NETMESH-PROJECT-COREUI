@@ -10,6 +10,13 @@ interface ProviderStats {
   avgDownload: number;
   noSignal: number;
   weakSignal: number;
+  totalUploadDataSize: number;
+  totalDownloadDataSize: number;
+}
+interface PersonStat {
+  name: string;
+  uploadDataSize: number;
+  downloadDataSize: number;
 }
 
 @Component({
@@ -66,6 +73,18 @@ export class ConnectivityDashboardComponent implements OnInit {
   globeStats: ProviderStats = this.emptyStats();
   ditoStats:  ProviderStats = this.emptyStats();
   allStats:   ProviderStats = this.emptyStats();
+  personStats: PersonStat[] = [];
+
+  readonly carouselTotal: number = 5;
+  readonly carouselVisible: number = 4;
+  carouselIndex: number = 0;
+
+  get carouselMaxIndex(): number { return this.carouselTotal - this.carouselVisible; }
+  get carouselDots(): number[] { return Array.from({ length: this.carouselMaxIndex + 1 }, (_, i) => i); }
+  carouselPrev(): void { if (this.carouselIndex > 0) this.carouselIndex--; }
+  carouselNext(): void { if (this.carouselIndex < this.carouselMaxIndex) this.carouselIndex++; }
+  goToCarousel(index: number): void { this.carouselIndex = index; }
+
 
   constructor(private router: Router, private connectivityService: ConnectivityService) {}
 
@@ -74,7 +93,15 @@ export class ConnectivityDashboardComponent implements OnInit {
   }
 
   emptyStats(): ProviderStats {
-    return { totalTests: 0, avgUpload: 0, avgDownload: 0, noSignal: 0, weakSignal: 0 };
+    return {
+      totalTests: 0,
+      avgUpload: 0,
+      avgDownload: 0,
+      noSignal: 0,
+      weakSignal: 0,
+      totalUploadDataSize: 0,
+      totalDownloadDataSize: 0
+    };
   }
 
   loadData(): void {
@@ -211,6 +238,7 @@ export class ConnectivityDashboardComponent implements OnInit {
     const ditoRows  = this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito');
     this.ditoStats  = this.calcStats(ditoRows);
     this.allStats   = this.calcStats(this.filteredData);
+    this.computePersonStats();
   }
 
   private calcStats(rows: ConnectivityData[]): ProviderStats {
@@ -225,7 +253,34 @@ export class ConnectivityDashboardComponent implements OnInit {
     const weakBarangays = new Set(
       rows.filter(r => toNum(r.upload) < 1 || toNum(r.download) < 5).map(r => r.barangay)
     );
-    return { totalTests, avgUpload, avgDownload, noSignal: noSignalBarangays.size, weakSignal: weakBarangays.size };
+    const totalUploadDataSize   = rows.reduce((s, r) => s + toNum(r.uploadDataSize),   0);
+    const totalDownloadDataSize = rows.reduce((s, r) => s + toNum(r.downloadDataSize), 0);
+    return {
+      totalTests,
+      avgUpload,
+      avgDownload,
+      noSignal: noSignalBarangays.size,
+      weakSignal: weakBarangays.size,
+      totalUploadDataSize,
+      totalDownloadDataSize
+    };
+  }
+
+  private computePersonStats(): void {
+    const map = new Map<string, PersonStat>();
+    const toNum = (v: any) => parseFloat(v) || 0;
+
+    for (const row of this.filteredData) {
+      const name = ((row as any).collectedBy ?? (row as any).validator ?? (row as any).enumerator ?? 'Unknown').toString().trim();
+      if (!map.has(name)) {
+        map.set(name, { name, uploadDataSize: 0, downloadDataSize: 0 });
+      }
+      const entry = map.get(name)!;
+      entry.uploadDataSize   += toNum(row.uploadDataSize);
+      entry.downloadDataSize += toNum(row.downloadDataSize);
+    }
+
+    this.personStats = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   private applyFilterAndSort(): void {
