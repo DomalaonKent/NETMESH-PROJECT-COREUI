@@ -35,6 +35,9 @@ export class DailyTimeRecordComponent implements OnInit {
   selectedYear: number | string = '';
   selectedMonth: number | string = '';
 
+  editingDay: number | null = null;
+  editingRemark: string = '';
+
   constructor(private dtrService: DailyTimeRecordService) {}
 
   ngOnInit(): void {
@@ -46,11 +49,11 @@ export class DailyTimeRecordComponent implements OnInit {
       this.selectedPersonnel,
       Number(this.selectedYear)
     );
-
     this.buildTable();
   }
 
   onFilterChange(): void {
+    this.cancelEdit();
     this.buildTable();
   }
 
@@ -77,6 +80,29 @@ export class DailyTimeRecordComponent implements OnInit {
       month
     );
   }
+
+  startEdit(rec: DtrRecord): void {
+    this.editingDay    = rec.DTRDAY;
+    this.editingRemark = rec.Remark ?? '';
+  }
+
+  saveRemark(rec: DtrRecord): void {
+    this.dtrService.updateRemark(
+      rec.ID,
+      rec.DTRYEAR,
+      rec.DTRMONTH,
+      rec.DTRDAY,
+      rec.FullName,
+      this.editingRemark
+    );
+    rec.Remark      = this.editingRemark;
+    this.editingDay = null;
+  }
+
+  cancelEdit(): void {
+    this.editingDay = null;
+  }
+
   isWeekend(rec: DtrRecord): boolean {
     if (rec.Remark === 'Saturday' || rec.Remark === 'Sunday') return true;
     if (!rec.DTRYEAR || !rec.DTRMONTH) return false;

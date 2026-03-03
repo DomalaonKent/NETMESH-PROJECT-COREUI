@@ -75,9 +75,31 @@
               <span *ngIf="!isWeekend(rec) && hasValue(rec.Out)">{{ rec.Out }}</span>
             </td>
             <td class="col-remarks">
-              <span *ngIf="hasValue(rec.Remark)" class="remark-tag" [class.remark-weekend]="isWeekend(rec)">
-                {{ rec.Remark }}
-              </span>
+              <ng-container *ngIf="editingDay !== rec.DTRDAY; else editMode">
+                <span *ngIf="hasValue(rec.Remark)"
+                      class="remark-tag"
+                      [class.remark-weekend]="isWeekend(rec)">
+                  {{ rec.Remark }}
+                </span>
+                <button class="btn-edit-remark"
+                        title="Edit remark"
+                        (click)="startEdit(rec)">
+                  <img src="assets/images/pencil.png" alt="Edit" class="pencil-icon" />
+                </button>
+              </ng-container>
+
+              <ng-template #editMode>
+                <div class="edit-remark-row">
+                  <input class="remark-input"
+                         [(ngModel)]="editingRemark"
+                         (keyup.enter)="saveRemark(rec)"
+                         (keyup.escape)="cancelEdit()"
+                         placeholder="Enter remark..."
+                         autofocus />
+                  <button class="btn-save-remark" title="Save" (click)="saveRemark(rec)">✔</button>
+                  <button class="btn-cancel-remark" title="Cancel" (click)="cancelEdit()">✕</button>
+                </div>
+              </ng-template>
             </td>
           </tr>
         </tbody>

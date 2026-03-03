@@ -30,6 +30,7 @@ export class DailyTimeRecordService {
   getMonthlyRecords(personnel: string, year: number, month: number): DtrRecord[] {
     const daysInMonth = new Date(year, month, 0).getDate();
     const recordMap = new Map<number, DtrRecord>();
+
     this.allRecords
       .filter(r =>
         (!personnel || r.FullName === personnel) &&
@@ -59,10 +60,43 @@ export class DailyTimeRecordService {
 
     return result;
   }
+
   getFirstMonth(personnel: string, year: number): number {
     const record = this.allRecords.find(
       r => r.FullName === personnel && r.DTRYEAR === year
     );
     return record ? record.DTRMONTH : 1;
+  }
+  updateRemark(
+    id: number,
+    year: number,
+    month: number,
+    day: number,
+    fullName: string,
+    remark: string
+  ): void {
+    const record = this.allRecords.find(r =>
+      r.FullName === fullName &&
+      r.DTRYEAR  === year     &&
+      r.DTRMONTH === month    &&
+      r.DTRDAY   === day
+    );
+
+    if (record) {
+      record.Remark = remark;
+    } else {
+      this.allRecords.push({
+        ID:       id || Date.now(),
+        DTRYEAR:  year,
+        DTRMONTH: month,
+        DTRDAY:   day,
+        FullName: fullName,
+        In:       'NULL',
+        Break:    'NULL',
+        Resume:   'NULL',
+        Out:      'NULL',
+        Remark:   remark
+      });
+    }
   }
 }
