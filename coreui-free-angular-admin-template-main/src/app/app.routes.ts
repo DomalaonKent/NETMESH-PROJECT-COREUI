@@ -79,6 +79,13 @@ export const routes: Routes = [
         data: { title: "Visitor's Logbook2" }
       },
       {
+        path: 'daily-time-record',
+        loadComponent: () =>
+          import('./views/DailyTimeRecord/DailyTimeRecord.component')
+            .then(m => m.DailyTimeRecordComponent),
+        data: { title: 'Daily Time Record' }
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
       },

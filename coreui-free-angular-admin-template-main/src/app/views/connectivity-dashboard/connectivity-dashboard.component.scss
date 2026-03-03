@@ -81,7 +81,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: 220px;
+    height: 230px;
     overflow: hidden;
   }
 }
@@ -202,6 +202,13 @@
     &::-webkit-scrollbar-track { background: transparent; }
   }
 }
+.card-provider-logo--dito {
+  width: 50px !important;
+  height: 40px !important;
+  object-fit: contain;
+  border-radius: 2px;
+  filter: brightness(2) contrast(1.5) saturate(1.2);
+}
 
 .card-dito  { background: linear-gradient(145deg,#7c1c00,#b02a0a); border-color: rgba(251,146,60,0.25); }
 .card-globe { background: linear-gradient(145deg,#0d1f3c,#162e54); border-color: rgba(56,189,248,0.25); }
@@ -253,7 +260,7 @@
 .globe-logo  { color: #93c5fd; }
 .smart-logo  { color: #86efac; }
 .all-logo    { color: #cbd5e1; }
-.person-logo { color: #c4b5fd; }
+.person-logo { color: #f8f8f8; }
 
 .card-stats { display: flex; flex-direction: column; gap: 6px; }
 
@@ -264,7 +271,7 @@
 .person-header-label {
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: #c4b5fd !important;
+  color: #f8f8f8 !important;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -305,7 +312,7 @@
 }
 
 .stat-value.data-size {
-  color: #67e8f9;
+  color: #fbbf24;
   font-size: 14px;
 }
 
