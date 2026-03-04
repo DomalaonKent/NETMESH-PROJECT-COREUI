@@ -1,3 +1,19 @@
+:host {
+  display: block;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.animated.fadeIn {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  width: 100%;
+}
+
+c-row {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
 .animated.fadeIn {
   animation: fadeIn 0.5s ease-in;
 }
