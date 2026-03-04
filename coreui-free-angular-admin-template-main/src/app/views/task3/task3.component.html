@@ -2,52 +2,56 @@
   <div class="simple-nav-panel">
     <div class="nav-title">Navigation Panel</div>
     <div class="nav-links">
-      <div class="nav-link">Dashboard</div>
-      <div class="nav-link">Settings</div>
+      <div class="nav-link nav-section-label">
+        <span class="nav-icon-wrap ord">
+          <img src="assets/images/folder.png" alt="ORD">
+        </span>
+        <span>ORD</span>
+      </div>
+      <div class="nav-link nav-section-label">
+        <span class="nav-icon-wrap legal">
+          <img src="assets/images/legal.png" alt="LEGAL">
+        </span>
+        <span>LEGAL</span>
+      </div>
+      <div class="nav-link nav-section-label">
+        <span class="nav-icon-wrap eod">
+          <img src="assets/images/enforce.png" alt="EOD">
+        </span>
+        <span>EOD</span>
+      </div>
+      <div class="nav-link nav-section-label">
+        <span class="nav-icon-wrap fad">
+        </span>
+        <span>FAD</span>
+      </div>
     </div>
   </div>
 
   <div class="main-area">
     <div class="welcome-banner">
-      <h1> Welcome to Internship Performance Overview </h1>
-      <p> Reviewing trainee milestones and historical task completion data. • CoreUI Theme Components</p>
+      <h1>Welcome to Internship Performance Overview</h1>
+      <p>Reviewing trainee milestones and historical task completion data. • CoreUI Theme Components</p>
     </div>
 
     <div class="animated fadeIn">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 class="mb-1"> OJT Accomplishment Overview </h2>
+          <h2 class="mb-1">OJT Accomplishment Overview</h2>
           <p class="text-medium-emphasis mb-0">
             Reviewing trainee milestones and historical task completion data.
           </p>
         </div>
 
         <div class="action-buttons">
-          <button class="btn-connectivity" (click)="goToConnectivity()">
-            Connectivity Datas
-          </button>
-          <button class="btn-call-sign" (click)="goToCallSign()">
-             Government Call Sign
-          </button>
-          <button class="btn-nongov-call-sign" (click)="goToNonGovCallSign()">
-             Non-Gov't Call Sign
-          </button>
-          <button class="btn-nongov-call-sign" (click)="goToPrs()">
-             PRS Component
-          </button>
-          <button class="btn-nongov-call-sign" (click)="goToVl()">
-             Visitors Logbook
-          </button>
-          <button class="btn-nongov-call-sign" (click)="goToVl2()">
-             Visitors Logbook2
-          </button>
-          <button class="btn-nongov-call-sign" (click)="goToDtr()">
-            Daily Time Record
-          </button>
-
-          <a routerLink="/dashboard" cButton color="primary" variant="outline">
-            Other Charts →
-          </a>
+          <button class="btn-connectivity" (click)="goToConnectivity()">Connectivity Datas</button>
+          <button class="btn-call-sign" (click)="goToCallSign()">Government Call Sign</button>
+          <button class="btn-nongov-call-sign" (click)="goToNonGovCallSign()">Non-Gov't Call Sign</button>
+          <button class="btn-nongov-call-sign" (click)="goToPrs()">PRS Component</button>
+          <button class="btn-nongov-call-sign" (click)="goToVl()">Visitors Logbook</button>
+          <button class="btn-nongov-call-sign" (click)="goToVl2()">Visitors Logbook2</button>
+          <button class="btn-nongov-call-sign" (click)="goToDtr()">Daily Time Record</button>
+          <a routerLink="/dashboard" cButton color="primary" variant="outline">Other Charts →</a>
         </div>
       </div>
 
@@ -55,39 +59,34 @@
         <c-col xs="12">
           <c-card class="border-primary">
             <c-card-header class="bg-primary bg-gradient text-white">
-              <strong>📊 Dropdown List </strong>
+              <strong>📊 Dropdown List</strong>
             </c-card-header>
-
             <c-card-body>
               <c-row>
-
                 <c-col md="4">
                   <label class="form-label fw-semibold">Select Province</label>
                   <select class="form-select" [(ngModel)]="selectedProvince">
-                    <option value=""> Choose Province </option>
+                    <option value="">Choose Province</option>
                     <option *ngFor="let p of provinces">{{ p }}</option>
                   </select>
                   <small>Selected: {{ selectedProvince || 'None' }}</small>
                 </c-col>
-
                 <c-col md="4">
                   <label class="form-label fw-semibold">Select Month</label>
                   <select class="form-select" [(ngModel)]="selectedMonth">
-                    <option value=""> Choose Month </option>
+                    <option value="">Choose Month</option>
                     <option *ngFor="let m of months">{{ m }}</option>
                   </select>
                   <small>Selected: {{ selectedMonth || 'None' }}</small>
                 </c-col>
-
                 <c-col md="4">
                   <label class="form-label fw-semibold">Select Year</label>
                   <select class="form-select" [(ngModel)]="selectedYear">
-                    <option value=""> Choose Year </option>
+                    <option value="">Choose Year</option>
                     <option *ngFor="let y of years">{{ y }}</option>
                   </select>
                   <small>Selected: {{ selectedYear || 'None' }}</small>
                 </c-col>
-
               </c-row>
             </c-card-body>
           </c-card>

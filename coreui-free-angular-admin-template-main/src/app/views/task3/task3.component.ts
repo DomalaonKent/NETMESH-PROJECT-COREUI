@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -43,15 +43,14 @@ interface OJTData {
   templateUrl: './task3.component.html',
   styleUrls: ['./task3.component.scss']
 })
-export class Task3Component implements OnInit {
-  [x: string]: any;
+export class Task3Component implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('horizontalBarCanvas') horizontalBarCanvas!: ElementRef<HTMLCanvasElement>;
 
   currentView: string = 'dashboard';
   provinces: string[] = [
-    'Albay','Camarines Norte','Camarines Sur',
-    'Catanduanes','Masbate','Sorsogon'
+    'Albay', 'Camarines Norte', 'Camarines Sur',
+    'Catanduanes', 'Masbate', 'Sorsogon'
   ];
 
   months: string[] = [
@@ -93,27 +92,14 @@ export class Task3Component implements OnInit {
     return ((hours / this.totalHours) * 100).toFixed(1) + '%';
   }
 
-  goToConnectivity(): void {
-    this.router.navigate(['/connectivity-dashboard']);
-  }
-  goToCallSign(): void {
-    this.router.navigate(['/call-sign']);
-  }
-  goToNonGovCallSign(): void {
-  this.router.navigate(['/non-gov-call-sign']);
-  }
-  goToPrs(): void {
-  this.router.navigate(['/prs']);
-  }
-  goToVl(): void {
-  this.router.navigate(['/visitor-logbook']);
-  }
-  goToVl2(): void {
-  this.router.navigate(['/visitor-logbook2']);
-  }
-  goToDtr(): void {
-  this.router.navigate(['/daily-time-record']);
-}
+  goToConnectivity(): void { this.router.navigate(['/connectivity-dashboard']); }
+  goToCallSign(): void { this.router.navigate(['/call-sign']); }
+  goToNonGovCallSign(): void { this.router.navigate(['/non-gov-call-sign']); }
+  goToPrs(): void { this.router.navigate(['/prs']); }
+  goToVl(): void { this.router.navigate(['/visitor-logbook']); }
+  goToVl2(): void { this.router.navigate(['/visitor-logbook2']); }
+  goToDtr(): void { this.router.navigate(['/daily-time-record']); }
+
   switchView(view: string): void {
     this.currentView = view;
     if (view === 'dashboard' && this.horizontalBarCanvas) {
@@ -126,17 +112,17 @@ export class Task3Component implements OnInit {
     const ctx = this.horizontalBarCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
 
-    const names  = this.ojtData.map(item => item.name);
-    const hours  = this.ojtData.map(item => item.hours);
-    const colors = this.ojtData.map(item => item.color);
+    if (this.horizontalChart) {
+      this.horizontalChart.destroy();
+    }
 
     this.horizontalChart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: names,
+        labels: this.ojtData.map(item => item.name),
         datasets: [{
-          data: hours,
-          backgroundColor: colors,
+          data: this.ojtData.map(item => item.hours),
+          backgroundColor: this.ojtData.map(item => item.color),
           borderRadius: 6,
           barThickness: 40
         }]

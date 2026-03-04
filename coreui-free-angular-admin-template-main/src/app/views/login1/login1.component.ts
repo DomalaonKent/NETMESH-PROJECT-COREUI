@@ -68,6 +68,6 @@ export class Login1Component implements OnInit {
       this.loginForm.markAllAsTouched();
       return;
     }
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/task3']);
   }
 }
