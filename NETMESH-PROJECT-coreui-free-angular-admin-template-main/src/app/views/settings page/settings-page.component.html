@@ -1,0 +1,120 @@
+<div class="settings-wrap" [class.light-mode]="isLightMode">
+  <div class="settings-header">
+    <div>
+      <h2 class="settings-title">Settings</h2>
+      <span class="settings-subtitle">Manage your application preferences</span>
+    </div>
+    <button class="btn-back" (click)="goBack()">← Back</button>
+  </div>
+
+  <div class="settings-grid">
+    <div class="settings-col">
+      <div class="s-card">
+        <div class="s-toggle-row">
+          <div class="s-field-info">
+            <span class="s-field-label">Theme Mode</span>
+            <span class="s-field-sub">Switch between dark and light theme</span>
+          </div>
+        </div>
+
+        <div class="theme-previews">
+            <div class="theme-preview-block" [class.active]="!isLightMode" (click)="setDark()">
+            <div class="tp-inner tp-dark-preview" style="background:#0a0f1e !important; min-height:70px; display:block; width:100%;"></div>
+            <div class="tp-dark-preview-footer">
+                <span>Dark Mode</span>
+            </div>
+            </div>
+
+            <div class="theme-preview-block" [class.active]="isLightMode" (click)="setLight()">
+            <div class="tp-inner tp-light-preview" style="background:#ffffff !important; min-height:70px; display:block; width:100%;"></div>
+            <div class="tp-light-preview-footer">
+                <span>Light Mode</span>
+            </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="s-card">
+        <div class="s-card-header">
+          <div>
+            <h3 class="s-card-title">Data & Display</h3>
+            <p class="s-card-desc">Control how data and tables are shown</p>
+          </div>
+        </div>
+        <div class="s-divider"></div>
+        <div class="s-cb-list">
+          <label class="s-cb-row" *ngFor="let d of display">
+            <div class="s-cb-box">
+              <input type="checkbox" [(ngModel)]="d.enabled" class="s-cb-input" />
+              <span class="s-cb-custom"></span>
+            </div>
+            <div class="s-cb-info">
+              <span class="s-cb-label">{{ d.label }}</span>
+              <span class="s-cb-sub">{{ d.description }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-col">
+      <div class="s-card">
+        <div class="s-card-header">
+          <div>
+            <h3 class="s-card-title">Privacy & Security</h3>
+            <p class="s-card-desc">Manage your privacy and security settings</p>
+          </div>
+        </div>
+        <div class="s-divider"></div>
+        <div class="s-cb-list">
+          <label class="s-cb-row" *ngFor="let p of privacy">
+            <div class="s-cb-box">
+              <input type="checkbox" [(ngModel)]="p.enabled" class="s-cb-input" />
+              <span class="s-cb-custom"></span>
+            </div>
+            <div class="s-cb-info">
+              <span class="s-cb-label">{{ p.label }}</span>
+              <span class="s-cb-sub">{{ p.description }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="s-card">
+        <div class="s-card-header">
+          <div>
+            <h3 class="s-card-title">Data Export</h3>
+            <p class="s-card-desc">Configure how validation data is exported</p>
+          </div>
+        </div>
+        <div class="s-divider"></div>
+        <div class="s-cb-list">
+          <label class="s-cb-row" *ngFor="let e of exportSettings">
+            <div class="s-cb-box">
+              <input type="checkbox" [(ngModel)]="e.enabled" class="s-cb-input" />
+              <span class="s-cb-custom"></span>
+            </div>
+            <div class="s-cb-info">
+              <span class="s-cb-label">{{ e.label }}</span>
+              <span class="s-cb-sub">{{ e.description }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="settings-footer">
+    <span class="footer-hint">Changes are saved to your local preferences</span>
+    <div class="footer-btns">
+      <button class="btn-reset" (click)="resetDefaults()">Reset to Defaults</button>
+      <button class="btn-save" (click)="saveSettings()">
+        <span *ngIf="!saved">Save Changes</span>
+        <span *ngIf="saved">Saved!</span>
+      </button>
+    </div>
+  </div>
+
+</div>

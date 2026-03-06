@@ -38,11 +38,11 @@ export class CoreBackboneService {
         validationTime:              item.ValidationTime              ?? item.validationTime,
         technology:                  item.Technology                  ?? item.technology,
         serviceProvider:             item.ServiceProvider             ?? item.serviceProvider,
-        uptime:                      item.Uptime                      ?? item.uptime                      ?? null,
-        packetLoss:                  item.PacketLoss                  ?? item.packetLoss                  ?? null,
-        latency:                     item.Latency                     ?? item.latency                     ?? null,
-        aggregatedOpticalSignalLoss: item.AggregatedOpticalSignalLoss ?? item.aggregatedOpticalSignalLoss ?? null,
-        collectedBy:                 item.CollectedBy                 ?? item.collectedBy                 ?? 'Unknown'
+        uptime:                      item.Uptime                      ?? item.uptime,                    
+        packetLoss:                  item.PacketLoss                  ?? item.packetLoss,
+        latency:                     item.Latency                     ?? item.latency,
+        aggregatedOpticalSignalLoss: item.AggregatedOpticalSignalLoss ?? item.aggregatedOpticalSignalLoss,
+        collectedBy:                 item.CollectedBy                 ?? item.collectedBy,             
       })))
     );
   }

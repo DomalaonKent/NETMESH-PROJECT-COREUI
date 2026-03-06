@@ -1,55 +1,60 @@
 <div class="validation-dashboard">
   <div class="page-header">
     <div class="page-title">
-      <h2>Core / Backbone</h2>
-      <span class="subtitle">Manage and view all connectivity records</span>
+        <h2>Core / Backbone</h2>
+        <span class="subtitle">Manage and view all connectivity records</span>
     </div>
     <div class="header-buttons">
-      <button class="btn-back" (click)="goBack()">← Back</button>
-      <button class="btn-add" (click)="onAddNew()">+ Add New</button>
+        <div class="search-container">
+        <input
+            type="text"
+            class="search-input"
+            placeholder="Search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()">
+        </div>
+        <button class="btn-back" (click)="goBack()">Back</button>
+        <button class="btn-add" (click)="onAddNew()">Add New</button>
     </div>
-  </div>
+</div>
 
-  <div class="toolbar">
-    <div class="search-container">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search"
-        [(ngModel)]="searchTerm"
-        (input)="onSearch()">
+    <div class="filter-bar">
+        <div class="filter-select-wrap">
+            <select class="filter-select" [(ngModel)]="selectedRegion" (change)="onRegionChange()">
+            <option value="">All Regions</option>
+            <option *ngFor="let r of regionList" [value]="r">{{ r }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+        </div>
+
+        <div class="filter-select-wrap">
+            <select class="filter-select" [(ngModel)]="selectedProvince" (change)="onProvinceChange()">
+            <option value="">All Provinces</option>
+            <option *ngFor="let p of filteredProvinceList" [value]="p">{{ p }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+        </div>
+
+        <div class="filter-select-wrap">
+            <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
+            <option value="">All Cities / Municipalities</option>
+            <option *ngFor="let c of filteredCityList" [value]="c">{{ c }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+        </div>
+
+        <div class="filter-select-wrap">
+            <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
+            <option value="">All Barangays</option>
+            <option *ngFor="let b of filteredBarangayList" [value]="b">{{ b }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+        </div>
+
+        <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
+            ✕ Clear
+        </button>
     </div>
-
-    <div class="filter-dropdowns">
-      <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedProvince" (change)="onProvinceChange()">
-          <option value="">All Provinces</option>
-          <option *ngFor="let p of provinceList" [value]="p">{{ p }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
-      </div>
-
-      <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
-          <option value="">All Cities / Municipalities</option>
-          <option *ngFor="let c of filteredCityList" [value]="c">{{ c }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
-      </div>
-
-      <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
-          <option value="">All Barangays</option>
-          <option *ngFor="let b of filteredBarangayList" [value]="b">{{ b }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
-      </div>
-
-      <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
-        ✕ Clear
-      </button>
-    </div>
-  </div>
 
   <div class="table-container">
   <table class="data-table">

@@ -1,51 +1,105 @@
-:host { display: block; }
+:host {
+  display: block;
+  min-height: 100vh;
+}
 
-.bg-body-tertiary {
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
   background: linear-gradient(135deg, #e8edf5 0%, #f5f7fa 100%);
 }
 
-c-card {
+.login-card {
   border: none;
-  border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10) 
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  background: #ffffff !important;
+  width: 100%;
 }
 
-.text-center h4 {
+.ntc-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.ntc-title {
   color: #1a3c6e;
   font-weight: 800;
+  font-size: 1.5rem;
+  margin-bottom: 0;
 }
 
-label[cFormLabel] {
-  font-size: 0.80rem;
+.field-label {
+  font-size: 0.85rem;
   font-weight: 600;
   color: #1a3c6e;
+  margin-bottom: 0.4rem;
+  display: block;
 }
 
-span[cInputGroupText] {
-  background-color: #1a3c6e;
-  border: none;
-  color: white;
+.input-icon {
+  background-color: #1a3c6e !important;
+  border: none !important;
+  color: white !important;
+  padding: 0.6rem 0.85rem;
 }
 
+.form-input,
 input[cFormControl] {
-  border-left: none;
-  background: #f9fafb;
+  border-left: none !important;
+  background: #f4f6fb !important;
+  color: #1e293b !important;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.85rem;
+  height: auto;
+
   &:focus {
-    background: #fff;
-    border-color: #1a3c6e;
-    box-shadow: 0 0 0 2px rgba(26, 60, 110, 0.15);
+    background: #fff !important;
+    border-color: #1a3c6e !important;
+    box-shadow: 0 0 0 3px rgba(26, 60, 110, 0.12) !important;
+    outline: none;
   }
-  &.is-invalid { border-color: #dc3545 ; }
+
+  &.is-invalid {
+    border-color: #dc3545 !important;
+  }
+
+  &::placeholder {
+    color: #aab0be;
+    font-size: 0.88rem;
+  }
 }
 
-button[cButton] {
+.btn-login,
+.btn-register {
   font-weight: 600;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-  &[color='primary'] {
-    background: #1a3c6e;
-    border-color: #1a3c6e;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.btn-login {
+  background: #1a3c6e !important;
+  border-color: #1a3c6e !important;
+  color: #fff !important;
+}
+
+.btn-register {
+  border-color: #1a3c6e !important;
+  color: #1a3c6e !important;
+  background: transparent !important;
+
+  &:hover {
+    background: #f0f4fa !important;
   }
 }

@@ -4,6 +4,26 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InternetGFService, UpstreamData } from './InternetGF.service';
 
+const REGION_PROVINCE_MAP: Record<string, string[]> = {
+  'NCR - Metro Manila':              ['Metro Manila'],
+  'CAR - Cordillera':                ['Abra', 'Apayao', 'Benguet', 'Ifugao', 'Kalinga', 'Mountain Province'],
+  'Region I - Ilocos Region':        ['Ilocos Norte', 'Ilocos Sur', 'La Union', 'Pangasinan'],
+  'Region II - Cagayan Valley':      ['Batanes', 'Cagayan', 'Isabela', 'Nueva Vizcaya', 'Quirino'],
+  'Region III - Central Luzon':      ['Aurora', 'Bataan', 'Bulacan', 'Nueva Ecija', 'Pampanga', 'Tarlac', 'Zambales'],
+  'Region IV-A - CALABARZON':        ['Batangas', 'Cavite', 'Laguna', 'Quezon', 'Rizal'],
+  'Region IV-B - MIMAROPA':          ['Marinduque', 'Occidental Mindoro', 'Oriental Mindoro', 'Palawan', 'Romblon'],
+  'Region V - Bicol Region':         ['Albay', 'Camarines Norte', 'Camarines Sur', 'Catanduanes', 'Masbate', 'Sorsogon'],
+  'Region VI - Western Visayas':     ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
+  'Region VII - Central Visayas':    ['Bohol', 'Cebu', 'Negros Oriental', 'Siquijor'],
+  'Region VIII - Eastern Visayas':   ['Biliran', 'Eastern Samar', 'Leyte', 'Northern Samar', 'Samar', 'Southern Leyte'],
+  'Region IX - Zamboanga Peninsula': ['Zamboanga del Norte', 'Zamboanga del Sur', 'Zamboanga Sibugay'],
+  'Region X - Northern Mindanao':    ['Bukidnon', 'Camiguin', 'Lanao del Norte', 'Misamis Occidental', 'Misamis Oriental'],
+  'Region XI - Davao Region':        ['Davao de Oro', 'Davao del Norte', 'Davao del Sur', 'Davao Occidental', 'Davao Oriental'],
+  'Region XII - SOCCSKSARGEN':       ['Cotabato', 'Sarangani', 'South Cotabato', 'Sultan Kudarat'],
+  'Region XIII - Caraga':            ['Agusan del Norte', 'Agusan del Sur', 'Dinagat Islands', 'Surigao del Norte', 'Surigao del Sur'],
+  'BARMM':                           ['Basilan', 'Lanao del Sur', 'Maguindanao del Norte', 'Maguindanao del Sur', 'Sulu', 'Tawi-Tawi'],
+};
+
 @Component({
   selector: 'app-internet-gf',
   standalone: true,
@@ -17,16 +37,18 @@ export class InternetGFComponent implements OnInit {
   filteredData: UpstreamData[] = [];
   pagedData: UpstreamData[] = [];
 
-  searchTerm: string = '';
-  selectedProvince: string = '';
-  selectedCity: string = '';
-  selectedBarangay: string = '';
+  searchTerm = '';
+  selectedRegion = '';
+  selectedProvince = '';
+  selectedCity = '';
+  selectedBarangay = '';
 
+  regionList: string[] = Object.keys(REGION_PROVINCE_MAP);
   provinceList: string[] = [];
+  filteredProvinceList: string[] = [];
   cityList: string[] = [];
-  barangayList: string[] = [];
-
   filteredCityList: string[] = [];
+  barangayList: string[] = [];
   filteredBarangayList: string[] = [];
 
   currentPage: number = 1;
@@ -118,34 +140,47 @@ export class InternetGFComponent implements OnInit {
       if (item.barangay?.trim())         barangays.add(item.barangay.trim());
     }
 
-    this.provinceList = Array.from(provinces).sort();
-    this.cityList     = Array.from(cities).sort();
-    this.barangayList = Array.from(barangays).sort();
-
+    this.provinceList         = Array.from(provinces).sort();
+    this.filteredProvinceList = [...this.provinceList];
+    this.cityList             = Array.from(cities).sort();
     this.filteredCityList     = [...this.cityList];
+    this.barangayList         = Array.from(barangays).sort();
     this.filteredBarangayList = [...this.barangayList];
+  }
+
+  onRegionChange(): void {
+    this.selectedProvince = '';
+    this.selectedCity = '';
+    this.selectedBarangay = '';
+    this.filteredCityList = [];
+    this.filteredBarangayList = [];
+
+    if (this.selectedRegion) {
+      const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
+      this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
+    } else {
+      this.filteredProvinceList = [...this.provinceList];
+      this.filteredCityList     = [...this.cityList];
+      this.filteredBarangayList = [...this.barangayList];
+    }
+    this.currentPage = 1;
+    this.applyFilterAndSort();
   }
 
   onProvinceChange(): void {
     this.selectedCity     = '';
     this.selectedBarangay = '';
-
+    const base = this.allData.filter(d =>
+      (!this.selectedRegion || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? ''))
+    );
     if (this.selectedProvince) {
-      const inProvince = this.allData.filter(d => d.province?.trim() === this.selectedProvince);
-      this.filteredCityList = [...new Set(
-        inProvince.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[]
-      )].sort();
+      const inProv = base.filter(d => d.province?.trim() === this.selectedProvince);
+      this.filteredCityList     = [...new Set(inProv.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(inProv.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     } else {
-      this.filteredCityList = [...this.cityList];
+      this.filteredCityList     = [...new Set(base.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     }
-    this.filteredBarangayList = this.selectedProvince
-      ? [...new Set(
-          this.allData
-            .filter(d => d.province?.trim() === this.selectedProvince)
-            .map(d => d.barangay?.trim()).filter(Boolean) as string[]
-        )].sort()
-      : [...this.barangayList];
-
     this.currentPage = 1;
     this.applyFilterAndSort();
   }
@@ -153,9 +188,10 @@ export class InternetGFComponent implements OnInit {
   onCityChange(): void {
     this.selectedBarangay = '';
     const base = this.allData.filter(d => {
-      const provinceOk = !this.selectedProvince || d.province?.trim() === this.selectedProvince;
+      const regionOk   = !this.selectedRegion   || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? '');
+      const provinceOk = !this.selectedProvince || d.province?.trim()         === this.selectedProvince;
       const cityOk     = !this.selectedCity     || d.cityMunicipality?.trim() === this.selectedCity;
-      return provinceOk && cityOk;
+      return regionOk && provinceOk && cityOk;
     });
     this.filteredBarangayList = [...new Set(
       base.map(d => d.barangay?.trim()).filter(Boolean) as string[]
@@ -170,14 +206,16 @@ export class InternetGFComponent implements OnInit {
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.selectedProvince || this.selectedCity || this.selectedBarangay || this.searchTerm);
+    return !!(this.searchTerm || this.selectedRegion || this.selectedProvince || this.selectedCity || this.selectedBarangay);
   }
 
   clearFilters(): void {
+    this.searchTerm        = '';
+    this.selectedRegion    = '';
     this.selectedProvince  = '';
     this.selectedCity      = '';
     this.selectedBarangay  = '';
-    this.searchTerm        = '';
+    this.filteredProvinceList = [...this.provinceList];
     this.filteredCityList     = [...this.cityList];
     this.filteredBarangayList = [...this.barangayList];
     this.currentPage = 1;
@@ -187,6 +225,10 @@ export class InternetGFComponent implements OnInit {
   private applyFilterAndSort(): void {
     let result = [...this.allData];
 
+    if (this.selectedRegion) {
+      const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
+      result = result.filter(d => allowed.includes(d.province?.trim() ?? ''));
+    }
     if (this.selectedProvince) {
       result = result.filter(item => item.province?.trim() === this.selectedProvince);
     }

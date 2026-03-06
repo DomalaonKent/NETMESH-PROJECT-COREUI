@@ -7,6 +7,7 @@ import { delay, filter, map, tap } from 'rxjs/operators';
 import { ColorModeService } from '@coreui/angular';
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
+import { SettingsPageService } from './views/settings page/settings-page.service';
 
 @Component({
     selector: 'app-root',
@@ -23,16 +24,18 @@ export class AppComponent implements OnInit {
 
   readonly #colorModeService = inject(ColorModeService);
   readonly #iconSetService = inject(IconSetService);
+  readonly #settingsService = inject(SettingsPageService);
 
   constructor() {
     this.#titleService.setTitle(this.title);
-    // iconSet singleton
     this.#iconSetService.icons = { ...iconSubset };
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
     this.#colorModeService.eventName.set('ColorSchemeChange');
   }
 
   ngOnInit(): void {
+    this.#settingsService.applyTheme(this.#settingsService.isLightMode);
+    this.#colorModeService.colorMode.set(this.#settingsService.isLightMode ? 'light' : 'dark');
 
     this.#router.events.pipe(
         takeUntilDestroyed(this.#destroyRef)

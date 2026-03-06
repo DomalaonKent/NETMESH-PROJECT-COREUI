@@ -1,87 +1,92 @@
 <div class="validation-dashboard">
-  <div class="page-header">
+    <div class="page-header">
     <div class="page-title">
-      <h2>Last Mile</h2>
-      <span class="subtitle">Manage and view all connectivity records</span>
+        <h2>Last Mile</h2>
+        <span class="subtitle">Manage and view all connectivity records</span>
     </div>
     <div class="header-buttons">
-      <button class="btn-back" (click)="goBack()">← Back</button>
-      <button class="btn-add" (click)="onAddNew()">+ Add New</button>
+        <div class="search-container">
+        <input
+            type="text"
+            class="search-input"
+            placeholder="Search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()">
+        </div>
+        <button class="btn-back" (click)="goBack()">Back</button>
+        <button class="btn-add" (click)="onAddNew()">Add New</button>
     </div>
-  </div>
+</div>
 
-  <div class="toolbar">
-    <div class="search-container">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search"
-        [(ngModel)]="searchTerm"
-        (input)="onSearch()">
+<div class="filter-bar">
+    <div class="filter-select-wrap">
+        <select class="filter-select" [(ngModel)]="selectedRegion" (change)="onRegionChange()">
+        <option value="">All Regions</option>
+        <option *ngFor="let r of regionList" [value]="r">{{ r }}</option>
+        </select>
+        <span class="select-arrow">▾</span>
     </div>
 
-    <div class="filter-dropdowns">
-      <div class="filter-select-wrap">
+    <div class="filter-select-wrap">
         <select class="filter-select" [(ngModel)]="selectedProvince" (change)="onProvinceChange()">
-          <option value="">All Provinces</option>
-          <option *ngFor="let p of provinceList" [value]="p">{{ p }}</option>
+        <option value="">All Provinces</option>
+        <option *ngFor="let p of filteredProvinceList" [value]="p">{{ p }}</option>
         </select>
         <span class="select-arrow">▾</span>
-      </div>
-
-      <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
-          <option value="">All Cities / Municipalities</option>
-          <option *ngFor="let c of filteredCityList" [value]="c">{{ c }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
-      </div>
-
-      <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
-          <option value="">All Barangays</option>
-          <option *ngFor="let b of filteredBarangayList" [value]="b">{{ b }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
-      </div>
-
-      <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
-        ✕ Clear
-      </button>
     </div>
-  </div>
+
+    <div class="filter-select-wrap">
+        <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
+        <option value="">All Cities / Municipalities</option>
+        <option *ngFor="let c of filteredCityList" [value]="c">{{ c }}</option>
+        </select>
+        <span class="select-arrow">▾</span>
+    </div>
+
+    <div class="filter-select-wrap">
+        <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
+        <option value="">All Barangays</option>
+        <option *ngFor="let b of filteredBarangayList" [value]="b">{{ b }}</option>
+        </select>
+        <span class="select-arrow">▾</span>
+    </div>
+
+    <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
+        ✕ Clear
+    </button>
+</div>
 
   <div class="table-container">
     <table class="data-table">
       <thead>
         <tr>
-            <th (click)="sortBy('id')"
-            [class.col-active]="getColSort('id')"
-            [class.col-asc]="getColSort('id') === 'asc'"
-            [class.col-desc]="getColSort('id') === 'desc'">
-          <span class="th-inner">
-            ID
-            <span class="sort-caret">
-              <svg *ngIf="!getColSort('id')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-              <svg *ngIf="getColSort('id') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <svg *ngIf="getColSort('id') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <th (click)="sortBy('id')"
+              [class.col-active]="getColSort('id')"
+              [class.col-asc]="getColSort('id') === 'asc'"
+              [class.col-desc]="getColSort('id') === 'desc'">
+            <span class="th-inner">
+              ID
+              <span class="sort-caret">
+                <svg *ngIf="!getColSort('id')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <svg *ngIf="getColSort('id') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg *ngIf="getColSort('id') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
             </span>
-          </span>
-        </th>
+          </th>
 
-        <th (click)="sortBy('location')"
-            [class.col-active]="getColSort('location')"
-            [class.col-asc]="getColSort('location') === 'asc'"
-            [class.col-desc]="getColSort('location') === 'desc'">
-          <span class="th-inner">
-            Location
-            <span class="sort-caret">
-              <svg *ngIf="!getColSort('location')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-              <svg *ngIf="getColSort('location') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <svg *ngIf="getColSort('location') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <th (click)="sortBy('location')"
+              [class.col-active]="getColSort('location')"
+              [class.col-asc]="getColSort('location') === 'asc'"
+              [class.col-desc]="getColSort('location') === 'desc'">
+            <span class="th-inner">
+              Location
+              <span class="sort-caret">
+                <svg *ngIf="!getColSort('location')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <svg *ngIf="getColSort('location') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg *ngIf="getColSort('location') === 'desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
             </span>
-          </span>
-        </th>
+          </th>
 
           <th (click)="sortBy('averageDownloadSpeed')"
               [class.col-active]="getColSort('averageDownloadSpeed')"
@@ -184,22 +189,22 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of pagedData">
-            <td>{{ item.id ?? '—' }}</td>
-            <td [class]="'location-cell' + (!item.location ? ' location-fallback' : '')">
+          <td>{{ item.id ?? '—' }}</td>
+          <td [class]="'location-cell' + (!item.location ? ' location-fallback' : '')">
             {{ item.location || (item.barangay ? item.barangay + ', ' + item.cityMunicipality : '—') }}
-            </td>
-            <td>{{ item.averageDownloadSpeed ?? '—' }}</td>
-            <td>{{ item.averageUploadSpeed ?? '—' }}</td>
-            <td>{{ item.latency ?? '—' }}</td>
-            <td>{{ item.packetLoss ?? '—' }}</td>
-            <td>{{ item.jitter ?? '—' }}</td>
-            <td>{{ item.serviceAvailability ?? '—' }}</td>
-            <td>{{ item.serviceUptime ?? '—' }}</td>
+          </td>
+          <td>{{ item.averageDownloadSpeed ?? '—' }}</td>
+          <td>{{ item.averageUploadSpeed ?? '—' }}</td>
+          <td>{{ item.latency ?? '—' }}</td>
+          <td>{{ item.packetLoss ?? '—' }}</td>
+          <td>{{ item.jitter ?? '—' }}</td>
+          <td>{{ item.serviceAvailability ?? '—' }}</td>
+          <td>{{ item.serviceUptime ?? '—' }}</td>
         </tr>
         <tr *ngIf="pagedData.length === 0">
-            <td colspan="9" class="empty-cell">No records found.</td>
+          <td colspan="9" class="empty-cell">No records found.</td>
         </tr>
-    </tbody>
+      </tbody>
     </table>
   </div>
 

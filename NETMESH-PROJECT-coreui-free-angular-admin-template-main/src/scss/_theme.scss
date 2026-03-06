@@ -14,51 +14,98 @@ body {
 
 .header > .container-fluid,
 .sidebar-header {
-  min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+  min-height: calc(4rem + 1px);
 }
 
-.sidebar-brand-full {
-  margin-left: 3px;
-}
+.sidebar-brand-full { margin-left: 3px; }
 
 .sidebar-header {
   .nav-underline-border {
     --cui-nav-underline-border-link-padding-x: 1rem;
     --cui-nav-underline-border-gap: 0;
   }
-
   .nav-link {
     display: flex;
     align-items: center;
-    min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+    min-height: calc(4rem + 1px);
   }
 }
 
-.sidebar-toggler {
-  margin-inline-start: auto;
-}
+.sidebar-toggler { margin-inline-start: auto; }
 
 .sidebar-narrow,
 .sidebar-narrow-unfoldable:not(:hover) {
-  .sidebar-toggler {
-    margin-inline-end: auto;
-  }
+  .sidebar-toggler { margin-inline-end: auto; }
 }
 
-.header > .container-fluid + .container-fluid {
-  min-height: 3rem;
-}
-
-.footer {
-  min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
-}
+.header > .container-fluid + .container-fluid { min-height: 3rem; }
+.footer { min-height: calc(3rem + 1px); }
 
 @include color-mode(dark) {
-  body {
-    background-color: var(--cui-dark-bg-subtle);
+  body { background-color: var(--cui-dark-bg-subtle); }
+  .footer { --cui-footer-bg: var(--cui-body-bg); }
+}
+
+body.light-theme {
+  // Override ALL CoreUI CSS variables to white
+  --cui-tertiary-bg:       #ffffff;
+  --cui-secondary-bg:      #f8fafc;
+  --cui-body-bg:           #ffffff;
+  --cui-dark-bg-subtle:    #ffffff;
+  --cui-body-color:        #1e293b;
+  --mat-sys-surface:       #ffffff;
+  --cui-border-color:      rgba(0,0,0,0.08);
+
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+
+  c-default-layout,
+  .c-body,
+  c-body,
+  [class*="c-body"],
+  .body,
+  .app-body,
+  .wrapper,
+  .wrapper > *,
+  main,
+  main > *,
+  .container-fluid,
+  .container-fluid > *,
+  c-container,
+  c-container > *,
+  app-root,
+  app-root > *,
+  app-default-layout,
+  app-default-layout > * {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
   }
 
-  .footer {
-    --cui-footer-bg: var(--cui-body-bg);
+  .bg-body,
+  .bg-body-tertiary,
+  .bg-body-secondary,
+  [class*="bg-body"],
+  [style*="background"] {
+    background-color: #ffffff !important;
+  }
+}
+
+body.dark-theme {
+  --cui-tertiary-bg:    #0a0f1e;
+  --cui-body-bg:        #0a0f1e;
+  --cui-secondary-bg:   #111827;
+
+  background-color: #0a0f1e !important;
+  color: #e2e8f0 !important;
+
+  c-default-layout,
+  .wrapper,
+  .wrapper > *,
+  main,
+  .container-fluid,
+  c-container,
+  app-root > *,
+  app-default-layout > * {
+    background-color: #0a0f1e !important;
   }
 }

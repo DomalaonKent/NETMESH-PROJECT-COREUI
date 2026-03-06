@@ -12,23 +12,52 @@
     display: flex;
     min-height: 100%;
   }
-
-  //.sidebar-nav {
-  //  scrollbar-color: var(--cui-gray-500, #444) transparent;
-  //}
 }
 
-// ng-scrollbar css variables
-//.cui-scrollbar {
-//  --scrollbar-border-radius: 7px;
-//  --scrollbar-padding: 1px;
-//  --scrollbar-viewport-margin: 0;
-//  --scrollbar-track-color: transparent;
-//  --scrollbar-wrapper-color: transparent;
-//  --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
-//  --scrollbar-thumb-hover-color: var(--scrollbar-thumb-color);
-//  --scrollbar-size: 5px;
-//  --scrollbar-hover-size: var(--scrollbar-size);
-//  --scrollbar-thumb-transition: height ease-out 150ms, width ease-out 150ms;
-//  --scrollbar-track-transition: height ease-out 150ms, width ease-out 150ms;
-//}
+// ── LIGHT THEME: force every layout element white ──────────────
+:host-context(body.light-theme) {
+  background-color: #ffffff !important;
+}
+
+:host-context(body.light-theme)::ng-deep {
+  // The wrapper div that causes the dark band
+  .wrapper,
+  .body,
+  c-body,
+  .c-body,
+  c-container,
+  .container-fluid,
+  main,
+  ng-scrollbar,
+  .ng-scrollbar,
+  .ng-scroll-viewport,
+  .ng-scroll-content,
+  .ng-scrollbar-wrapper,
+  .ng-scrollbar-track,
+  div, section, article {
+    background-color: #ffffff !important;
+  }
+}
+
+// ── DARK THEME ─────────────────────────────────────────────────
+:host-context(body.dark-theme) {
+  background-color: #0a0f1e !important;
+}
+
+:host-context(body.dark-theme)::ng-deep {
+  .wrapper,
+  .body,
+  c-body,
+  .c-body,
+  c-container,
+  .container-fluid,
+  main,
+  ng-scrollbar,
+  .ng-scrollbar,
+  .ng-scroll-viewport,
+  .ng-scroll-content,
+  .ng-scrollbar-wrapper,
+  div {
+    background-color: #0a0f1e !important;
+  }
+}
