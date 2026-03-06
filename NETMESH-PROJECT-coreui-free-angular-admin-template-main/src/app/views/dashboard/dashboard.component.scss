@@ -46,3 +46,24 @@ body.light-theme {
     color: #64748b;
   }
 }
+
+.db-diagram-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  background: rgba(15, 23, 42, 0.6);
+  margin-bottom: 2rem;
+
+  .db-diagram-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+body.light-theme {
+  .db-diagram-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+  }
+}
