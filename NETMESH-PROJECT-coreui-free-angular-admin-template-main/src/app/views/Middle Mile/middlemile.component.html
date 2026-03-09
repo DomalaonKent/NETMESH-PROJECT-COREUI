@@ -13,10 +13,114 @@
             [(ngModel)]="searchTerm"
             (input)="onSearch()">
         </div>
+        <button class="btn-map-toggle" (click)="showMap = !showMap">
+          {{ showMap ? 'Hide Map' : 'Show Map' }}
+        </button>
     <button class="btn-back" (click)="goBack()">Back</button>
     <button class="btn-add" (click)="onAddNew()">Add New</button>
   </div>
 </div>
+
+  <div class="cards-carousel-wrapper">
+    <button class="carousel-btn carousel-btn--prev" (click)="carouselPrev()" [disabled]="carouselIndex === 0">&#8249;</button>
+    <div class="cards-carousel-viewport">
+      <div class="summary-cards"
+           [style.transform]="'translateX(calc(-' + carouselIndex + ' * (100% / 4 + 4px)))'">
+        <div class="summary-card card-smart">
+          <div class="card-header">
+            <img src="assets/images/smart.png" class="card-provider-logo" alt="Smart" />
+            <span class="card-logo smart-logo">Smart</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row"><span class="stat-label">Total Tests Performed</span><span class="stat-value">{{ smartStats.totalTests }}</span></div>
+            <div class="stat-row"><span class="stat-label">Average Uptime</span><span class="stat-value">{{ smartStats.avgUptime | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Packet Loss</span><span class="stat-value">{{ smartStats.avgPacketLoss | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Latency</span><span class="stat-value">{{ smartStats.avgLatency | number:'1.2-2' }} ms</span></div>
+            <div class="stat-row warn"><span class="stat-label">High Packet Loss Locations</span><span class="stat-value warn">{{ smartStats.highPacketLoss }}</span></div>
+          </div>
+        </div>
+
+        <div class="summary-card card-globe">
+          <div class="card-header">
+            <img src="assets/images/globe.png" class="card-provider-logo" alt="Globe" />
+            <span class="card-logo globe-logo">Globe</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row"><span class="stat-label">Total Tests Performed</span><span class="stat-value">{{ globeStats.totalTests }}</span></div>
+            <div class="stat-row"><span class="stat-label">Average Uptime</span><span class="stat-value">{{ globeStats.avgUptime | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Packet Loss</span><span class="stat-value">{{ globeStats.avgPacketLoss | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Latency</span><span class="stat-value">{{ globeStats.avgLatency | number:'1.2-2' }} ms</span></div>
+            <div class="stat-row warn"><span class="stat-label">High Packet Loss Locations</span><span class="stat-value warn">{{ globeStats.highPacketLoss }}</span></div>
+          </div>
+        </div>
+
+        <div class="summary-card card-dito">
+          <div class="card-header">
+            <img src="assets/images/dito.webp" class="card-provider-logo card-provider-logo--dito" alt="DITO" />
+            <span class="card-logo dito-logo">DITO</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row"><span class="stat-label">Total Tests Performed</span><span class="stat-value">{{ ditoStats.totalTests }}</span></div>
+            <div class="stat-row"><span class="stat-label">Average Uptime</span><span class="stat-value">{{ ditoStats.avgUptime | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Packet Loss</span><span class="stat-value">{{ ditoStats.avgPacketLoss | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Latency</span><span class="stat-value">{{ ditoStats.avgLatency | number:'1.2-2' }} ms</span></div>
+            <div class="stat-row warn"><span class="stat-label">High Packet Loss Locations</span><span class="stat-value warn">{{ ditoStats.highPacketLoss }}</span></div>
+          </div>
+        </div>
+
+        <div class="summary-card card-all">
+          <div class="card-header">
+            <img src="assets/images/alltelco.png" class="card-provider-logo card-provider-logo--tower" alt="All Telcos" />
+            <span class="card-logo all-logo">All Telcos</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row"><span class="stat-label">Total Tests Performed</span><span class="stat-value">{{ allStats.totalTests }}</span></div>
+            <div class="stat-row"><span class="stat-label">Average Uptime</span><span class="stat-value">{{ allStats.avgUptime | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Packet Loss</span><span class="stat-value">{{ allStats.avgPacketLoss | number:'1.2-2' }}%</span></div>
+            <div class="stat-row"><span class="stat-label">Average Latency</span><span class="stat-value">{{ allStats.avgLatency | number:'1.2-2' }} ms</span></div>
+            <div class="stat-row warn"><span class="stat-label">High Packet Loss Locations</span><span class="stat-value warn">{{ allStats.highPacketLoss }}</span></div>
+          </div>
+        </div>
+
+        <div class="summary-card card-person">
+          <div class="card-header">
+            <img src="assets/images/person.png" class="card-provider-logo" alt="Person" />
+            <span class="card-logo person-logo">Per Person</span>
+          </div>
+          <div class="card-stats">
+            <ng-container *ngIf="personStats.length; else noPersonData">
+              <ng-container *ngFor="let p of personStats">
+                <div class="stat-row person-name-row"><span class="stat-label person-header-label">{{ p.name }}</span></div>
+                <div class="stat-row"><span class="stat-label">Total Records</span><span class="stat-value data-size">{{ p.totalRecords }}</span></div>
+                <div class="person-divider"></div>
+              </ng-container>
+            </ng-container>
+            <ng-template #noPersonData><div class="empty-person">No data available</div></ng-template>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="carousel-btn carousel-btn--next" (click)="carouselNext()" [disabled]="carouselIndex >= carouselMaxIndex">&#8250;</button>
+  </div>
+
+  <div class="carousel-dots">
+    <div class="carousel-dots-track">
+      <button *ngFor="let dot of carouselDots; let i = index"
+              class="carousel-dot" [class.active]="i === carouselIndex"
+              (click)="goToCarousel(i)">
+      </button>
+    </div>
+  </div>
+ 
+  <div *ngIf="showMap" class="map-section">
+    <app-map-viewer
+      [kmlLayers]="kmlLayers"
+      [center]="[12.8797, 121.7740]"
+      [zoom]="6">
+    </app-map-viewer>
+  </div>
 
     <div class="filter-bar">
     <div class="filter-select-wrap">

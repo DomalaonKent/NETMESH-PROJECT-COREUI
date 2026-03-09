@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LastMileService, LastMileData } from './lastmile.service';
+import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -24,15 +25,27 @@ const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'BARMM':                           ['Basilan', 'Lanao del Sur', 'Maguindanao del Norte', 'Maguindanao del Sur', 'Sulu', 'Tawi-Tawi'],
 };
 
+interface ProviderStats {
+  totalTests: number;
+  avgDownload: number;
+  avgUpload: number;
+  avgLatency: number;
+  highPacketLoss: number;
+}
+
+interface PersonStat {
+  name: string;
+  totalRecords: number;
+}
+
 @Component({
   selector: 'app-last-mile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MapViewerComponent],
   templateUrl: './lastmile.component.html',
   styleUrls: ['./lastmile.component.scss']
 })
 export class LastMileComponent implements OnInit {
-
   allData: LastMileData[] = [];
   filteredData: LastMileData[] = [];
   pagedData: LastMileData[] = [];
@@ -70,6 +83,64 @@ export class LastMileComponent implements OnInit {
 
   sortColumn: keyof LastMileData | null = null;
   sortDirection: 'asc' | 'desc' | null = null;
+
+  showMap = false;
+  kmlLayers: KmlLayerConfig[] = [
+    { name: 'Regions',       url: 'assets/kml/gadm41_PHL_1/gadm41_PHL_1.kml', color: '#38bdf8', enabled: true  },
+    { name: 'Provinces',     url: 'assets/kml/gadm41_PHL_2/gadm41_PHL_2.kml', color: '#a78bfa', enabled: false },
+    { name: 'Municipalities',url: 'assets/kml/gadm41_PHL_3/gadm41_PHL_3.kml', color: '#34d399', enabled: false },
+  ];
+
+  readonly carouselTotal: number = 5;
+  readonly carouselVisible: number = 4;
+  carouselIndex = 0;
+  get carouselMaxIndex(): number { return this.carouselTotal - this.carouselVisible; }
+  get carouselDots(): number[]   { return Array.from({ length: this.carouselMaxIndex + 1 }, (_, i) => i); }
+  carouselPrev(): void { if (this.carouselIndex > 0) this.carouselIndex--; }
+  carouselNext(): void { if (this.carouselIndex < this.carouselMaxIndex) this.carouselIndex++; }
+  goToCarousel(i: number): void { this.carouselIndex = i; }
+
+  smartStats:  ProviderStats = this.emptyStats();
+  globeStats:  ProviderStats = this.emptyStats();
+  ditoStats:   ProviderStats = this.emptyStats();
+  allStats:    ProviderStats = this.emptyStats();
+  personStats: PersonStat[]  = [];
+
+  private emptyStats(): ProviderStats {
+    return { totalTests: 0, avgDownload: 0, avgUpload: 0, avgLatency: 0, highPacketLoss: 0 };
+  }
+
+  private parseNum(v: any): number {
+    if (v === null || v === undefined) return 0;
+    return parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+  }
+
+  private calcStats(rows: LastMileData[]): ProviderStats {
+    if (!rows.length) return this.emptyStats();
+    const totalTests    = rows.length;
+    const avgDownload   = rows.reduce((s, r) => s + this.parseNum(r.averageDownloadSpeed), 0) / totalTests;
+    const avgUpload     = rows.reduce((s, r) => s + this.parseNum(r.averageUploadSpeed),   0) / totalTests;
+    const avgLatency    = rows.reduce((s, r) => s + this.parseNum(r.latency),               0) / totalTests;
+    const highPacketLoss = new Set(
+      rows.filter(r => this.parseNum(r.packetLoss) > 2).map(r => r.location || r.barangay)
+    ).size;
+    return { totalTests, avgDownload, avgUpload, avgLatency, highPacketLoss };
+  }
+
+  private computeStats(): void {
+    this.smartStats = this.calcStats(this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'smart'));
+    this.globeStats = this.calcStats(this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'globe'));
+    this.ditoStats  = this.calcStats(this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito'));
+    this.allStats   = this.calcStats(this.filteredData);
+
+    const map = new Map<string, PersonStat>();
+    for (const row of this.filteredData) {
+      const name = (row as any).collectedBy || 'Unknown';
+      if (!map.has(name)) map.set(name, { name, totalRecords: 0 });
+      map.get(name)!.totalRecords++;
+    }
+    this.personStats = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   constructor(private router: Router, private lastMileService: LastMileService) {}
 
@@ -239,6 +310,7 @@ export class LastMileComponent implements OnInit {
     }
     this.filteredData = result;
     this.applyPagination();
+    this.computeStats();
   }
 
   private extractPeriod(timeStr: string): string {
