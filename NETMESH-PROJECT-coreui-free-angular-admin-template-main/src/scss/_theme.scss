@@ -47,60 +47,58 @@ body {
 }
 
 body.light-theme {
-  // Override ALL CoreUI CSS variables to white
-  --cui-tertiary-bg:       #ffffff;
-  --cui-secondary-bg:      #f8fafc;
-  --cui-body-bg:           #ffffff;
-  --cui-dark-bg-subtle:    #ffffff;
-  --cui-body-color:        #1e293b;
-  --mat-sys-surface:       #ffffff;
-  --cui-border-color:      rgba(0,0,0,0.08);
+  --cui-tertiary-bg:    #ffffff;
+  --cui-secondary-bg:   #f8fafc;
+  --cui-body-bg:        #ffffff;
+  --cui-dark-bg-subtle: #ffffff;
+  --cui-body-color:     #1e293b;
+  --mat-sys-surface:    #ffffff;
+  --cui-border-color:   rgba(0,0,0,0.08);
 
   background-color: #ffffff !important;
   color: #1e293b !important;
 
   c-default-layout,
-  .c-body,
-  c-body,
-  [class*="c-body"],
-  .body,
-  .app-body,
-  .wrapper,
-  .wrapper > *,
-  main,
-  main > *,
-  .container-fluid,
-  .container-fluid > *,
-  c-container,
-  c-container > *,
-  app-root,
-  app-root > *,
-  app-default-layout,
-  app-default-layout > * {
+  .c-body, c-body, [class*="c-body"],
+  .body, .app-body,
+  .wrapper, .wrapper > *,
+  main, main > *,
+  .container-fluid, .container-fluid > *,
+  c-container, c-container > *,
+  app-root, app-root > *,
+  app-default-layout, app-default-layout > * {
     background-color: #ffffff !important;
     color: #1e293b !important;
   }
 
-  .bg-body,
-  .bg-body-tertiary,
-  .bg-body-secondary,
-  [class*="bg-body"],
-  [style*="background"] {
+  .bg-body, .bg-body-tertiary, .bg-body-secondary,
+  [class*="bg-body"], [style*="background"] {
     background-color: #ffffff !important;
+  }
+  
+  .summary-card,
+  .summary-card *,
+  .summary-card > *,
+  .summary-card div,
+  .summary-card .card-body,
+  .summary-card .card-header,
+  .summary-card .card-stats,
+  .summary-card .stat-row {
+    background-color: transparent !important;
+    color: inherit !important;
   }
 }
 
 body.dark-theme {
-  --cui-tertiary-bg:    #0a0f1e;
-  --cui-body-bg:        #0a0f1e;
-  --cui-secondary-bg:   #111827;
+  --cui-tertiary-bg:  #0a0f1e;
+  --cui-body-bg:      #0a0f1e;
+  --cui-secondary-bg: #111827;
 
   background-color: #0a0f1e !important;
   color: #e2e8f0 !important;
 
   c-default-layout,
-  .wrapper,
-  .wrapper > *,
+  .wrapper, .wrapper > *,
   main,
   .container-fluid,
   c-container,
@@ -108,4 +106,36 @@ body.dark-theme {
   app-default-layout > * {
     background-color: #0a0f1e !important;
   }
+
+  .summary-card,
+  .summary-card *,
+  .summary-card > *,
+  .summary-card div,
+  .summary-card .card-body,
+  .summary-card .card-header,
+  .summary-card .card-stats,
+  .summary-card .stat-row {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
 }
+
+.summary-card {
+  --cui-card-bg: transparent !important;
+  --cui-card-cap-bg: transparent !important;
+  --cui-card-border-color: transparent !important;
+}
+
+.summary-card.card-smart  { background: linear-gradient(145deg, #0d2b1a, #1a4a2a) !important; border: 1px solid rgba(34,197,94,0.25)   !important; }
+.summary-card.card-globe  { background: linear-gradient(145deg, #0d1f3c, #162e54) !important; border: 1px solid rgba(56,189,248,0.25)  !important; }
+.summary-card.card-dito   { background: linear-gradient(145deg, #7c1c00, #b02a0a) !important; border: 1px solid rgba(251,146,60,0.25)  !important; }
+.summary-card.card-all    { background: linear-gradient(145deg, #111827, #1e2c42) !important; border: 1px solid rgba(148,163,184,0.2)  !important; }
+.summary-card.card-person { background: linear-gradient(145deg, #1a1040, #2d1a6e) !important; border: 1px solid rgba(167,139,250,0.35) !important; }
+
+.summary-card .stat-label                { color: rgba(255,255,255,0.55) !important; }
+.summary-card .stat-value                { color: #ffffff !important; }
+.summary-card .stat-row.warn .stat-value { color: #fbbf24 !important; }
+.summary-card .stat-value.neutral        { color: #94a3b8 !important; }
+.summary-card .stat-value.data-size      { color: #fbbf24 !important; }
+.summary-card .person-header-label       { color: #f8f8f8 !important; }
+.summary-card .empty-person              { color: #4e6880 !important; }

@@ -1,0 +1,14 @@
+<div class="map-wrapper">
+  <div class="kml-panel">
+    <div class="kml-panel-title">Map Layers</div>
+    <div class="kml-layer-item" *ngFor="let layer of kmlLayers">
+      <label class="kml-toggle">
+        <input type="checkbox" [(ngModel)]="layer.enabled" (change)="toggleLayer(layer)" />
+        <span class="kml-dot" [style.background]="layer.color"></span>
+        <span class="kml-name">{{ layer.name }}</span>
+      </label>
+    </div>
+    <div class="kml-hint" *ngIf="isLoading">Loading...</div>
+  </div>
+  <div #mapContainer class="map-container"></div>
+</div>

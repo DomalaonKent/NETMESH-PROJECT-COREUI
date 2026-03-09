@@ -37,9 +37,13 @@
               "src/assets"
             ],
             "styles": [
-              "src/scss/styles.scss"
+              "src/scss/styles.scss",
+              "leaflet/dist/leaflet.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "leaflet/dist/leaflet.js",
+              "leaflet-omnivore/leaflet-omnivore.min.js"
+            ],
             "allowedCommonJsDependencies": [],
             "stylePreprocessorOptions": {
               "sass": {

@@ -1,21 +1,201 @@
 <div class="validation-dashboard">
-      <div class="page-header">
-        <div class="page-title">
-          <h2>Validation Page Data</h2>
-          <span class="subtitle">Manage and view all connectivity records</span>
-        </div>
-      <div class="header-buttons">
-        <div class="search-container">
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Search"
-            [(ngModel)]="searchTerm"
-            (input)="onSearch()">
-        </div>
-        <button class="btn-back" (click)="goBack()">Back</button>
-        <button class="btn-add" (click)="onAddNew()">Add New</button>
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Validation Page Data</h2>
+      <span class="subtitle">Manage and view all connectivity records</span>
+    </div>
+    <div class="header-buttons">
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()">
       </div>
+
+      <button class="btn-map-toggle" (click)="showMap = !showMap">
+        {{ showMap ? 'Hide Map' : 'Show Map' }}
+      </button>
+
+      <button class="btn-back" (click)="goBack()">Back</button>
+      <button class="btn-add" (click)="onAddNew()">Add New</button>
+    </div>
+  </div>
+
+  <div class="cards-carousel-wrapper">
+    <button class="carousel-btn carousel-btn--prev" (click)="carouselPrev()" [disabled]="carouselIndex === 0">&#8249;</button>
+
+    <div class="cards-carousel-viewport">
+      <div class="summary-cards"
+           [style.transform]="'translateX(calc(-' + carouselIndex + ' * (100% / 4 + 4px)))'">
+        <div class="summary-card card-smart">
+          <div class="card-header">
+            <img src="assets/images/smart.png" class="card-provider-logo" alt="Smart" />
+            <span class="card-logo smart-logo">Smart</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-label">Total Tests Performed</span>
+              <span class="stat-value">{{ smartStats.totalTests }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Upload</span>
+              <span class="stat-value">{{ smartStats.avgUpload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Download</span>
+              <span class="stat-value">{{ smartStats.avgDownload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Barangays without signal</span>
+              <span class="stat-value neutral">{{ smartStats.noSignal }}</span>
+            </div>
+            <div class="stat-row warn">
+              <span class="stat-label">Barangays weak signal / Download</span>
+              <span class="stat-value warn">{{ smartStats.weakSignal }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card card-globe">
+          <div class="card-header">
+            <img src="assets/images/globe.png" class="card-provider-logo" alt="Globe" />
+            <span class="card-logo globe-logo">Globe</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-label">Total Tests Performed</span>
+              <span class="stat-value">{{ globeStats.totalTests }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Upload</span>
+              <span class="stat-value">{{ globeStats.avgUpload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Download</span>
+              <span class="stat-value">{{ globeStats.avgDownload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Barangays without signal</span>
+              <span class="stat-value neutral">{{ globeStats.noSignal }}</span>
+            </div>
+            <div class="stat-row warn">
+              <span class="stat-label">Barangays weak signal / Download</span>
+              <span class="stat-value warn">{{ globeStats.weakSignal }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card card-dito">
+          <div class="card-header">
+            <img src="assets/images/dito.webp" class="card-provider-logo card-provider-logo--dito" alt="DITO" />
+            <span class="card-logo dito-logo">DITO</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-label">Total Tests Performed</span>
+              <span class="stat-value">{{ ditoStats.totalTests }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Upload</span>
+              <span class="stat-value">{{ ditoStats.avgUpload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Download</span>
+              <span class="stat-value">{{ ditoStats.avgDownload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Barangays without signal</span>
+              <span class="stat-value neutral">{{ ditoStats.noSignal }}</span>
+            </div>
+            <div class="stat-row warn">
+              <span class="stat-label">Barangays weak signal / Download</span>
+              <span class="stat-value warn">{{ ditoStats.weakSignal }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card card-all">
+          <div class="card-header">
+            <img src="assets/images/alltelco.png" class="card-provider-logo card-provider-logo--tower" alt="All Telcos" />
+            <span class="card-logo all-logo">All Telcos</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-label">Total Tests Performed</span>
+              <span class="stat-value">{{ allStats.totalTests }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Upload</span>
+              <span class="stat-value">{{ allStats.avgUpload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Average Download</span>
+              <span class="stat-value">{{ allStats.avgDownload | number:'1.2-2' }} Mbps</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Barangays without signal</span>
+              <span class="stat-value neutral">{{ allStats.noSignal }}</span>
+            </div>
+            <div class="stat-row warn">
+              <span class="stat-label">Barangays weak signal / Download</span>
+              <span class="stat-value warn">{{ allStats.weakSignal }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card card-person">
+          <div class="card-header">
+            <img src="assets/images/person.png" class="card-provider-logo" alt="Person" />
+            <span class="card-logo person-logo">Per Person</span>
+          </div>
+          <div class="card-stats">
+            <ng-container *ngIf="personStats.length; else noPersonData">
+              <ng-container *ngFor="let p of personStats">
+                <div class="stat-row person-name-row">
+                  <span class="stat-label person-header-label">{{ p.name }}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">Total Upload Data Size</span>
+                  <span class="stat-value data-size">{{ p.uploadDataSize | number:'1.2-2' }} MB</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">Total Download Data Size</span>
+                  <span class="stat-value data-size">{{ p.downloadDataSize | number:'1.2-2' }} MB</span>
+                </div>
+                <div class="person-divider"></div>
+              </ng-container>
+            </ng-container>
+            <ng-template #noPersonData>
+              <div class="empty-person">No data available</div>
+            </ng-template>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="carousel-btn carousel-btn--next" (click)="carouselNext()" [disabled]="carouselIndex >= carouselMaxIndex">&#8250;</button>
+  </div>
+
+  <div class="carousel-dots">
+    <div class="carousel-dots-track">
+      <button
+        *ngFor="let dot of carouselDots; let i = index"
+        class="carousel-dot"
+        [class.active]="i === carouselIndex"
+        (click)="goToCarousel(i)">
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="showMap" class="map-section">
+    <app-map-viewer
+      [kmlLayers]="kmlLayers"
+      [center]="[12.8797, 121.7740]"
+      [zoom]="6">
+    </app-map-viewer>
   </div>
 
   <div class="filter-bar">

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ValidationPageService, ConnectivityData } from './validation-page.service';
+import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -24,10 +25,23 @@ const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'BARMM':                           ['Basilan', 'Lanao del Sur', 'Maguindanao del Norte', 'Maguindanao del Sur', 'Sulu', 'Tawi-Tawi'],
 };
 
+interface ProviderStats {
+  totalTests: number;
+  avgUpload: number;
+  avgDownload: number;
+  noSignal: number;
+  weakSignal: number;
+}
+interface PersonStat {
+  name: string;
+  uploadDataSize: number;
+  downloadDataSize: number;
+}
+
 @Component({
   selector: 'app-validation-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MapViewerComponent],
   templateUrl: './validation-page.component.html',
   styleUrls: ['./validation-page.component.scss']
 })
@@ -57,6 +71,14 @@ export class ValidationPageComponent implements OnInit {
   totalPages: number = 1;
   pageSizeOptions: number[] = [10, 25, 50, 100];
 
+  showMap = false;
+
+kmlLayers: KmlLayerConfig[] = [
+  { name: 'Regions', url: 'assets/kml/gadm41_PHL_1/gadm41_PHL_1.kml', color: '#38bdf8', enabled: true },
+  { name: 'Provinces', url: 'assets/kml/gadm41_PHL_2/gadm41_PHL_2.kml', color: '#a78bfa', enabled: false },
+  { name: 'Municipalities', url: 'assets/kml/gadm41_PHL_3/gadm41_PHL_3.kml', color: '#34d399', enabled: false },
+];
+
   dateList: string[] = [];
   activeDateIndex: number = -1;
   get activeDate(): string | null {
@@ -77,6 +99,65 @@ export class ValidationPageComponent implements OnInit {
 
   sortColumn: keyof ConnectivityData | null = null;
   sortDirection: 'asc' | 'desc' | null = null;
+
+  readonly carouselTotal: number = 5;
+  readonly carouselVisible: number = 4;
+  carouselIndex: number = 0;
+
+  get carouselMaxIndex(): number { return this.carouselTotal - this.carouselVisible; }
+  get carouselDots(): number[]   { return Array.from({ length: this.carouselMaxIndex + 1 }, (_, i) => i); }
+  carouselPrev(): void { if (this.carouselIndex > 0) this.carouselIndex--; }
+  carouselNext(): void { if (this.carouselIndex < this.carouselMaxIndex) this.carouselIndex++; }
+  goToCarousel(index: number): void { this.carouselIndex = index; }
+
+  smartStats:  ProviderStats = this.emptyStats();
+  globeStats:  ProviderStats = this.emptyStats();
+  ditoStats:   ProviderStats = this.emptyStats();
+  allStats:    ProviderStats = this.emptyStats();
+  personStats: PersonStat[]  = [];
+
+  emptyStats(): ProviderStats {
+    return { totalTests: 0, avgUpload: 0, avgDownload: 0, noSignal: 0, weakSignal: 0 };
+  }
+
+  private calcStats(rows: ConnectivityData[]): ProviderStats {
+    if (!rows.length) return this.emptyStats();
+    const toNum = (v: any) => parseFloat(v) || 0;
+    const totalTests  = rows.length;
+    const avgUpload   = rows.reduce((s, r) => s + toNum(r.upload),   0) / totalTests;
+    const avgDownload = rows.reduce((s, r) => s + toNum(r.download), 0) / totalTests;
+    const noSignal    = new Set(
+      rows.filter(r => !r.signalStrength || Number(r.signalStrength) === 0).map(r => r.barangay)
+    ).size;
+    const weakSignal  = new Set(
+      rows.filter(r => toNum(r.upload) < 1 || toNum(r.download) < 5).map(r => r.barangay)
+    ).size;
+    return { totalTests, avgUpload, avgDownload, noSignal, weakSignal };
+  }
+
+  private computeStats(): void {
+    this.smartStats = this.calcStats(
+      this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'smart')
+    );
+    this.globeStats = this.calcStats(
+      this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'globe')
+    );
+    this.ditoStats  = this.calcStats(
+      this.filteredData.filter(d => d.serviceProvider?.toLowerCase().trim() === 'dito')
+    );
+    this.allStats   = this.calcStats(this.filteredData);
+
+    const map = new Map<string, PersonStat>();
+    const toNum = (v: any) => parseFloat(v) || 0;
+    for (const row of this.filteredData) {
+      const name = row.collectedBy || 'Unknown';
+      if (!map.has(name)) map.set(name, { name, uploadDataSize: 0, downloadDataSize: 0 });
+      const e = map.get(name)!;
+      e.uploadDataSize   += toNum(row.uploadDataSize);
+      e.downloadDataSize += toNum(row.downloadDataSize);
+    }
+    this.personStats = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   constructor(private router: Router, private validationPageService: ValidationPageService) {}
 
@@ -325,6 +406,7 @@ export class ValidationPageComponent implements OnInit {
 
     this.filteredData = result;
     this.applyPagination();
+    this.computeStats(); 
   }
 
   private extractPeriod(timeStr: string): string {
