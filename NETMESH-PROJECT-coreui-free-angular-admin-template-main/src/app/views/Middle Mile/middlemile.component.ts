@@ -92,11 +92,27 @@ export class MiddleMileComponent implements OnInit {
   sortDirection: 'asc' | 'desc' | null = null;
 
   showMap = false;
-  kmlLayers: KmlLayerConfig[] = [
-    { name: 'Regions',       url: 'assets/kml/gadm41_PHL_1/gadm41_PHL_1.kml', color: '#38bdf8', enabled: true  },
-    { name: 'Provinces',     url: 'assets/kml/gadm41_PHL_2/gadm41_PHL_2.kml', color: '#a78bfa', enabled: false },
-    { name: 'Municipalities',url: 'assets/kml/gadm41_PHL_3/gadm41_PHL_3.kml', color: '#34d399', enabled: false },
-  ];
+  
+kmlLayers: KmlLayerConfig[] = [
+  {
+    name: 'Regions',
+    url: 'assets/kmz/gadm41_PHL_1.kmz',
+    color: '#a78bfa',
+    enabled: true
+  },
+  {
+    name: 'Provinces',
+    url: 'assets/kmz/gadm41_PHL_2.kmz',
+    color: '#34d399',
+    enabled: false
+  },
+  {
+    name: 'Municipalities',
+    url: 'assets/kmz/gadm41_PHL_3.kmz',
+    color: '#fb923c',
+    enabled: false
+  },
+];
 
   readonly carouselTotal: number = 5;
   readonly carouselVisible: number = 4;

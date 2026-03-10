@@ -5,8 +5,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
-
-declare const omnivore: any;
+import JSZip from 'jszip';
 
 export interface KmlLayerConfig {
   name: string;
@@ -30,7 +29,7 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() zoom: number = 6;
 
   private map!: L.Map;
-  private layerMap = new Map<string, any>();
+  private layerMap = new Map<string, L.Layer>();
   private pendingFlyTo: { center: [number, number]; zoom: number } | null = null;
   isLoading = false;
 
@@ -86,13 +85,13 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.layerMap.forEach(layer => this.map.removeLayer(layer));
     this.layerMap.clear();
 
-    const order = ['Regions', 'Provinces', 'Municipalities'];
+    const order = ['Country', 'Regions', 'Provinces', 'Municipalities'];
     const sorted = [...this.kmlLayers].sort(
       (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
     );
 
     for (const kml of sorted) {
-      if (kml.enabled) this.loadKmlLayer(kml);
+      if (kml.enabled) this.loadLayer(kml);
     }
   }
 
@@ -105,32 +104,165 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
         this.layerMap.delete(kml.name);
       }
     } else {
+      this.loadLayer(kml);
+    }
+  }
+
+  private loadLayer(kml: KmlLayerConfig): void {
+    const isKmz = kml.url.toLowerCase().endsWith('.kmz');
+    if (isKmz) {
+      this.loadKmzLayer(kml);
+    } else {
       this.loadKmlLayer(kml);
     }
   }
 
-  private getLayerStyle(kmlName: string, color: string): L.PathOptions {
-    switch (kmlName) {
-      case 'Regions':
-        return { color, weight: 3,   opacity: 1,    fillColor: color, fillOpacity: 0    };
-      case 'Provinces':
-        return { color, weight: 1.5, opacity: 0.85, fillColor: color, fillOpacity: 0.04 };
-      case 'Municipalities':
-        return { color, weight: 0.8, opacity: 0.7,  fillColor: color, fillOpacity: 0.03 };
-      default:
-        return { color, weight: 1.5, opacity: 0.8,  fillColor: color, fillOpacity: 0.06 };
+  private parseCoords(text: string): number[][] {
+    const coords: number[][] = [];
+    const tokens = text.trim().split(/\s+/);
+    for (const token of tokens) {
+      if (!token) continue;
+      const parts = token.split(',');
+      const lng = parseFloat(parts[0]);
+      const lat = parseFloat(parts[1]);
+      if (isFinite(lng) && isFinite(lat)) {
+        coords.push([lng, lat]);
+      }
+    }
+    return coords;
+  }
+
+  private async loadKmzLayer(config: KmlLayerConfig): Promise<void> {
+    this.isLoading = true;
+    try {
+      const response = await fetch(config.url);
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${config.url}`);
+      const arrayBuffer = await response.arrayBuffer();
+
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const kmlFile = zip.file(/\.kml$/i)[0];
+      if (!kmlFile) throw new Error('No .kml found inside KMZ');
+      const kmlText = await kmlFile.async('text');
+
+      const domParser = new DOMParser();
+      const kmlDom = domParser.parseFromString(kmlText, 'text/xml');
+
+      const style = this.getLayerStyle(config.name, config.color);
+      const leafletLayer = L.geoJSON(undefined, {
+        style: () => style,
+        onEachFeature: (feature, featureLayer) => {
+          const name = feature.properties?.name || '';
+          if (name) {
+            (featureLayer as any).bindPopup(`
+              <div style="font-family:sans-serif;padding:6px 4px;min-width:120px">
+                <strong style="color:#0f172a;font-size:13px">${name}</strong>
+                <div style="font-size:11px;color:#475569;margin-top:3px;padding-top:3px;
+                     border-top:1px solid #e2e8f0">${config.name}</div>
+              </div>
+            `);
+          }
+          (featureLayer as any).on('mouseover', function (this: any) {
+            if (typeof this.setStyle === 'function')
+              this.setStyle({ weight: (style.weight ?? 1) + 1.5, fillOpacity: 0.2 });
+          });
+          (featureLayer as any).on('mouseout', function (this: any) {
+            if (typeof this.setStyle === 'function') this.setStyle(style);
+          });
+        }
+      });
+
+      const placemarks = Array.from(kmlDom.getElementsByTagName('Placemark'));
+      let featureCount = 0;
+
+      for (const pm of placemarks) {
+        const nameEl = pm.getElementsByTagName('name')[0]
+                    || pm.getElementsByTagName('n')[0];
+        let displayName = nameEl?.textContent?.trim() || '';
+
+        if (!displayName || displayName.startsWith('PHL.')) {
+          const simpleDatas = Array.from(pm.getElementsByTagName('SimpleData'));
+          for (const sd of simpleDatas) {
+            const attr = sd.getAttribute('name') || '';
+            if (attr === 'GID_0' || attr === 'NAME_1' || attr === 'NAME_2' || attr === 'NAME_3') {
+              const val = sd.textContent?.trim() || '';
+              if (val && val !== 'NA' && val !== 'Philippines') {
+                displayName = val;
+                break;
+              }
+            }
+          }
+        }
+
+        const polygonEls = Array.from(pm.getElementsByTagName('Polygon'));
+
+        if (polygonEls.length === 0) continue;
+
+        const multiPolygonCoords: number[][][][] = [];
+
+        for (const polyEl of polygonEls) {
+          const rings: number[][][] = [];
+
+          const outer = polyEl.getElementsByTagName('outerBoundaryIs')[0];
+          if (outer) {
+            const coordEl = outer.getElementsByTagName('coordinates')[0];
+            if (coordEl) {
+              const ring = this.parseCoords(coordEl.textContent || '');
+              if (ring.length >= 3) rings.push(ring);
+            }
+          }
+
+          const inners = Array.from(polyEl.getElementsByTagName('innerBoundaryIs'));
+          for (const inner of inners) {
+            const coordEl = inner.getElementsByTagName('coordinates')[0];
+            if (coordEl) {
+              const ring = this.parseCoords(coordEl.textContent || '');
+              if (ring.length >= 3) rings.push(ring);
+            }
+          }
+
+          if (rings.length > 0) multiPolygonCoords.push(rings);
+        }
+
+        if (multiPolygonCoords.length === 0) continue;
+
+        const geometry: any = multiPolygonCoords.length === 1
+          ? { type: 'Polygon', coordinates: multiPolygonCoords[0] }
+          : { type: 'MultiPolygon', coordinates: multiPolygonCoords };
+
+        const feature: any = {
+          type: 'Feature',
+          properties: { name: displayName },
+          geometry
+        };
+
+        try {
+          leafletLayer.addData(feature);
+          featureCount++;
+        } catch (e) {
+          console.warn('Skipped feature:', displayName, e);
+        }
+      }
+
+      leafletLayer.addTo(this.map);
+      this.layerMap.set(config.name, leafletLayer);
+      console.log(`KMZ loaded: ${config.name}`, featureCount, 'features');
+
+    } catch (err) {
+      console.error(`Failed to load KMZ: ${config.url}`, err);
+    } finally {
+      this.isLoading = false;
     }
   }
 
   private loadKmlLayer(kml: KmlLayerConfig): void {
-    if (typeof omnivore === 'undefined') {
+    const omnivore = (window as any)['omnivore'];
+    if (!omnivore) {
       console.warn('leaflet-omnivore not loaded!');
       return;
     }
 
     this.isLoading = true;
-    const color = kml.color;
-    const style = this.getLayerStyle(kml.name, color);
+    const style = this.getLayerStyle(kml.name, kml.color);
 
     const customLayer = L.geoJson(undefined, {
       style: () => style,
@@ -139,13 +271,13 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
           || feature.properties?.NAME_1
           || feature.properties?.NAME_2
           || feature.properties?.NAME_3
-          || feature.properties?.NAME_4
           || '';
         if (name) {
           (featureLayer as any).bindPopup(`
             <div style="font-family:sans-serif;padding:6px 4px;min-width:120px">
               <strong style="color:#0f172a;font-size:13px">${name}</strong>
-              <div style="font-size:11px;color:#475569;margin-top:3px;padding-top:3px;border-top:1px solid #e2e8f0">${kml.name}</div>
+              <div style="font-size:11px;color:#475569;margin-top:3px;padding-top:3px;
+                   border-top:1px solid #e2e8f0">${kml.name}</div>
             </div>
           `);
           (featureLayer as any).on('mouseover', function (this: any) {
@@ -159,19 +291,30 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
     });
 
     const layer = omnivore.kml(kml.url, null, customLayer);
-
     layer.on('ready', () => {
-      console.log(`KML loaded: ${kml.name}`, layer.getLayers().length, 'features');
       this.layerMap.set(kml.name, layer);
       this.isLoading = false;
     });
-
     layer.on('error', (e: any) => {
       console.error(`Failed to load KML: ${kml.url}`, e);
       this.isLoading = false;
     });
-
     layer.addTo(this.map);
+  }
+
+  private getLayerStyle(kmlName: string, color: string): L.PathOptions {
+    switch (kmlName) {
+      case 'Country':
+        return { color, weight: 3,   opacity: 1,    fillColor: color, fillOpacity: 0    };
+      case 'Regions':
+        return { color, weight: 2,   opacity: 1,    fillColor: color, fillOpacity: 0    };
+      case 'Provinces':
+        return { color, weight: 1.5, opacity: 0.85, fillColor: color, fillOpacity: 0.04 };
+      case 'Municipalities':
+        return { color, weight: 0.8, opacity: 0.7,  fillColor: color, fillOpacity: 0.03 };
+      default:
+        return { color, weight: 1.5, opacity: 0.8,  fillColor: color, fillOpacity: 0.06 };
+    }
   }
 
   ngOnDestroy(): void {
