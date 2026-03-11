@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InternetGFService, UpstreamData } from './InternetGF.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
+import { readExcelFile, pickExcelFile, readExcelFromUrl } from '../../helpers/excel-upload.helper';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -46,7 +47,6 @@ interface PersonStat {
   styleUrls: ['./InternetGF.component.scss']
 })
 export class InternetGFComponent implements OnInit {
-
   allData: UpstreamData[] = [];
   filteredData: UpstreamData[] = [];
   pagedData: UpstreamData[] = [];
@@ -72,44 +72,23 @@ export class InternetGFComponent implements OnInit {
 
   showMap = false;
 
-kmlLayers: KmlLayerConfig[] = [
-  {
-    name: 'Regions',
-    url: 'assets/kmz/gadm41_PHL_1.kmz',
-    color: '#a78bfa',
-    enabled: true
-  },
-  {
-    name: 'Provinces',
-    url: 'assets/kmz/gadm41_PHL_2.kmz',
-    color: '#34d399',
-    enabled: false
-  },
-  {
-    name: 'Municipalities',
-    url: 'assets/kmz/gadm41_PHL_3.kmz',
-    color: '#fb923c',
-    enabled: false
-  },
-];
+  kmlLayers: KmlLayerConfig[] = [
+    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: true  },
+    { name: 'Provinces',      url: 'assets/kmz/gadm41_PHL_2.kmz', color: '#34d399', enabled: false },
+    { name: 'Municipalities', url: 'assets/kmz/gadm41_PHL_3.kmz', color: '#fb923c', enabled: false },
+  ];
 
   dateList: string[] = [];
   activeDateIndex: number = -1;
-  get activeDate(): string | null {
-    return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null;
-  }
+  get activeDate(): string | null { return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null; }
 
   periodList: string[] = ['AM', 'PM'];
   activePeriodIndex: number = -1;
-  get activePeriod(): string | null {
-    return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null;
-  }
+  get activePeriod(): string | null { return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null; }
 
   providerList: string[] = [];
   activeProviderIndex: number = -1;
-  get activeProvider(): string | null {
-    return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null;
-  }
+  get activeProvider(): string | null { return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null; }
 
   sortColumn: keyof UpstreamData | null = null;
   sortDirection: 'asc' | 'desc' | null = null;
@@ -130,6 +109,20 @@ kmlLayers: KmlLayerConfig[] = [
   allStats:    ProviderStats = this.emptyStats();
   personStats: PersonStat[]  = [];
 
+  showUploadDropdown: boolean = false;
+  showUrlInput: boolean = false;
+  excelUrl: string = '';
+  isLoadingFromUrl: boolean = false;
+  urlErrorMessage: string = '';
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.upload-dropdown-wrap')) {
+      this.showUploadDropdown = false;
+    }
+  }
+
   emptyStats(): ProviderStats {
     return { totalTests: 0, avgUptime: 0, avgPacketLoss: 0, avgLatency: 0, highPacketLoss: 0 };
   }
@@ -142,10 +135,10 @@ kmlLayers: KmlLayerConfig[] = [
 
   private calcStats(rows: UpstreamData[]): ProviderStats {
     if (!rows.length) return this.emptyStats();
-    const totalTests   = rows.length;
-    const avgUptime    = rows.reduce((s, r) => s + this.parseNum(r.uptime),     0) / totalTests;
-    const avgPacketLoss= rows.reduce((s, r) => s + this.parseNum(r.packetLoss), 0) / totalTests;
-    const avgLatency   = rows.reduce((s, r) => s + this.parseNum(r.latency),    0) / totalTests;
+    const totalTests    = rows.length;
+    const avgUptime     = rows.reduce((s, r) => s + this.parseNum(r.uptime),     0) / totalTests;
+    const avgPacketLoss = rows.reduce((s, r) => s + this.parseNum(r.packetLoss), 0) / totalTests;
+    const avgLatency    = rows.reduce((s, r) => s + this.parseNum(r.latency),    0) / totalTests;
     const highPacketLoss = new Set(
       rows.filter(r => this.parseNum(r.packetLoss) > 2).map(r => r.location || r.barangay)
     ).size;
@@ -175,9 +168,7 @@ kmlLayers: KmlLayerConfig[] = [
 
   constructor(private router: Router, private internetGFService: InternetGFService) {}
 
-  ngOnInit(): void {
-    this.loadData();
-  }
+  ngOnInit(): void { this.loadData(); }
 
   loadData(): void {
     this.internetGFService.getData().subscribe({
@@ -188,10 +179,67 @@ kmlLayers: KmlLayerConfig[] = [
         this.buildProviderList();
         this.applyFilterAndSort();
       },
-      error: (err: unknown) => {
-        console.error('Failed to load data:', err);
-      }
+      error: (err: unknown) => console.error('Failed to load data:', err)
     });
+  }
+
+  async uploadFromLocalFile(): Promise<void> {
+    const file = await pickExcelFile();
+    if (!file) return;
+    const rows = await readExcelFile<UpstreamData>(file);
+    this.allData = [...rows, ...this.allData];
+    this.refreshTable();
+  }
+
+  toggleUrlInput(): void {
+    this.showUrlInput    = !this.showUrlInput;
+    this.excelUrl        = '';
+    this.urlErrorMessage = '';
+  }
+
+  async uploadFromUrl(): Promise<void> {
+    if (!this.excelUrl.trim()) {
+      this.urlErrorMessage = 'Please enter a valid URL.';
+      return;
+    }
+    this.isLoadingFromUrl = true;
+    this.urlErrorMessage  = '';
+    try {
+      const rows = await readExcelFromUrl<UpstreamData>(this.excelUrl.trim());
+      this.allData = [...rows, ...this.allData];
+      this.refreshTable();
+      this.showUrlInput = false;
+      this.excelUrl     = '';
+    } catch (error) {
+      this.urlErrorMessage = 'Failed to load file. Please check the URL and try again.';
+      console.error(error);
+    } finally {
+      this.isLoadingFromUrl = false;
+    }
+  }
+
+  private refreshTable(): void {
+    this.buildDropdownLists();
+    this.buildDateList();
+    this.buildProviderList();
+    this.applyFilterAndSort();
+  }
+
+  buildDropdownLists(): void {
+    const provinces = new Set<string>();
+    const cities    = new Set<string>();
+    const barangays = new Set<string>();
+    for (const item of this.allData) {
+      if (item.province?.trim())         provinces.add(item.province.trim());
+      if (item.cityMunicipality?.trim()) cities.add(item.cityMunicipality.trim());
+      if (item.barangay?.trim())         barangays.add(item.barangay.trim());
+    }
+    this.provinceList         = Array.from(provinces).sort();
+    this.filteredProvinceList = [...this.provinceList];
+    this.cityList             = Array.from(cities).sort();
+    this.filteredCityList     = [...this.cityList];
+    this.barangayList         = Array.from(barangays).sort();
+    this.filteredBarangayList = [...this.barangayList];
   }
 
   buildDateList(): void {
@@ -201,10 +249,7 @@ kmlLayers: KmlLayerConfig[] = [
       if (d) seen.add(d);
     }
     this.dateList = Array.from(seen).sort((a, b) => {
-      const toMs = (s: string) => {
-        const [m, d, y] = s.split('/');
-        return new Date(+y, +m - 1, +d).getTime();
-      };
+      const toMs = (s: string) => { const [m, d, y] = s.split('/'); return new Date(+y, +m - 1, +d).getTime(); };
       return toMs(a) - toMs(b);
     });
   }
@@ -225,35 +270,18 @@ kmlLayers: KmlLayerConfig[] = [
     this.providerList = ordered;
   }
 
-  buildDropdownLists(): void {
-    const provinces = new Set<string>();
-    const cities    = new Set<string>();
-    const barangays = new Set<string>();
-
-    for (const item of this.allData) {
-      if (item.province?.trim())         provinces.add(item.province.trim());
-      if (item.cityMunicipality?.trim()) cities.add(item.cityMunicipality.trim());
-      if (item.barangay?.trim())         barangays.add(item.barangay.trim());
-    }
-
-    this.provinceList         = Array.from(provinces).sort();
-    this.filteredProvinceList = [...this.provinceList];
-    this.cityList             = Array.from(cities).sort();
-    this.filteredCityList     = [...this.cityList];
-    this.barangayList         = Array.from(barangays).sort();
-    this.filteredBarangayList = [...this.barangayList];
-  }
-
   onRegionChange(): void {
     this.selectedProvince = '';
     this.selectedCity = '';
     this.selectedBarangay = '';
     this.filteredCityList = [];
     this.filteredBarangayList = [];
-
     if (this.selectedRegion) {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
+      const inRegion = this.allData.filter(d => allowed.includes(d.province?.trim() ?? ''));
+      this.filteredCityList     = [...new Set(inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(inRegion.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     } else {
       this.filteredProvinceList = [...this.provinceList];
       this.filteredCityList     = [...this.cityList];
@@ -289,17 +317,12 @@ kmlLayers: KmlLayerConfig[] = [
       const cityOk     = !this.selectedCity     || d.cityMunicipality?.trim() === this.selectedCity;
       return regionOk && provinceOk && cityOk;
     });
-    this.filteredBarangayList = [...new Set(
-      base.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-    )].sort();
+    this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     this.currentPage = 1;
     this.applyFilterAndSort();
   }
 
-  onBarangayChange(): void {
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-  }
+  onBarangayChange(): void { this.currentPage = 1; this.applyFilterAndSort(); }
 
   hasActiveFilters(): boolean {
     return !!(this.searchTerm || this.selectedRegion || this.selectedProvince || this.selectedCity || this.selectedBarangay);
@@ -325,28 +348,12 @@ kmlLayers: KmlLayerConfig[] = [
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       result = result.filter(d => allowed.includes(d.province?.trim() ?? ''));
     }
-    if (this.selectedProvince) {
-      result = result.filter(item => item.province?.trim() === this.selectedProvince);
-    }
-    if (this.selectedCity) {
-      result = result.filter(item => item.cityMunicipality?.trim() === this.selectedCity);
-    }
-    if (this.selectedBarangay) {
-      result = result.filter(item => item.barangay?.trim() === this.selectedBarangay);
-    }
-    if (this.activeDate) {
-      result = result.filter(item => item.validationDate?.trim() === this.activeDate);
-    }
-    if (this.activePeriod) {
-      result = result.filter(item =>
-        this.extractPeriod(item.validationTime) === this.activePeriod
-      );
-    }
-    if (this.activeProvider) {
-      result = result.filter(item =>
-        item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase()
-      );
-    }
+    if (this.selectedProvince) result = result.filter(item => item.province?.trim()         === this.selectedProvince);
+    if (this.selectedCity)     result = result.filter(item => item.cityMunicipality?.trim() === this.selectedCity);
+    if (this.selectedBarangay) result = result.filter(item => item.barangay?.trim()         === this.selectedBarangay);
+    if (this.activeDate)       result = result.filter(item => item.validationDate?.trim()   === this.activeDate);
+    if (this.activePeriod)     result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
+    if (this.activeProvider)   result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
 
     const term = this.searchTerm.toLowerCase().trim();
     if (term) {
@@ -374,11 +381,9 @@ kmlLayers: KmlLayerConfig[] = [
         if (col === 'id') return (Number(a.id) - Number(b.id)) * dir;
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
-        const aNum = parseFloat(aVal);
-        const bNum = parseFloat(bVal);
+        const aNum = parseFloat(aVal); const bNum = parseFloat(bVal);
         if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-        if (!aVal && bVal) return 1;
-        if (aVal && !bVal) return -1;
+        if (!aVal && bVal) return 1; if (aVal && !bVal) return -1;
         return aVal.localeCompare(bVal) * dir;
       });
     }
@@ -403,40 +408,26 @@ kmlLayers: KmlLayerConfig[] = [
 
   onServiceProviderClick(): void {
     this.activeProviderIndex = (this.activeProviderIndex + 1) >= this.providerList.length ? -1 : this.activeProviderIndex + 1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
-
   onValidationDateClick(): void {
     this.activeDateIndex = (this.activeDateIndex + 1) >= this.dateList.length ? -1 : this.activeDateIndex + 1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
-
   onValidationTimeClick(): void {
     this.activePeriodIndex = (this.activePeriodIndex + 1) >= this.periodList.length ? -1 : this.activePeriodIndex + 1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
 
   sortBy(column: keyof UpstreamData): void {
     if (column === 'serviceProvider') { this.onServiceProviderClick(); return; }
     if (column === 'validationDate')  { this.onValidationDateClick(); return; }
     if (column === 'validationTime')  { this.onValidationTimeClick(); return; }
-
     if (this.sortColumn === column) {
-      if (this.sortDirection === 'asc') {
-        this.sortDirection = 'desc';
-      } else {
-        this.sortColumn = null;
-        this.sortDirection = null;
-      }
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+      if (this.sortDirection === 'asc') { this.sortDirection = 'desc'; }
+      else { this.sortColumn = null; this.sortDirection = null; }
+    } else { this.sortColumn = column; this.sortDirection = 'asc'; }
+    this.currentPage = 1; this.applyFilterAndSort();
   }
 
   getColSort(column: keyof UpstreamData): 'asc' | 'desc' | null {
@@ -446,15 +437,9 @@ kmlLayers: KmlLayerConfig[] = [
     return this.sortColumn === column ? this.sortDirection : null;
   }
 
-  get dateHeaderLabel(): string {
-    return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : 'Validation Date';
-  }
-  get timeHeaderLabel(): string {
-    return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : 'Validation Time';
-  }
-  get providerHeaderLabel(): string {
-    return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : 'Service Provider';
-  }
+  get dateHeaderLabel():     string { return this.activeDateIndex     >= 0 ? this.dateList[this.activeDateIndex]         : 'Validation Date'; }
+  get timeHeaderLabel():     string { return this.activePeriodIndex   >= 0 ? this.periodList[this.activePeriodIndex]     : 'Validation Time'; }
+  get providerHeaderLabel(): string { return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : 'Service Provider'; }
 
   applyPagination(): void {
     this.totalPages = Math.max(1, Math.ceil(this.filteredData.length / this.pageSize));
@@ -465,26 +450,14 @@ kmlLayers: KmlLayerConfig[] = [
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.applyPagination();
+    this.currentPage = page; this.applyPagination();
   }
-
-  onPageSizeChange(): void {
-    this.pageSize = Number(this.pageSize);
-    this.currentPage = 1;
-    this.applyPagination();
-  }
-
-  get pageStart(): number {
-    return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
-  }
-  get pageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredData.length);
-  }
+  onPageSizeChange(): void { this.pageSize = Number(this.pageSize); this.currentPage = 1; this.applyPagination(); }
+  get pageStart(): number { return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1; }
+  get pageEnd():   number { return Math.min(this.currentPage * this.pageSize, this.filteredData.length); }
 
   get pageNumbers(): number[] {
-    const total = this.totalPages;
-    const current = this.currentPage;
+    const total = this.totalPages; const current = this.currentPage;
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
     const pages: number[] = [1];
     if (current > 3) pages.push(-1);
@@ -494,11 +467,7 @@ kmlLayers: KmlLayerConfig[] = [
     return pages;
   }
 
-  onSearch(): void {
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-  }
-
+  onSearch(): void { this.currentPage = 1; this.applyFilterAndSort(); }
   goBack(): void { this.router.navigate(['/login1']); }
   onAddNew(): void { console.log('Add New clicked'); }
 }

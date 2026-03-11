@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LastMileService, LastMileData } from './lastmile.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
+import { readExcelFile, pickExcelFile, readExcelFromUrl } from '../../helpers/excel-upload.helper';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -85,27 +86,18 @@ export class LastMileComponent implements OnInit {
   sortDirection: 'asc' | 'desc' | null = null;
 
   showMap = false;
-  
-kmlLayers: KmlLayerConfig[] = [
-  {
-    name: 'Regions',
-    url: 'assets/kmz/gadm41_PHL_1.kmz',
-    color: '#a78bfa',
-    enabled: true
-  },
-  {
-    name: 'Provinces',
-    url: 'assets/kmz/gadm41_PHL_2.kmz',
-    color: '#34d399',
-    enabled: false
-  },
-  {
-    name: 'Municipalities',
-    url: 'assets/kmz/gadm41_PHL_3.kmz',
-    color: '#fb923c',
-    enabled: false
-  },
-];
+
+  showUploadDropdown = false;
+  showUrlInput = false;
+  excelUrl = '';
+  isLoadingFromUrl = false;
+  urlErrorMessage = '';
+
+  kmlLayers: KmlLayerConfig[] = [
+    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: true  },
+    { name: 'Provinces',      url: 'assets/kmz/gadm41_PHL_2.kmz', color: '#34d399', enabled: false },
+    { name: 'Municipalities', url: 'assets/kmz/gadm41_PHL_3.kmz', color: '#fb923c', enabled: false },
+  ];
 
   readonly carouselTotal: number = 5;
   readonly carouselVisible: number = 4;
@@ -122,6 +114,14 @@ kmlLayers: KmlLayerConfig[] = [
   allStats:    ProviderStats = this.emptyStats();
   personStats: PersonStat[]  = [];
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.upload-dropdown-wrap')) {
+      this.showUploadDropdown = false;
+    }
+  }
+
   private emptyStats(): ProviderStats {
     return { totalTests: 0, avgDownload: 0, avgUpload: 0, avgLatency: 0, highPacketLoss: 0 };
   }
@@ -133,10 +133,10 @@ kmlLayers: KmlLayerConfig[] = [
 
   private calcStats(rows: LastMileData[]): ProviderStats {
     if (!rows.length) return this.emptyStats();
-    const totalTests    = rows.length;
-    const avgDownload   = rows.reduce((s, r) => s + this.parseNum(r.averageDownloadSpeed), 0) / totalTests;
-    const avgUpload     = rows.reduce((s, r) => s + this.parseNum(r.averageUploadSpeed),   0) / totalTests;
-    const avgLatency    = rows.reduce((s, r) => s + this.parseNum(r.latency),               0) / totalTests;
+    const totalTests     = rows.length;
+    const avgDownload    = rows.reduce((s, r) => s + this.parseNum(r.averageDownloadSpeed), 0) / totalTests;
+    const avgUpload      = rows.reduce((s, r) => s + this.parseNum(r.averageUploadSpeed),   0) / totalTests;
+    const avgLatency     = rows.reduce((s, r) => s + this.parseNum(r.latency),               0) / totalTests;
     const highPacketLoss = new Set(
       rows.filter(r => this.parseNum(r.packetLoss) > 2).map(r => r.location || r.barangay)
     ).size;
@@ -173,6 +173,47 @@ kmlLayers: KmlLayerConfig[] = [
       },
       error: (err) => console.error('Failed to load data:', err)
     });
+  }
+
+  async uploadFromLocalFile(): Promise<void> {
+    this.showUploadDropdown = false;
+    const file = await pickExcelFile();
+    if (!file) return;
+    const rows = await readExcelFile<LastMileData>(file);
+    this.allData = [...rows, ...this.allData];
+    this.refreshTable();
+  }
+
+  toggleUrlInput(): void {
+    this.showUploadDropdown = false;
+    this.showUrlInput    = !this.showUrlInput;
+    this.excelUrl        = '';
+    this.urlErrorMessage = '';
+  }
+
+  async uploadFromUrl(): Promise<void> {
+    if (!this.excelUrl.trim()) { this.urlErrorMessage = 'Please enter a valid URL.'; return; }
+    this.isLoadingFromUrl = true;
+    this.urlErrorMessage  = '';
+    try {
+      const rows = await readExcelFromUrl<LastMileData>(this.excelUrl.trim());
+      this.allData = [...rows, ...this.allData];
+      this.refreshTable();
+      this.showUrlInput = false;
+      this.excelUrl     = '';
+    } catch (error) {
+      this.urlErrorMessage = 'Failed to load file from URL.';
+      console.error(error);
+    } finally {
+      this.isLoadingFromUrl = false;
+    }
+  }
+
+  private refreshTable(): void {
+    this.buildDropdownLists();
+    this.buildDateList();
+    this.buildProviderList();
+    this.applyFilterAndSort();
   }
 
   buildDropdownLists(): void {
@@ -220,7 +261,6 @@ kmlLayers: KmlLayerConfig[] = [
     this.selectedBarangay = '';
     this.filteredCityList = [];
     this.filteredBarangayList = [];
-
     if (this.selectedRegion) {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));

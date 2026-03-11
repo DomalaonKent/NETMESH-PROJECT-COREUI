@@ -1,12 +1,13 @@
 <div class="validation-dashboard">
-    <div class="page-header">
+  <div class="page-header">
     <div class="page-title">
-        <h2>Last Mile</h2>
-        <span class="subtitle">Manage and view all connectivity records</span>
+      <h2>Last Mile</h2>
+      <span class="subtitle">Manage and view all connectivity records</span>
     </div>
-    <div class="header-buttons">
+    <div class="header-right">
+      <div class="header-buttons">
         <div class="search-container">
-        <input
+          <input
             type="text"
             class="search-input"
             placeholder="Search"
@@ -16,10 +17,38 @@
         <button class="btn-map-toggle" (click)="showMap = !showMap">
           {{ showMap ? 'Hide Map' : 'Show Map' }}
         </button>
-        <button class="btn-back" (click)="goBack()">Back</button>
+        <div class="upload-dropdown-wrap">
+          <button class="btn-add btn-upload-toggle" (click)="showUploadDropdown = !showUploadDropdown">
+            Upload ▾
+          </button>
+          <div class="upload-dropdown-menu" *ngIf="showUploadDropdown">
+            <button class="upload-dropdown-item" (click)="uploadFromLocalFile(); showUploadDropdown = false">
+              Upload File
+            </button>
+            <button class="upload-dropdown-item" (click)="toggleUrlInput(); showUploadDropdown = false">
+              Upload URL
+            </button>
+          </div>
+        </div>
         <button class="btn-add" (click)="onAddNew()">Add New</button>
+        <button class="btn-back" (click)="goBack()">Back</button>
+      </div>
+
+      <div class="url-upload-panel" *ngIf="showUrlInput">
+        <input
+          type="text"
+          class="search-input url-input"
+          placeholder="https://example.com/data.xlsx"
+          [(ngModel)]="excelUrl"
+        />
+        <button class="btn-add" (click)="uploadFromUrl()" [disabled]="isLoadingFromUrl">
+          {{ isLoadingFromUrl ? 'Loading...' : 'Load Data' }}
+        </button>
+        <button class="btn-back" (click)="toggleUrlInput()">Cancel</button>
+        <span class="url-error" *ngIf="urlErrorMessage">{{ urlErrorMessage }}</span>
+      </div>
     </div>
-</div>
+  </div>
 
   <div class="cards-carousel-wrapper">
     <button class="carousel-btn carousel-btn--prev" (click)="carouselPrev()" [disabled]="carouselIndex === 0">&#8249;</button>
@@ -113,7 +142,7 @@
       </button>
     </div>
   </div>
-  
+
   <div *ngIf="showMap" class="map-section">
     <app-map-viewer
       [kmlLayers]="kmlLayers"
@@ -122,43 +151,43 @@
     </app-map-viewer>
   </div>
 
-<div class="filter-bar">
+  <div class="filter-bar">
     <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedRegion" (change)="onRegionChange()">
+      <select class="filter-select" [(ngModel)]="selectedRegion" (change)="onRegionChange()">
         <option value="">All Regions</option>
         <option *ngFor="let r of regionList" [value]="r">{{ r }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
+      </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedProvince" (change)="onProvinceChange()">
+      <select class="filter-select" [(ngModel)]="selectedProvince" (change)="onProvinceChange()">
         <option value="">All Provinces</option>
         <option *ngFor="let p of filteredProvinceList" [value]="p">{{ p }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
+      </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
+      <select class="filter-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
         <option value="">All Cities / Municipalities</option>
         <option *ngFor="let c of filteredCityList" [value]="c">{{ c }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
+      </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <div class="filter-select-wrap">
-        <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
+      <select class="filter-select" [(ngModel)]="selectedBarangay" (change)="onBarangayChange()">
         <option value="">All Barangays</option>
         <option *ngFor="let b of filteredBarangayList" [value]="b">{{ b }}</option>
-        </select>
-        <span class="select-arrow">▾</span>
+      </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
-        ✕ Clear
+      ✕ Clear
     </button>
-</div>
+  </div>
 
   <div class="table-container">
     <table class="data-table">
@@ -168,8 +197,7 @@
               [class.col-active]="getColSort('id')"
               [class.col-asc]="getColSort('id') === 'asc'"
               [class.col-desc]="getColSort('id') === 'desc'">
-            <span class="th-inner">
-              ID
+            <span class="th-inner">ID
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('id')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('id') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -182,8 +210,7 @@
               [class.col-active]="getColSort('location')"
               [class.col-asc]="getColSort('location') === 'asc'"
               [class.col-desc]="getColSort('location') === 'desc'">
-            <span class="th-inner">
-              Location
+            <span class="th-inner">Location
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('location')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('location') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -196,8 +223,7 @@
               [class.col-active]="getColSort('averageDownloadSpeed')"
               [class.col-asc]="getColSort('averageDownloadSpeed') === 'asc'"
               [class.col-desc]="getColSort('averageDownloadSpeed') === 'desc'">
-            <span class="th-inner">
-              Average Download Speed
+            <span class="th-inner">Average Download Speed
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('averageDownloadSpeed')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('averageDownloadSpeed') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -210,8 +236,7 @@
               [class.col-active]="getColSort('averageUploadSpeed')"
               [class.col-asc]="getColSort('averageUploadSpeed') === 'asc'"
               [class.col-desc]="getColSort('averageUploadSpeed') === 'desc'">
-            <span class="th-inner">
-              Average Upload Speed
+            <span class="th-inner">Average Upload Speed
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('averageUploadSpeed')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('averageUploadSpeed') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -224,8 +249,7 @@
               [class.col-active]="getColSort('latency')"
               [class.col-asc]="getColSort('latency') === 'asc'"
               [class.col-desc]="getColSort('latency') === 'desc'">
-            <span class="th-inner">
-              Latency
+            <span class="th-inner">Latency
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('latency')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('latency') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -238,8 +262,7 @@
               [class.col-active]="getColSort('packetLoss')"
               [class.col-asc]="getColSort('packetLoss') === 'asc'"
               [class.col-desc]="getColSort('packetLoss') === 'desc'">
-            <span class="th-inner">
-              Packet Loss
+            <span class="th-inner">Packet Loss
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('packetLoss')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('packetLoss') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -252,8 +275,7 @@
               [class.col-active]="getColSort('jitter')"
               [class.col-asc]="getColSort('jitter') === 'asc'"
               [class.col-desc]="getColSort('jitter') === 'desc'">
-            <span class="th-inner">
-              Jitter
+            <span class="th-inner">Jitter
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('jitter')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('jitter') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -266,8 +288,7 @@
               [class.col-active]="getColSort('serviceAvailability')"
               [class.col-asc]="getColSort('serviceAvailability') === 'asc'"
               [class.col-desc]="getColSort('serviceAvailability') === 'desc'">
-            <span class="th-inner">
-              Service Availability
+            <span class="th-inner">Service Availability
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('serviceAvailability')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('serviceAvailability') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -275,13 +296,12 @@
               </span>
             </span>
           </th>
-
+          
           <th (click)="sortBy('serviceUptime')"
               [class.col-active]="getColSort('serviceUptime')"
               [class.col-asc]="getColSort('serviceUptime') === 'asc'"
               [class.col-desc]="getColSort('serviceUptime') === 'desc'">
-            <span class="th-inner">
-              Service Uptime
+            <span class="th-inner">Service Uptime
               <span class="sort-caret">
                 <svg *ngIf="!getColSort('serviceUptime')" class="caret-idle" viewBox="0 0 10 12" fill="none"><path d="M5 1L5 11M5 1L2 4M5 1L8 4M5 11L2 8M5 11L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 <svg *ngIf="getColSort('serviceUptime') === 'asc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -4,22 +4,52 @@
       <h2>Validation Page Data</h2>
       <span class="subtitle">Manage and view all connectivity records</span>
     </div>
-    <div class="header-buttons">
-      <div class="search-container">
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Search"
-          [(ngModel)]="searchTerm"
-          (input)="onSearch()">
+    <div class="header-right">
+      <div class="header-buttons">
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()">
+        </div>
+
+        <button class="btn-map-toggle" (click)="showMap = !showMap">
+          {{ showMap ? 'Hide Map' : 'Show Map' }}
+        </button>
+
+        <div class="upload-dropdown-wrap">
+          <button class="btn-add btn-upload-toggle" (click)="showUploadDropdown = !showUploadDropdown">
+            Upload  ▾
+          </button>
+          <div class="upload-dropdown-menu" *ngIf="showUploadDropdown">
+            <button class="upload-dropdown-item" (click)="uploadFromLocalFile(); showUploadDropdown = false">
+              Upload File
+            </button>
+            <button class="upload-dropdown-item" (click)="toggleUrlInput(); showUploadDropdown = false">
+              Upload URL
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-add" (click)="onAddNew()">Add New</button>
+        <button class="btn-back" (click)="goBack()">Back</button>
       </div>
 
-      <button class="btn-map-toggle" (click)="showMap = !showMap">
-        {{ showMap ? 'Hide Map' : 'Show Map' }}
-      </button>
-
-      <button class="btn-back" (click)="goBack()">Back</button>
-      <button class="btn-add" (click)="onAddNew()">Add New</button>
+      <div class="url-upload-panel" *ngIf="showUrlInput">
+        <input
+          type="text"
+          class="search-input url-input"
+          placeholder="https://example.com/data.xlsx"
+          [(ngModel)]="excelUrl"
+        />
+        <button class="btn-add" (click)="uploadFromUrl()" [disabled]="isLoadingFromUrl">
+          {{ isLoadingFromUrl ? 'Loading...' : 'Load Data' }}
+        </button>
+        <button class="btn-back" (click)="toggleUrlInput()">Cancel</button>
+        <span class="url-error" *ngIf="urlErrorMessage">{{ urlErrorMessage }}</span>
+      </div>
     </div>
   </div>
 

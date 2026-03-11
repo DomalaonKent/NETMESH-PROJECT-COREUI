@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MiddleMileService, UpstreamData } from './middlemile.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
+import { readExcelFile, pickExcelFile, readExcelFromUrl } from '../../helpers/excel-upload.helper';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -65,54 +66,39 @@ export class MiddleMileComponent implements OnInit {
   barangayList: string[] = [];
   filteredBarangayList: string[] = [];
 
-  currentPage: number = 1;
-  pageSize: number = 10;
-  totalPages: number = 1;
-  pageSizeOptions: number[] = [10, 25, 50, 100];
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  pageSizeOptions = [10, 25, 50, 100];
 
   dateList: string[] = [];
-  activeDateIndex: number = -1;
-  get activeDate(): string | null {
-    return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null;
-  }
+  activeDateIndex = -1;
+  get activeDate(): string | null { return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null; }
 
   periodList: string[] = ['AM', 'PM'];
-  activePeriodIndex: number = -1;
-  get activePeriod(): string | null {
-    return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null;
-  }
+  activePeriodIndex = -1;
+  get activePeriod(): string | null { return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null; }
 
   providerList: string[] = [];
-  activeProviderIndex: number = -1;
-  get activeProvider(): string | null {
-    return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null;
-  }
+  activeProviderIndex = -1;
+  get activeProvider(): string | null { return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null; }
 
   sortColumn: keyof UpstreamData | null = null;
   sortDirection: 'asc' | 'desc' | null = null;
 
   showMap = false;
-  
-kmlLayers: KmlLayerConfig[] = [
-  {
-    name: 'Regions',
-    url: 'assets/kmz/gadm41_PHL_1.kmz',
-    color: '#a78bfa',
-    enabled: true
-  },
-  {
-    name: 'Provinces',
-    url: 'assets/kmz/gadm41_PHL_2.kmz',
-    color: '#34d399',
-    enabled: false
-  },
-  {
-    name: 'Municipalities',
-    url: 'assets/kmz/gadm41_PHL_3.kmz',
-    color: '#fb923c',
-    enabled: false
-  },
-];
+
+  showUploadDropdown = false;
+  showUrlInput = false;
+  excelUrl = '';
+  isLoadingFromUrl = false;
+  urlErrorMessage = '';
+
+  kmlLayers: KmlLayerConfig[] = [
+    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: true  },
+    { name: 'Provinces',      url: 'assets/kmz/gadm41_PHL_2.kmz', color: '#34d399', enabled: false },
+    { name: 'Municipalities', url: 'assets/kmz/gadm41_PHL_3.kmz', color: '#fb923c', enabled: false },
+  ];
 
   readonly carouselTotal: number = 5;
   readonly carouselVisible: number = 4;
@@ -128,6 +114,14 @@ kmlLayers: KmlLayerConfig[] = [
   ditoStats:   ProviderStats = this.emptyStats();
   allStats:    ProviderStats = this.emptyStats();
   personStats: PersonStat[]  = [];
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.upload-dropdown-wrap')) {
+      this.showUploadDropdown = false;
+    }
+  }
 
   private emptyStats(): ProviderStats {
     return { totalTests: 0, avgUptime: 0, avgPacketLoss: 0, avgLatency: 0, highPacketLoss: 0 };
@@ -182,12 +176,48 @@ kmlLayers: KmlLayerConfig[] = [
     });
   }
 
+  async uploadFromLocalFile(): Promise<void> {
+    const file = await pickExcelFile();
+    if (!file) return;
+    const rows = await readExcelFile<UpstreamData>(file);
+    this.allData = [...rows, ...this.allData];
+    this.refreshTable();
+  }
+
+  toggleUrlInput(): void {
+    this.showUrlInput    = !this.showUrlInput;
+    this.excelUrl        = '';
+    this.urlErrorMessage = '';
+  }
+
+  async uploadFromUrl(): Promise<void> {
+    if (!this.excelUrl.trim()) { this.urlErrorMessage = 'Please enter a valid URL.'; return; }
+    this.isLoadingFromUrl = true;
+    this.urlErrorMessage  = '';
+    try {
+      const rows = await readExcelFromUrl<UpstreamData>(this.excelUrl.trim());
+      this.allData = [...rows, ...this.allData];
+      this.refreshTable();
+      this.showUrlInput = false;
+      this.excelUrl     = '';
+    } catch (error) {
+      this.urlErrorMessage = 'Failed to load file.';
+      console.error(error);
+    } finally {
+      this.isLoadingFromUrl = false;
+    }
+  }
+
+  private refreshTable(): void {
+    this.buildDropdownLists();
+    this.buildDateList();
+    this.buildProviderList();
+    this.applyFilterAndSort();
+  }
+
   buildDateList(): void {
     const seen = new Set<string>();
-    for (const item of this.allData) {
-      const d = item.validationDate?.trim();
-      if (d) seen.add(d);
-    }
+    for (const item of this.allData) { const d = item.validationDate?.trim(); if (d) seen.add(d); }
     this.dateList = Array.from(seen).sort((a, b) => {
       const toMs = (s: string) => { const [m, d, y] = s.split('/'); return new Date(+y, +m - 1, +d).getTime(); };
       return toMs(a) - toMs(b);
@@ -196,10 +226,7 @@ kmlLayers: KmlLayerConfig[] = [
 
   buildProviderList(): void {
     const seen = new Set<string>();
-    for (const item of this.allData) {
-      const p = item.serviceProvider?.trim();
-      if (p) seen.add(p);
-    }
+    for (const item of this.allData) { const p = item.serviceProvider?.trim(); if (p) seen.add(p); }
     const preferred = ['Smart', 'DITO', 'Globe'];
     const ordered: string[] = [];
     for (const p of preferred) {
@@ -233,7 +260,6 @@ kmlLayers: KmlLayerConfig[] = [
     this.selectedBarangay = '';
     this.filteredCityList = [];
     this.filteredBarangayList = [];
-
     if (this.selectedRegion) {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
@@ -247,7 +273,7 @@ kmlLayers: KmlLayerConfig[] = [
   }
 
   onProvinceChange(): void {
-    this.selectedCity     = '';
+    this.selectedCity = '';
     this.selectedBarangay = '';
     const base = this.allData.filter(d =>
       (!this.selectedRegion || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? ''))
@@ -272,9 +298,7 @@ kmlLayers: KmlLayerConfig[] = [
       const cityOk     = !this.selectedCity     || d.cityMunicipality?.trim() === this.selectedCity;
       return regionOk && provinceOk && cityOk;
     });
-    this.filteredBarangayList = [...new Set(
-      base.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-    )].sort();
+    this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     this.currentPage = 1;
     this.applyFilterAndSort();
   }
@@ -286,11 +310,11 @@ kmlLayers: KmlLayerConfig[] = [
   }
 
   clearFilters(): void {
-    this.searchTerm        = '';
-    this.selectedRegion    = '';
-    this.selectedProvince  = '';
-    this.selectedCity      = '';
-    this.selectedBarangay  = '';
+    this.searchTerm = '';
+    this.selectedRegion = '';
+    this.selectedProvince = '';
+    this.selectedCity = '';
+    this.selectedBarangay = '';
     this.filteredProvinceList = [...this.provinceList];
     this.filteredCityList     = [...this.cityList];
     this.filteredBarangayList = [...this.barangayList];
@@ -315,18 +339,18 @@ kmlLayers: KmlLayerConfig[] = [
     const term = this.searchTerm.toLowerCase().trim();
     if (term) {
       result = result.filter(item =>
-        String(item.id                          ?? '').toLowerCase().includes(term) ||
-        (item.province                          ?? '').toLowerCase().includes(term) ||
-        (item.cityMunicipality                  ?? '').toLowerCase().includes(term) ||
-        (item.barangay                          ?? '').toLowerCase().includes(term) ||
-        (item.location                          ?? '').toLowerCase().includes(term) ||
-        (item.validationDate                    ?? '').toLowerCase().includes(term) ||
-        (item.validationTime                    ?? '').toLowerCase().includes(term) ||
-        (item.technology                        ?? '').toLowerCase().includes(term) ||
-        (item.serviceProvider                   ?? '').toLowerCase().includes(term) ||
-        String(item.uptime                      ?? '').toLowerCase().includes(term) ||
-        String(item.packetLoss                  ?? '').toLowerCase().includes(term) ||
-        String(item.latency                     ?? '').toLowerCase().includes(term) ||
+        String(item.id ?? '').toLowerCase().includes(term) ||
+        (item.province ?? '').toLowerCase().includes(term) ||
+        (item.cityMunicipality ?? '').toLowerCase().includes(term) ||
+        (item.barangay ?? '').toLowerCase().includes(term) ||
+        (item.location ?? '').toLowerCase().includes(term) ||
+        (item.validationDate ?? '').toLowerCase().includes(term) ||
+        (item.validationTime ?? '').toLowerCase().includes(term) ||
+        (item.technology ?? '').toLowerCase().includes(term) ||
+        (item.serviceProvider ?? '').toLowerCase().includes(term) ||
+        String(item.uptime ?? '').toLowerCase().includes(term) ||
+        String(item.packetLoss ?? '').toLowerCase().includes(term) ||
+        String(item.latency ?? '').toLowerCase().includes(term) ||
         String(item.aggregatedOpticalSignalLoss ?? '').toLowerCase().includes(term)
       );
     }
@@ -338,11 +362,9 @@ kmlLayers: KmlLayerConfig[] = [
         if (col === 'id') return (Number(a.id) - Number(b.id)) * dir;
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
-        const aNum = parseFloat(aVal);
-        const bNum = parseFloat(bVal);
+        const aNum = parseFloat(aVal); const bNum = parseFloat(bVal);
         if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-        if (!aVal && bVal) return 1;
-        if (aVal && !bVal) return -1;
+        if (!aVal && bVal) return 1; if (aVal && !bVal) return -1;
         return aVal.localeCompare(bVal) * dir;
       });
     }
@@ -430,6 +452,6 @@ kmlLayers: KmlLayerConfig[] = [
   }
 
   onSearch(): void { this.currentPage = 1; this.applyFilterAndSort(); }
-  goBack(): void { this.router.navigate(['/login1']); }
+  goBack(): void { this.router.navigate(['/connectivity-dashboard']); }
   onAddNew(): void { console.log('Add New clicked'); }
 }

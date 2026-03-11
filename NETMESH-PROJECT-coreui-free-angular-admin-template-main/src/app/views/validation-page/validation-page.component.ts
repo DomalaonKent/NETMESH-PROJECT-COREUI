@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ValidationPageService, ConnectivityData } from './validation-page.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
+import { readExcelFile, pickExcelFile, readExcelFromUrl } from '../../helpers/excel-upload.helper';
 
 const REGION_PROVINCE_MAP: Record<string, string[]> = {
   'NCR - Metro Manila':              ['Metro Manila'],
@@ -73,26 +74,11 @@ export class ValidationPageComponent implements OnInit {
 
   showMap = false;
 
-kmlLayers: KmlLayerConfig[] = [
-  {
-    name: 'Regions',
-    url: 'assets/kmz/gadm41_PHL_1.kmz',
-    color: '#a78bfa',
-    enabled: true
-  },
-  {
-    name: 'Provinces',
-    url: 'assets/kmz/gadm41_PHL_2.kmz',
-    color: '#34d399',
-    enabled: false
-  },
-  {
-    name: 'Municipalities',
-    url: 'assets/kmz/gadm41_PHL_3.kmz',
-    color: '#fb923c',
-    enabled: false
-  },
-];
+  kmlLayers: KmlLayerConfig[] = [
+    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: true  },
+    { name: 'Provinces',      url: 'assets/kmz/gadm41_PHL_2.kmz', color: '#34d399', enabled: false },
+    { name: 'Municipalities', url: 'assets/kmz/gadm41_PHL_3.kmz', color: '#fb923c', enabled: false },
+  ];
 
   dateList: string[] = [];
   activeDateIndex: number = -1;
@@ -130,6 +116,20 @@ kmlLayers: KmlLayerConfig[] = [
   ditoStats:   ProviderStats = this.emptyStats();
   allStats:    ProviderStats = this.emptyStats();
   personStats: PersonStat[]  = [];
+
+  showUploadDropdown: boolean = false;
+  showUrlInput: boolean = false;
+  excelUrl: string = '';
+  isLoadingFromUrl: boolean = false;
+  urlErrorMessage: string = '';
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.upload-dropdown-wrap')) {
+      this.showUploadDropdown = false;
+    }
+  }
 
   emptyStats(): ProviderStats {
     return { totalTests: 0, avgUpload: 0, avgDownload: 0, noSignal: 0, weakSignal: 0 };
@@ -195,6 +195,50 @@ kmlLayers: KmlLayerConfig[] = [
     });
   }
 
+  async uploadFromLocalFile(): Promise<void> {
+    const file = await pickExcelFile();
+    if (!file) return;
+    const rows = await readExcelFile<ConnectivityData>(file);
+    this.allData = [...rows, ...this.allData];
+    this.refreshTable();
+  }
+
+  toggleUrlInput(): void {
+    this.showUrlInput    = !this.showUrlInput;
+    this.excelUrl        = '';
+    this.urlErrorMessage = '';
+  }
+
+  async uploadFromUrl(): Promise<void> {
+    if (!this.excelUrl.trim()) {
+      this.urlErrorMessage = 'Please enter a valid URL.';
+      return;
+    }
+
+    this.isLoadingFromUrl = true;
+    this.urlErrorMessage  = '';
+
+    try {
+      const rows = await readExcelFromUrl<ConnectivityData>(this.excelUrl.trim());
+      this.allData = [...rows, ...this.allData];
+      this.refreshTable();
+      this.showUrlInput = false;
+      this.excelUrl     = '';
+    } catch (error) {
+      this.urlErrorMessage = 'Failed to load file.';
+      console.error(error);
+    } finally {
+      this.isLoadingFromUrl = false;
+    }
+  }
+
+  private refreshTable(): void {
+    this.buildDropdownLists();
+    this.buildDateList();
+    this.buildProviderList();
+    this.applyFilterAndSort();
+  }
+
   buildDateList(): void {
     const seen = new Set<string>();
     for (const item of this.allData) {
@@ -257,9 +301,7 @@ kmlLayers: KmlLayerConfig[] = [
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
 
-      const inRegion = this.allData.filter(d =>
-        allowed.includes(d.province?.trim() ?? '')
-      );
+      const inRegion = this.allData.filter(d => allowed.includes(d.province?.trim() ?? ''));
       this.filteredCityList = [...new Set(
         inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[]
       )].sort();
@@ -405,9 +447,7 @@ kmlLayers: KmlLayerConfig[] = [
       const col = this.sortColumn;
       const dir = this.sortDirection === 'asc' ? 1 : -1;
       result.sort((a, b) => {
-        if (col === 'id') {
-          return (Number(a.id) - Number(b.id)) * dir;
-        }
+        if (col === 'id') return (Number(a.id) - Number(b.id)) * dir;
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
         const aNum = parseFloat(aVal);
@@ -421,7 +461,7 @@ kmlLayers: KmlLayerConfig[] = [
 
     this.filteredData = result;
     this.applyPagination();
-    this.computeStats(); 
+    this.computeStats();
   }
 
   private extractPeriod(timeStr: string): string {
@@ -434,11 +474,7 @@ kmlLayers: KmlLayerConfig[] = [
     if (!timeStr) return { hour: '--', minute: '--', period: '' };
     const match = timeStr.trim().toLowerCase().match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/);
     if (!match) return { hour: timeStr, minute: '', period: '' };
-    return {
-      hour:   match[1],
-      minute: match[2],
-      period: match[3].toUpperCase()
-    };
+    return { hour: match[1], minute: match[2], period: match[3].toUpperCase() };
   }
 
   onServiceProviderClick(): void {
