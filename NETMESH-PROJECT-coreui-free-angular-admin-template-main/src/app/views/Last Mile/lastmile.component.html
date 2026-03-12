@@ -127,7 +127,7 @@
             <ng-template #noPersonData><div class="empty-person">No data available</div></ng-template>
           </div>
         </div>
-
+        
       </div>
     </div>
 
@@ -144,6 +144,23 @@
   </div>
 
   <div *ngIf="showMap" class="map-section">
+    <div class="coord-jump-panel">
+      <input
+        type="text"
+        class="search-input coord-input"
+        placeholder="Latitude (e.g. 13.62)"
+        [(ngModel)]="coordLat"
+      />
+      <input
+        type="text"
+        class="search-input coord-input"
+        placeholder="Longitude (e.g. 123.18)"
+        [(ngModel)]="coordLng"
+      />
+      <button class="btn-add" (click)="flyToInputCoordinates()">Go to Coordinates</button>
+      <span class="coord-error"   *ngIf="coordErrorMessage">⚠ {{ coordErrorMessage }}</span>
+      <span class="coord-success" *ngIf="coordSuccessMessage">✓ {{ coordSuccessMessage }}</span>
+    </div>
     <app-map-viewer
       [kmlLayers]="kmlLayers"
       [center]="[12.8797, 121.7740]"
@@ -296,7 +313,7 @@
               </span>
             </span>
           </th>
-          
+
           <th (click)="sortBy('serviceUptime')"
               [class.col-active]="getColSort('serviceUptime')"
               [class.col-asc]="getColSort('serviceUptime') === 'asc'"
@@ -352,4 +369,45 @@
     </div>
   </div>
 
+</div>
+
+<div class="upload-summary-overlay" *ngIf="showUploadSummary && !isLoadingFromUrl" (click)="closeUploadSummary()">
+  <div class="upload-summary-modal" (click)="$event.stopPropagation()">
+    <div class="upload-summary-header">
+      <span class="upload-summary-title">Upload Summary</span>
+      <button class="upload-summary-close" (click)="closeUploadSummary()">✕</button>
+    </div>
+    <div class="upload-summary-body" *ngIf="uploadSummary">
+      <div class="upload-summary-stats">
+        <div class="upload-stat-item upload-stat-total">
+          <span class="upload-stat-number">{{ uploadSummary.totalRows }}</span>
+          <span class="upload-stat-label">Total Rows</span>
+        </div>
+        <div class="upload-stat-item upload-stat-success">
+          <span class="upload-stat-number">{{ uploadSummary.successCount }}</span>
+          <span class="upload-stat-label">Successful</span>
+        </div>
+        <div class="upload-stat-item upload-stat-failed">
+          <span class="upload-stat-number">{{ uploadSummary.failedCount }}</span>
+          <span class="upload-stat-label">Failed</span>
+        </div>
+      </div>
+      <div class="upload-all-success" *ngIf="uploadSummary.failedCount === 0">
+        <span class="upload-success-icon">✓</span>
+        All records were uploaded successfully.
+      </div>
+      <div class="upload-failed-section" *ngIf="uploadSummary.failedCount > 0">
+        <div class="upload-failed-heading">Failed Records</div>
+        <div class="upload-failed-list">
+          <div class="upload-failed-row" *ngFor="let row of uploadSummary.failedRows">
+            <span class="upload-failed-rownum">Row {{ row.rowNumber }}</span>
+            <span class="upload-failed-reason">{{ row.reason }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="upload-summary-footer">
+      <button class="btn-add" (click)="closeUploadSummary()">OK</button>
+    </div>
+  </div>
 </div>

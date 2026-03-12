@@ -1,30 +1,11 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ValidationPageService, ConnectivityData } from './validation-page.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
-import { readExcelFile, pickExcelFile, readExcelFromUrl } from '../../helpers/excel-upload.helper';
-
-const REGION_PROVINCE_MAP: Record<string, string[]> = {
-  'NCR - Metro Manila':              ['Metro Manila'],
-  'CAR - Cordillera':                ['Abra', 'Apayao', 'Benguet', 'Ifugao', 'Kalinga', 'Mountain Province'],
-  'Region I - Ilocos Region':        ['Ilocos Norte', 'Ilocos Sur', 'La Union', 'Pangasinan'],
-  'Region II - Cagayan Valley':      ['Batanes', 'Cagayan', 'Isabela', 'Nueva Vizcaya', 'Quirino'],
-  'Region III - Central Luzon':      ['Aurora', 'Bataan', 'Bulacan', 'Nueva Ecija', 'Pampanga', 'Tarlac', 'Zambales'],
-  'Region IV-A - CALABARZON':        ['Batangas', 'Cavite', 'Laguna', 'Quezon', 'Rizal'],
-  'Region IV-B - MIMAROPA':          ['Marinduque', 'Occidental Mindoro', 'Oriental Mindoro', 'Palawan', 'Romblon'],
-  'Region V - Bicol Region':         ['Albay', 'Camarines Norte', 'Camarines Sur', 'Catanduanes', 'Masbate', 'Sorsogon'],
-  'Region VI - Western Visayas':     ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
-  'Region VII - Central Visayas':    ['Bohol', 'Cebu', 'Negros Oriental', 'Siquijor'],
-  'Region VIII - Eastern Visayas':   ['Biliran', 'Eastern Samar', 'Leyte', 'Northern Samar', 'Samar', 'Southern Leyte'],
-  'Region IX - Zamboanga Peninsula': ['Zamboanga del Norte', 'Zamboanga del Sur', 'Zamboanga Sibugay'],
-  'Region X - Northern Mindanao':    ['Bukidnon', 'Camiguin', 'Lanao del Norte', 'Misamis Occidental', 'Misamis Oriental'],
-  'Region XI - Davao Region':        ['Davao de Oro', 'Davao del Norte', 'Davao del Sur', 'Davao Occidental', 'Davao Oriental'],
-  'Region XII - SOCCSKSARGEN':       ['Cotabato', 'Sarangani', 'South Cotabato', 'Sultan Kudarat'],
-  'Region XIII - Caraga':            ['Agusan del Norte', 'Agusan del Sur', 'Dinagat Islands', 'Surigao del Norte', 'Surigao del Sur'],
-  'BARMM':                           ['Basilan', 'Lanao del Sur', 'Maguindanao del Norte', 'Maguindanao del Sur', 'Sulu', 'Tawi-Tawi'],
-};
+import { readExcelFile, pickExcelFile, readExcelFromUrl, readExcelFileWithSummary, readExcelFromUrlWithSummary, FailedRow } from '../../helpers/excel-upload.helper';
+import { REGION_PROVINCE_MAP, MapCenter } from '../../helpers/coordinate.helper';
 
 interface ProviderStats {
   totalTests: number;
@@ -39,6 +20,13 @@ interface PersonStat {
   downloadDataSize: number;
 }
 
+export interface UploadSummary {
+  totalRows: number;
+  successCount: number;
+  failedCount: number;
+  failedRows: FailedRow[];
+}
+
 @Component({
   selector: 'app-validation-page',
   standalone: true,
@@ -48,9 +36,15 @@ interface PersonStat {
 })
 export class ValidationPageComponent implements OnInit {
 
+  @ViewChild(MapViewerComponent) mapViewer!: MapViewerComponent;
+
   allData: ConnectivityData[] = [];
   filteredData: ConnectivityData[] = [];
   pagedData: ConnectivityData[] = [];
+
+  dynamicColumns: string[] = [];
+  dynamicSortColumn: string | null = null;
+  dynamicSortDirection: 'asc' | 'desc' | null = null;
 
   searchTerm: string = '';
   selectedRegion: string = '';
@@ -72,10 +66,10 @@ export class ValidationPageComponent implements OnInit {
   totalPages: number = 1;
   pageSizeOptions: number[] = [10, 25, 50, 100];
 
-  showMap = false;
+  showMap: boolean = false;
 
   kmlLayers: KmlLayerConfig[] = [
-    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: true  },
+    { name: 'Regions',        url: 'assets/kmz/gadm41_PHL_1.kmz', color: '#a78bfa', enabled: false },
     { name: 'Provinces',      url: 'assets/kmz/gadm41_PHL_2.kmz', color: '#34d399', enabled: false },
     { name: 'Municipalities', url: 'assets/kmz/gadm41_PHL_3.kmz', color: '#fb923c', enabled: false },
   ];
@@ -123,12 +117,62 @@ export class ValidationPageComponent implements OnInit {
   isLoadingFromUrl: boolean = false;
   urlErrorMessage: string = '';
 
+  coordLat: string = '';
+  coordLng: string = '';
+  coordErrorMessage: string = '';
+  coordSuccessMessage: string = '';
+
+  showUploadSummary: boolean = false;
+  uploadSummary: UploadSummary | null = null;
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.upload-dropdown-wrap')) {
       this.showUploadDropdown = false;
     }
+  }
+
+  constructor(
+    private router: Router,
+    private validationPageService: ValidationPageService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  private buildDynamicColumns(): void {
+    const seen = new LinkedSet<string>();
+    for (const row of this.allData) {
+      for (const key of Object.keys(row as any)) {
+        seen.add(key);
+      }
+    }
+    this.dynamicColumns = seen.toArray();
+  }
+
+  getCellValue(row: any, col: string): any {
+    const val = row[col];
+    if (val === undefined || val === null || val === '') return '—';
+    return val;
+  }
+
+  sortByDynamic(col: string): void {
+    if (this.dynamicSortColumn === col) {
+      if (this.dynamicSortDirection === 'asc') {
+        this.dynamicSortDirection = 'desc';
+      } else if (this.dynamicSortDirection === 'desc') {
+        this.dynamicSortColumn = null;
+        this.dynamicSortDirection = null;
+      }
+    } else {
+      this.dynamicSortColumn = col;
+      this.dynamicSortDirection = 'asc';
+    }
+    this.currentPage = 1;
+    this.applyFilterAndSort();
   }
 
   emptyStats(): ProviderStats {
@@ -174,16 +218,11 @@ export class ValidationPageComponent implements OnInit {
     this.personStats = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  constructor(private router: Router, private validationPageService: ValidationPageService) {}
-
-  ngOnInit(): void {
-    this.loadData();
-  }
-
   loadData(): void {
     this.validationPageService.getData().subscribe({
       next: (data: ConnectivityData[]) => {
         this.allData = data;
+        this.buildDynamicColumns();
         this.buildDropdownLists();
         this.buildDateList();
         this.buildProviderList();
@@ -198,15 +237,37 @@ export class ValidationPageComponent implements OnInit {
   async uploadFromLocalFile(): Promise<void> {
     const file = await pickExcelFile();
     if (!file) return;
-    const rows = await readExcelFile<ConnectivityData>(file);
-    this.allData = [...rows, ...this.allData];
+
+    const result = await readExcelFileWithSummary<ConnectivityData>(file);
+    this.allData = [...result.successRows, ...this.allData];
     this.refreshTable();
+
+    this.uploadSummary = {
+      totalRows:    result.successRows.length + result.failedRows.length,
+      successCount: result.successRows.length,
+      failedCount:  result.failedRows.length,
+      failedRows:   result.failedRows,
+    };
+    this.showUploadSummary = true;
+    this.cdr.detectChanges();
   }
 
   toggleUrlInput(): void {
     this.showUrlInput    = !this.showUrlInput;
     this.excelUrl        = '';
     this.urlErrorMessage = '';
+  }
+
+  private convertToDirectDownloadUrl(url: string): string {
+    const googleSheetsMatch = url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    if (googleSheetsMatch) {
+      return `https://docs.google.com/spreadsheets/d/${googleSheetsMatch[1]}/export?format=xlsx`;
+    }
+    const googleDriveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (googleDriveMatch) {
+      return `https://drive.google.com/uc?export=download&id=${googleDriveMatch[1]}`;
+    }
+    return url;
   }
 
   async uploadFromUrl(): Promise<void> {
@@ -219,20 +280,37 @@ export class ValidationPageComponent implements OnInit {
     this.urlErrorMessage  = '';
 
     try {
-      const rows = await readExcelFromUrl<ConnectivityData>(this.excelUrl.trim());
-      this.allData = [...rows, ...this.allData];
+      const downloadUrl = this.convertToDirectDownloadUrl(this.excelUrl.trim());
+      const result = await readExcelFromUrlWithSummary<ConnectivityData>(downloadUrl);
+      this.allData = [...result.successRows, ...this.allData];
       this.refreshTable();
       this.showUrlInput = false;
       this.excelUrl     = '';
+
+      this.uploadSummary = {
+        totalRows:    result.successRows.length + result.failedRows.length,
+        successCount: result.successRows.length,
+        failedCount:  result.failedRows.length,
+        failedRows:   result.failedRows,
+      };
+      this.showUploadSummary = true;
+      this.cdr.detectChanges();
     } catch (error) {
-      this.urlErrorMessage = 'Failed to load file.';
+      this.urlErrorMessage = 'Failed to load file. Please check the URL and try again.';
       console.error(error);
     } finally {
       this.isLoadingFromUrl = false;
+      this.cdr.detectChanges();
     }
   }
 
+  closeUploadSummary(): void {
+    this.showUploadSummary = false;
+    this.uploadSummary = null;
+  }
+
   private refreshTable(): void {
+    this.buildDynamicColumns();   
     this.buildDropdownLists();
     this.buildDateList();
     this.buildProviderList();
@@ -290,6 +368,24 @@ export class ValidationPageComponent implements OnInit {
     this.filteredBarangayList = [...this.barangayList];
   }
 
+  private zoomMap(): void {
+    if (!this.mapViewer) return;
+    const [lat, lng, zoom] = MapCenter(this.selectedCity, this.selectedProvince, this.selectedRegion);
+    this.mapViewer.flyTo([lat, lng], zoom);
+  }
+
+  flyToInputCoordinates(): void {
+    this.coordErrorMessage   = '';
+    this.coordSuccessMessage = '';
+    const result = this.mapViewer?.flyToCoordinates(this.coordLat.trim(), this.coordLng.trim());
+    if (!result || !result.success) {
+      this.coordErrorMessage = result?.error ?? 'Unable to navigate. Please enter valid decimal coordinates.';
+    } else {
+      this.coordSuccessMessage = `Flying to (${this.coordLat.trim()}, ${this.coordLng.trim()})`;
+      setTimeout(() => this.coordSuccessMessage = '', 3000);
+    }
+  }
+
   onRegionChange(): void {
     this.selectedProvince  = '';
     this.selectedCity      = '';
@@ -298,16 +394,17 @@ export class ValidationPageComponent implements OnInit {
     this.filteredBarangayList = [];
 
     if (this.selectedRegion) {
+      const regionsLayer = this.kmlLayers.find(l => l.name === 'Regions');
+      if (regionsLayer && !regionsLayer.enabled) { regionsLayer.enabled = true; this.mapViewer?.toggleLayer(regionsLayer); }
+    }
+
+    if (this.selectedRegion) {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
 
       const inRegion = this.allData.filter(d => allowed.includes(d.province?.trim() ?? ''));
-      this.filteredCityList = [...new Set(
-        inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[]
-      )].sort();
-      this.filteredBarangayList = [...new Set(
-        inRegion.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-      )].sort();
+      this.filteredCityList = [...new Set(inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(inRegion.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     } else {
       this.filteredProvinceList = [...this.provinceList];
       this.filteredCityList     = [...this.cityList];
@@ -316,11 +413,17 @@ export class ValidationPageComponent implements OnInit {
 
     this.currentPage = 1;
     this.applyFilterAndSort();
+    this.zoomMap();
   }
 
   onProvinceChange(): void {
     this.selectedCity     = '';
     this.selectedBarangay = '';
+
+    if (this.selectedProvince) {
+      const provincesLayer = this.kmlLayers.find(l => l.name === 'Provinces');
+      if (provincesLayer && !provincesLayer.enabled) { provincesLayer.enabled = true; this.mapViewer?.toggleLayer(provincesLayer); }
+    }
 
     const base = this.allData.filter(d =>
       (!this.selectedRegion || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? ''))
@@ -328,27 +431,25 @@ export class ValidationPageComponent implements OnInit {
 
     if (this.selectedProvince) {
       const inProv = base.filter(d => d.province?.trim() === this.selectedProvince);
-      this.filteredCityList = [...new Set(
-        inProv.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[]
-      )].sort();
-      this.filteredBarangayList = [...new Set(
-        inProv.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-      )].sort();
+      this.filteredCityList     = [...new Set(inProv.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(inProv.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     } else {
-      this.filteredCityList = [...new Set(
-        base.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[]
-      )].sort();
-      this.filteredBarangayList = [...new Set(
-        base.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-      )].sort();
+      this.filteredCityList     = [...new Set(base.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     }
 
     this.currentPage = 1;
     this.applyFilterAndSort();
+    this.zoomMap();
   }
 
   onCityChange(): void {
     this.selectedBarangay = '';
+
+    if (this.selectedCity) {
+      const municipalitiesLayer = this.kmlLayers.find(l => l.name === 'Municipalities');
+      if (municipalitiesLayer && !municipalitiesLayer.enabled) { municipalitiesLayer.enabled = true; this.mapViewer?.toggleLayer(municipalitiesLayer); }
+    }
 
     const base = this.allData.filter(d => {
       const regionOk   = !this.selectedRegion   || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? '');
@@ -357,27 +458,31 @@ export class ValidationPageComponent implements OnInit {
       return regionOk && provinceOk && cityOk;
     });
 
-    this.filteredBarangayList = [...new Set(
-      base.map(d => d.barangay?.trim()).filter(Boolean) as string[]
-    )].sort();
-
+    this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     this.currentPage = 1;
     this.applyFilterAndSort();
+    this.zoomMap();
   }
 
   onBarangayChange(): void {
     this.currentPage = 1;
     this.applyFilterAndSort();
+    if (!this.mapViewer) return;
+    if (this.selectedBarangay) {
+      const row = this.filteredData.find(d =>
+        d.barangay?.trim() === this.selectedBarangay && (d as any).latitude && (d as any).longitude
+      );
+      if (row) {
+        const lat = parseFloat((row as any).latitude);
+        const lng = parseFloat((row as any).longitude);
+        if (isFinite(lat) && isFinite(lng)) { this.mapViewer.flyTo([lat, lng], 14); return; }
+      }
+    }
+    this.zoomMap();
   }
 
   hasActiveFilters(): boolean {
-    return !!(
-      this.selectedRegion   ||
-      this.selectedProvince ||
-      this.selectedCity     ||
-      this.selectedBarangay ||
-      this.searchTerm
-    );
+    return !!(this.selectedRegion || this.selectedProvince || this.selectedCity || this.selectedBarangay || this.searchTerm);
   }
 
   clearFilters(): void {
@@ -391,10 +496,16 @@ export class ValidationPageComponent implements OnInit {
     this.filteredBarangayList = [...this.barangayList];
     this.currentPage = 1;
     this.applyFilterAndSort();
+
+    this.kmlLayers.forEach(layer => {
+      if (layer.enabled) { layer.enabled = false; this.mapViewer?.toggleLayer(layer); }
+    });
+
+    if (this.mapViewer) this.mapViewer.flyTo([12.8797, 121.7740], 6);
   }
 
   private applyFilterAndSort(): void {
-    let result = [...this.allData];
+    let result = [...this.allData] as any[];
 
     if (this.selectedRegion) {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
@@ -413,9 +524,7 @@ export class ValidationPageComponent implements OnInit {
       result = result.filter(item => item.validationDate?.trim() === this.activeDate);
     }
     if (this.activePeriod) {
-      result = result.filter(item =>
-        this.extractPeriod(item.validationTime) === this.activePeriod
-      );
+      result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
     }
     if (this.activeProvider) {
       result = result.filter(item =>
@@ -426,28 +535,16 @@ export class ValidationPageComponent implements OnInit {
     const term = this.searchTerm.toLowerCase().trim();
     if (term) {
       result = result.filter(item =>
-        String(item.id             ?? '').toLowerCase().includes(term) ||
-        (item.region               ?? '').toLowerCase().includes(term) ||
-        (item.province             ?? '').toLowerCase().includes(term) ||
-        (item.cityMunicipality     ?? '').toLowerCase().includes(term) ||
-        (item.barangay             ?? '').toLowerCase().includes(term) ||
-        (item.location             ?? '').toLowerCase().includes(term) ||
-        (item.validationDate       ?? '').toLowerCase().includes(term) ||
-        (item.validationTime       ?? '').toLowerCase().includes(term) ||
-        (item.technology           ?? '').toLowerCase().includes(term) ||
-        (item.serviceProvider      ?? '').toLowerCase().includes(term) ||
-        String(item.upload         ?? '').toLowerCase().includes(term) ||
-        String(item.download       ?? '').toLowerCase().includes(term) ||
-        String(item.signalStrength ?? '').toLowerCase().includes(term) ||
-        (item.collectedBy          ?? '').toLowerCase().includes(term)
+        Object.values(item).some(val =>
+          String(val ?? '').toLowerCase().includes(term)
+        )
       );
     }
 
-    if (this.sortColumn && this.sortDirection) {
-      const col = this.sortColumn;
-      const dir = this.sortDirection === 'asc' ? 1 : -1;
+    if (this.dynamicSortColumn && this.dynamicSortDirection) {
+      const col = this.dynamicSortColumn;
+      const dir = this.dynamicSortDirection === 'asc' ? 1 : -1;
       result.sort((a, b) => {
-        if (col === 'id') return (Number(a.id) - Number(b.id)) * dir;
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
         const aNum = parseFloat(aVal);
@@ -459,7 +556,7 @@ export class ValidationPageComponent implements OnInit {
       });
     }
 
-    this.filteredData = result;
+    this.filteredData = result as ConnectivityData[];
     this.applyPagination();
     this.computeStats();
   }
@@ -499,47 +596,11 @@ export class ValidationPageComponent implements OnInit {
   }
 
   sortBy(column: keyof ConnectivityData): void {
-    if (column === 'serviceProvider') { this.onServiceProviderClick(); return; }
-    if (column === 'validationDate')  { this.onValidationDateClick(); return; }
-    if (column === 'validationTime')  { this.onValidationTimeClick(); return; }
-
-    if (column === 'upload' || column === 'download') {
-      if (this.sortColumn === column) {
-        if (this.sortDirection === 'desc') {
-          this.sortDirection = 'asc';
-        } else {
-          this.sortColumn    = null;
-          this.sortDirection = null;
-        }
-      } else {
-        this.sortColumn    = column;
-        this.sortDirection = 'desc';
-      }
-      this.currentPage = 1;
-      this.applyFilterAndSort();
-      return;
-    }
-
-    if (this.sortColumn === column) {
-      if (this.sortDirection === 'asc') {
-        this.sortDirection = 'desc';
-      } else {
-        this.sortColumn    = null;
-        this.sortDirection = null;
-      }
-    } else {
-      this.sortColumn    = column;
-      this.sortDirection = 'asc';
-    }
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.sortByDynamic(column as string);
   }
 
   getColSort(column: keyof ConnectivityData): 'asc' | 'desc' | null {
-    if (column === 'serviceProvider') return this.activeProviderIndex >= 0 ? 'asc' : null;
-    if (column === 'validationDate')  return this.activeDateIndex >= 0 ? 'asc' : null;
-    if (column === 'validationTime')  return this.activePeriodIndex >= 0 ? 'asc' : null;
-    return this.sortColumn === column ? this.sortDirection : null;
+    return this.dynamicSortColumn === (column as string) ? this.dynamicSortDirection : null;
   }
 
   get dateHeaderLabel():     string { return this.activeDateIndex     >= 0 ? this.dateList[this.activeDateIndex]         : 'Validation Date'; }
@@ -560,7 +621,7 @@ export class ValidationPageComponent implements OnInit {
   }
 
   onPageSizeChange(): void {
-    this.pageSize = Number(this.pageSize);
+    this.pageSize    = Number(this.pageSize);
     this.currentPage = 1;
     this.applyPagination();
   }
@@ -584,11 +645,13 @@ export class ValidationPageComponent implements OnInit {
     return pages;
   }
 
-  onSearch(): void {
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-  }
-
-  goBack(): void { this.router.navigate(['/connectivity-dashboard']); }
+  onSearch(): void { this.currentPage = 1; this.applyFilterAndSort(); }
+  goBack(): void   { this.router.navigate(['/connectivity-dashboard']); }
   onAddNew(): void { console.log('Add New clicked'); }
+}
+
+class LinkedSet<T> {
+  private map = new Map<T, true>();
+  add(val: T): void { this.map.set(val, true); }
+  toArray(): T[]    { return Array.from(this.map.keys()); }
 }

@@ -82,3 +82,15 @@
   margin-top: 8px;
   text-align: center;
 }
+
+.kml-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.kml-filename {
+  font-size: 9px;
+  color: #64748b;
+  font-style: normal;
+}
