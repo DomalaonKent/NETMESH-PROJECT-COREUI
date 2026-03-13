@@ -1,4 +1,7 @@
-import {Component, OnDestroy, AfterViewInit, Input, ElementRef, ViewChild, OnChanges, SimpleChanges} from '@angular/core';
+import {
+  Component, OnDestroy, AfterViewInit, Input, Output, EventEmitter,
+  ElementRef, ViewChild, OnChanges, SimpleChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as Leaf from 'leaflet';
@@ -23,14 +26,22 @@ export type { KmlLayerConfig };
 export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
 
-  @Input() kmlLayers: KmlLayerConfig[] = [];
-  @Input() center: [number, number] = [12.8797, 121.7740];
-  @Input() zoom: number = 6;
+  @Input()  kmlLayers: KmlLayerConfig[] = [];
+  @Input()  center: [number, number]    = [12.8797, 121.7740];
+  @Input()  zoom: number                = 6;
+  @Output() markersCleared = new EventEmitter<void>();
 
-  private map!: L.Map;
-  private layerMap = new Map<string, L.Layer>();
+  private map!: Leaf.Map;
+  private layerMap   = new Map<string, Leaf.Layer>();
   private pendingFlyTo: { center: [number, number]; zoom: number } | null = null;
-  isLoading = false;
+  private markerLayer: Leaf.LayerGroup = Leaf.layerGroup();
+
+  markerCount:    number  = 0;
+  isLoading:      boolean = false;
+
+  detectedLatCol: string = '';
+  detectedLngCol: string = '';
+  skippedCount:   number = 0;
 
   ngAfterViewInit(): void { setTimeout(() => this.initMap(), 0); }
 
@@ -58,14 +69,15 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
     if (this.map) flyToFeature(this.map, cityName, 'city', fallbackProvince);
   }
 
-  flyToCoordinates(rawLat: string | number, rawLng: string | number): { success: boolean; error: string | null } {
+  flyToCoordinates(
+    rawLat: string | number,
+    rawLng: string | number
+  ): { success: boolean; error: string | null } {
     const result = parseCoordinates(rawLat, rawLng);
-
     if (result.error) {
       console.warn('[MapViewer] flyToCoordinates failed:', result.error);
       return { success: false, error: result.error };
     }
-
     const center: [number, number] = [result.lat!, result.lng!];
     if (this.map) {
       this.map.flyTo(center, 14, { duration: 1.2 });
@@ -75,17 +87,86 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
     return { success: true, error: null };
   }
 
+  // ✅ FIXED: Single implementation with optional meta param (no broken overload)
+  plotMarkers(
+    points: { lat: number; lng: number; label?: string }[],
+    meta?: { latCol: string; lngCol: string; totalRows: number }
+  ): void {
+    this.markerLayer.clearLayers();
+    this.markerCount    = 0;
+    this.detectedLatCol = meta?.latCol  ?? '';
+    this.detectedLngCol = meta?.lngCol  ?? '';
+    this.skippedCount   = meta ? (meta.totalRows - points.length) : 0;
+
+    if (!points.length) return;
+
+    const bounds: [number, number][] = [];
+
+    for (const pt of points) {
+      const pinIcon = Leaf.icon({
+        iconUrl:     'assets/images/location.png',
+        iconSize:    [32, 32],
+        iconAnchor:  [16, 32],
+        popupAnchor: [0,  -36],
+        className:   'custom-pin-icon',
+      });
+
+      const marker = Leaf.marker([pt.lat, pt.lng], { icon: pinIcon });
+
+      marker.bindPopup(`
+        <div style="font-family:inherit;min-width:110px">
+          ${pt.label
+            ? `<div style="font-weight:700;color:#e2e8f0;
+                          font-size:12px;margin-bottom:4px;
+                          padding-bottom:4px;
+                          border-bottom:1px solid rgba(56,189,248,0.2)">
+                 ${pt.label}
+               </div>`
+            : ''}
+          <div style="font-size:10.5px;color:#64748b;letter-spacing:0.3px">
+            ${pt.lat.toFixed(5)},&nbsp;${pt.lng.toFixed(5)}
+          </div>
+        </div>
+      `);
+
+      marker.addTo(this.markerLayer);
+      bounds.push([pt.lat, pt.lng]);
+    }
+
+    this.markerCount = points.length;
+
+    if (bounds.length > 0) {
+      this.map.fitBounds(bounds as Leaf.LatLngBoundsExpression, {
+        padding: [40, 40],
+        maxZoom: 14,
+      });
+    }
+  }
+
+  clearMarkers(): void {
+    this.markerLayer.clearLayers();
+    this.markerCount    = 0;
+    this.detectedLatCol = '';
+    this.detectedLngCol = '';
+    this.skippedCount   = 0;
+  }
+
+  onClearMarkers(): void {
+    this.clearMarkers();
+    this.markersCleared.emit();
+  }
+
   private initMap(): void {
     delete (Leaf.Icon.Default.prototype as any)._getIconUrl;
     Leaf.Icon.Default.mergeOptions({
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     });
 
     this.map = Leaf.map(this.mapContainer.nativeElement, {
-      center: this.center,
-      zoom: this.zoom,
+      center:      this.center,
+      zoom:        this.zoom,
       zoomControl: true,
     });
 
@@ -93,6 +174,8 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(this.map);
+
+    this.markerLayer.addTo(this.map);
 
     this.reloadAllLayers();
     setTimeout(() => this.map.invalidateSize(), 200);
@@ -109,7 +192,9 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.layerMap.forEach(layer => this.map.removeLayer(layer));
     this.layerMap.clear();
     const order  = ['Country', 'Regions', 'Provinces', 'Municipalities'];
-    const sorted = [...this.kmlLayers].sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+    const sorted = [...this.kmlLayers].sort(
+      (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
+    );
     for (const kml of sorted) { if (kml.enabled) this.loadLayer(kml); }
   }
 
@@ -128,7 +213,6 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private async loadLayer(config: KmlLayerConfig): Promise<void> {
-
     this.isLoading = true;
     try {
       if (config.url.toLowerCase().endsWith('.kmz')) {
@@ -151,33 +235,42 @@ export class MapViewerComponent implements AfterViewInit, OnDestroy, OnChanges {
 
     const customLayer = Leaf.geoJson(undefined, {
       style: () => style,
-      onEachFeature: (feature: any, featureLayer: L.Layer) => {
-        const name = feature.properties?.name || feature.properties?.NAME_1
-          || feature.properties?.NAME_2 || feature.properties?.NAME_3 || '';
+      onEachFeature: (feature: any, featureLayer: Leaf.Layer) => {
+        const name =
+          feature.properties?.name    ||
+          feature.properties?.NAME_1  ||
+          feature.properties?.NAME_2  ||
+          feature.properties?.NAME_3  || '';
         if (name) {
           (featureLayer as any).bindPopup(`
             <div style="font-family:sans-serif;padding:6px 4px;min-width:120px">
               <strong style="color:#0f172a;font-size:13px">${name}</strong>
               <div style="font-size:11px;color:#475569;margin-top:3px;padding-top:3px;
-                   border-top:1px solid #e2e8f0">${kml.name}</div>
+                          border-top:1px solid #e2e8f0">${kml.name}</div>
             </div>
           `);
           (featureLayer as any).on('mouseover', function (this: any) {
             this.setStyle({ weight: (style.weight ?? 1) + 1.5, fillOpacity: 0.15 });
           });
-          (featureLayer as any).on('mouseout', function (this: any) { this.setStyle(style); });
+          (featureLayer as any).on('mouseout', function (this: any) {
+            this.setStyle(style);
+          });
         }
       }
     });
 
     const layer = omnivore.kml(kml.url, null, customLayer);
     layer.on('ready', () => { this.layerMap.set(kml.name, layer); this.isLoading = false; });
-    layer.on('error', (e: any) => { console.error(`Failed to load KML: ${kml.url}`, e); this.isLoading = false; });
+    layer.on('error', (e: any) => {
+      console.error(`Failed to load KML: ${kml.url}`, e);
+      this.isLoading = false;
+    });
     layer.addTo(this.map);
   }
 
   ngOnDestroy(): void { if (this.map) this.map.remove(); }
+
   getFilename(url: string): string {
-  return url.split('/').pop() || url;
-}
+    return url.split('/').pop() || url;
+  }
 }

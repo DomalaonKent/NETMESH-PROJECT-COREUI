@@ -6,6 +6,7 @@ import { LastMileService, LastMileData } from './lastmile.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 import { readExcelFile, pickExcelFile, readExcelFromUrl, readExcelFileWithSummary, readExcelFromUrlWithSummary, FailedRow } from '../../helpers/excel-upload.helper';
 import { REGION_PROVINCE_MAP, MapCenter } from '../../helpers/coordinate.helper';
+import { ExcelCoordUploadComponent, PlotResult } from '../excel-coord-upload/excel-coord-upload.component';
 
 interface ProviderStats {
   totalTests: number;
@@ -27,10 +28,16 @@ export interface UploadSummary {
   failedRows: FailedRow[];
 }
 
+interface CoordPoint {
+  lat: number;
+  lng: number;
+  label?: string;
+}
+
 @Component({
   selector: 'app-last-mile',
   standalone: true,
-  imports: [CommonModule, FormsModule, MapViewerComponent],
+  imports: [CommonModule, FormsModule, MapViewerComponent, ExcelCoordUploadComponent],
   templateUrl: './lastmile.component.html',
   styleUrls: ['./lastmile.component.scss']
 })
@@ -112,6 +119,8 @@ export class LastMileComponent implements OnInit {
   showUploadSummary: boolean = false;
   uploadSummary: UploadSummary | null = null;
 
+  showCoordUpload: boolean = false;
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -177,6 +186,39 @@ export class LastMileComponent implements OnInit {
     });
   }
 
+  private extractCoordPoints(rows: Record<string, any>[]): CoordPoint[] {
+    if (!rows.length) return [];
+    const keys   = Object.keys(rows[0]);
+    const latKey = keys.find(k => /^(lat(itude)?|y)$/i.test(k.trim()));
+    const lngKey = keys.find(k => /^(lo?ng(itude)?|lon|x)$/i.test(k.trim()));
+    if (!latKey || !lngKey) return [];
+    const points: CoordPoint[] = [];
+    for (const row of rows) {
+      const lat = parseFloat(row[latKey]);
+      const lng = parseFloat(row[lngKey]);
+      if (isNaN(lat) || isNaN(lng))  continue;
+      if (lat < -90  || lat > 90)    continue;
+      if (lng < -180 || lng > 180)   continue;
+      const label: string | undefined =
+        row['barangay'] || row['Barangay'] ||
+        row['location'] || row['Location'] ||
+        row['name']     || row['Name']     ||
+        row['cityMunicipality'] || undefined;
+      points.push({ lat, lng, label });
+    }
+    return points;
+  }
+
+  private plotUploadedCoords(rows: Record<string, any>[]): void {
+    const points = this.extractCoordPoints(rows);
+    if (!points.length) return;
+    this.showMap = true;
+    setTimeout(() => {
+      this.mapViewer?.plotMarkers(points);
+      this.cdr.detectChanges();
+    }, 350);
+  }
+
   async uploadFromLocalFile(): Promise<void> {
     this.showUploadDropdown = false;
     const file = await pickExcelFile();
@@ -185,6 +227,7 @@ export class LastMileComponent implements OnInit {
     const result = await readExcelFileWithSummary<LastMileData>(file);
     this.allData = [...result.successRows, ...this.allData];
     this.refreshTable();
+    this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
     this.uploadSummary = {
       totalRows:    result.successRows.length + result.failedRows.length,
@@ -226,7 +269,9 @@ export class LastMileComponent implements OnInit {
       this.refreshTable();
       this.showUrlInput = false;
       this.excelUrl     = '';
+      this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
+      this.isLoadingFromUrl = false;
       this.uploadSummary = {
         totalRows:    result.successRows.length + result.failedRows.length,
         successCount: result.successRows.length,
@@ -259,6 +304,22 @@ export class LastMileComponent implements OnInit {
       this.coordSuccessMessage = `Flying to (${this.coordLat.trim()}, ${this.coordLng.trim()})`;
       setTimeout(() => this.coordSuccessMessage = '', 3000);
     }
+  }
+
+  toggleCoordUpload(): void {
+    this.showCoordUpload = !this.showCoordUpload;
+  }
+
+  onExcelCoordPlot(result: PlotResult): void {
+    this.showMap = true;
+    setTimeout(() => {
+      this.mapViewer?.plotMarkers(result.points, result.meta);
+      this.cdr.detectChanges();
+    }, 350);
+  }
+
+  onExcelCoordClear(): void {
+    this.mapViewer?.clearMarkers();
   }
 
   private refreshTable(): void {
@@ -427,6 +488,7 @@ export class LastMileComponent implements OnInit {
     });
 
     if (this.mapViewer) this.mapViewer.flyTo([12.8797, 121.7740], 6);
+    this.mapViewer?.clearMarkers();
   }
 
   private applyFilterAndSort(): void {

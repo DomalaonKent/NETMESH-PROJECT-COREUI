@@ -130,7 +130,7 @@
             <ng-template #noPersonData><div class="empty-person">No data available</div></ng-template>
           </div>
         </div>
-        
+
       </div>
     </div>
 
@@ -163,13 +163,28 @@
         [(ngModel)]="coordLng"
       />
       <button class="btn-add" (click)="flyToInputCoordinates()">Go to Coordinates</button>
-      <span class="coord-error"   *ngIf="coordErrorMessage">⚠ {{ coordErrorMessage }}</span>
+
+      <button class="btn-excel-coord-toggle" (click)="toggleCoordUpload()">
+        {{ showCoordUpload ? '▴ Hide Excel Upload' : '▾ Plot Excel Coordinates' }}
+      </button>
+
+      <span class="coord-error"   *ngIf="coordErrorMessage"> ✕ {{ coordErrorMessage }}</span>
       <span class="coord-success" *ngIf="coordSuccessMessage">✓ {{ coordSuccessMessage }}</span>
     </div>
+
+    <div class="excel-coord-panel" *ngIf="showCoordUpload">
+      <app-excel-coord-upload
+        (plotPoints)="onExcelCoordPlot($event)"
+        (clearPoints)="onExcelCoordClear()">
+      </app-excel-coord-upload>
+    </div>
+
     <app-map-viewer
+      #mapViewer
       [kmlLayers]="kmlLayers"
       [center]="[12.8797, 121.7740]"
-      [zoom]="6">
+      [zoom]="6"
+      (markersCleared)="onExcelCoordClear()">
     </app-map-viewer>
   </div>
 
@@ -292,7 +307,7 @@
               </span>
             </span>
           </th>
-          
+
           <th (click)="sortBy('uptime')"
               [class.col-active]="getColSort('uptime')"
               [class.col-asc]="getColSort('uptime') === 'asc'"

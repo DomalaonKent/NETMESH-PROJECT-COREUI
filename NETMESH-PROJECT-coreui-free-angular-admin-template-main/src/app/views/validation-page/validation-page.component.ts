@@ -6,6 +6,7 @@ import { ValidationPageService, ConnectivityData } from './validation-page.servi
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 import { readExcelFile, pickExcelFile, readExcelFromUrl, readExcelFileWithSummary, readExcelFromUrlWithSummary, FailedRow } from '../../helpers/excel-upload.helper';
 import { REGION_PROVINCE_MAP, MapCenter } from '../../helpers/coordinate.helper';
+import { ExcelCoordUploadComponent, PlotResult } from '../excel-coord-upload/excel-coord-upload.component';
 
 interface ProviderStats {
   totalTests: number;
@@ -27,10 +28,16 @@ export interface UploadSummary {
   failedRows: FailedRow[];
 }
 
+interface CoordPoint {
+  lat: number;
+  lng: number;
+  label?: string;
+}
+
 @Component({
   selector: 'app-validation-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MapViewerComponent],
+  imports: [CommonModule, FormsModule, MapViewerComponent, ExcelCoordUploadComponent],
   templateUrl: './validation-page.component.html',
   styleUrls: ['./validation-page.component.scss']
 })
@@ -76,21 +83,15 @@ export class ValidationPageComponent implements OnInit {
 
   dateList: string[] = [];
   activeDateIndex: number = -1;
-  get activeDate(): string | null {
-    return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null;
-  }
+  get activeDate(): string | null { return this.activeDateIndex >= 0 ? this.dateList[this.activeDateIndex] : null; }
 
   periodList: string[] = ['AM', 'PM'];
   activePeriodIndex: number = -1;
-  get activePeriod(): string | null {
-    return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null;
-  }
+  get activePeriod(): string | null { return this.activePeriodIndex >= 0 ? this.periodList[this.activePeriodIndex] : null; }
 
   providerList: string[] = [];
   activeProviderIndex: number = -1;
-  get activeProvider(): string | null {
-    return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null;
-  }
+  get activeProvider(): string | null { return this.activeProviderIndex >= 0 ? this.providerList[this.activeProviderIndex] : null; }
 
   sortColumn: keyof ConnectivityData | null = null;
   sortDirection: 'asc' | 'desc' | null = null;
@@ -125,6 +126,8 @@ export class ValidationPageComponent implements OnInit {
   showUploadSummary: boolean = false;
   uploadSummary: UploadSummary | null = null;
 
+  showCoordUpload: boolean = false;
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -139,9 +142,7 @@ export class ValidationPageComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.loadData();
-  }
+  ngOnInit(): void { this.loadData(); }
 
   private buildDynamicColumns(): void {
     const seen = new LinkedSet<string>();
@@ -228,10 +229,41 @@ export class ValidationPageComponent implements OnInit {
         this.buildProviderList();
         this.applyFilterAndSort();
       },
-      error: (err: unknown) => {
-        console.error('Failed to load data:', err);
-      }
+      error: (err: unknown) => console.error('Failed to load data:', err)
     });
+  }
+
+  private extractCoordPoints(rows: Record<string, any>[]): CoordPoint[] {
+    if (!rows.length) return [];
+    const keys   = Object.keys(rows[0]);
+    const latKey = keys.find(k => /^(lat(itude)?|y)$/i.test(k.trim()));
+    const lngKey = keys.find(k => /^(lo?ng(itude)?|lon|x)$/i.test(k.trim()));
+    if (!latKey || !lngKey) return [];
+    const points: CoordPoint[] = [];
+    for (const row of rows) {
+      const lat = parseFloat(row[latKey]);
+      const lng = parseFloat(row[lngKey]);
+      if (isNaN(lat) || isNaN(lng))  continue;
+      if (lat < -90  || lat > 90)    continue;
+      if (lng < -180 || lng > 180)   continue;
+      const label: string | undefined =
+        row['barangay'] || row['Barangay'] ||
+        row['location'] || row['Location'] ||
+        row['name']     || row['Name']     ||
+        row['cityMunicipality'] || undefined;
+      points.push({ lat, lng, label });
+    }
+    return points;
+  }
+
+  private plotUploadedCoords(rows: Record<string, any>[]): void {
+    const points = this.extractCoordPoints(rows);
+    if (!points.length) return;
+    this.showMap = true;
+    setTimeout(() => {
+      this.mapViewer?.plotMarkers(points);
+      this.cdr.detectChanges();
+    }, 350);
   }
 
   async uploadFromLocalFile(): Promise<void> {
@@ -241,6 +273,7 @@ export class ValidationPageComponent implements OnInit {
     const result = await readExcelFileWithSummary<ConnectivityData>(file);
     this.allData = [...result.successRows, ...this.allData];
     this.refreshTable();
+    this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
     this.uploadSummary = {
       totalRows:    result.successRows.length + result.failedRows.length,
@@ -275,7 +308,7 @@ export class ValidationPageComponent implements OnInit {
       this.urlErrorMessage = 'Please enter a valid URL.';
       return;
     }
-
+    
     this.isLoadingFromUrl = true;
     this.urlErrorMessage  = '';
 
@@ -286,7 +319,9 @@ export class ValidationPageComponent implements OnInit {
       this.refreshTable();
       this.showUrlInput = false;
       this.excelUrl     = '';
+      this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
+      this.isLoadingFromUrl = false;
       this.uploadSummary = {
         totalRows:    result.successRows.length + result.failedRows.length,
         successCount: result.successRows.length,
@@ -309,8 +344,36 @@ export class ValidationPageComponent implements OnInit {
     this.uploadSummary = null;
   }
 
+  flyToInputCoordinates(): void {
+    this.coordErrorMessage   = '';
+    this.coordSuccessMessage = '';
+    const result = this.mapViewer?.flyToCoordinates(this.coordLat.trim(), this.coordLng.trim());
+    if (!result || !result.success) {
+      this.coordErrorMessage = result?.error ?? 'Unable to navigate. Please enter valid decimal coordinates.';
+    } else {
+      this.coordSuccessMessage = `Flying to (${this.coordLat.trim()}, ${this.coordLng.trim()})`;
+      setTimeout(() => this.coordSuccessMessage = '', 3000);
+    }
+  }
+
+  toggleCoordUpload(): void {
+    this.showCoordUpload = !this.showCoordUpload;
+  }
+
+  onExcelCoordPlot(result: PlotResult): void {
+    this.showMap = true;
+    setTimeout(() => {
+      this.mapViewer?.plotMarkers(result.points, result.meta);
+      this.cdr.detectChanges();
+    }, 350);
+  }
+
+  onExcelCoordClear(): void {
+    this.mapViewer?.clearMarkers();
+  }
+
   private refreshTable(): void {
-    this.buildDynamicColumns();   
+    this.buildDynamicColumns();
     this.buildDropdownLists();
     this.buildDateList();
     this.buildProviderList();
@@ -324,10 +387,7 @@ export class ValidationPageComponent implements OnInit {
       if (d) seen.add(d);
     }
     this.dateList = Array.from(seen).sort((a, b) => {
-      const toMs = (s: string) => {
-        const [m, d, y] = s.split('/');
-        return new Date(+y, +m - 1, +d).getTime();
-      };
+      const toMs = (s: string) => { const [m, d, y] = s.split('/'); return new Date(+y, +m - 1, +d).getTime(); };
       return toMs(a) - toMs(b);
     });
   }
@@ -374,18 +434,6 @@ export class ValidationPageComponent implements OnInit {
     this.mapViewer.flyTo([lat, lng], zoom);
   }
 
-  flyToInputCoordinates(): void {
-    this.coordErrorMessage   = '';
-    this.coordSuccessMessage = '';
-    const result = this.mapViewer?.flyToCoordinates(this.coordLat.trim(), this.coordLng.trim());
-    if (!result || !result.success) {
-      this.coordErrorMessage = result?.error ?? 'Unable to navigate. Please enter valid decimal coordinates.';
-    } else {
-      this.coordSuccessMessage = `Flying to (${this.coordLat.trim()}, ${this.coordLng.trim()})`;
-      setTimeout(() => this.coordSuccessMessage = '', 3000);
-    }
-  }
-
   onRegionChange(): void {
     this.selectedProvince  = '';
     this.selectedCity      = '';
@@ -403,7 +451,7 @@ export class ValidationPageComponent implements OnInit {
       this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
 
       const inRegion = this.allData.filter(d => allowed.includes(d.province?.trim() ?? ''));
-      this.filteredCityList = [...new Set(inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
+      this.filteredCityList     = [...new Set(inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
       this.filteredBarangayList = [...new Set(inRegion.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
     } else {
       this.filteredProvinceList = [...this.provinceList];
@@ -502,6 +550,7 @@ export class ValidationPageComponent implements OnInit {
     });
 
     if (this.mapViewer) this.mapViewer.flyTo([12.8797, 121.7740], 6);
+    this.mapViewer?.clearMarkers();
   }
 
   private applyFilterAndSort(): void {
@@ -511,33 +560,17 @@ export class ValidationPageComponent implements OnInit {
       const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
       result = result.filter(item => allowed.includes(item.province?.trim() ?? ''));
     }
-    if (this.selectedProvince) {
-      result = result.filter(item => item.province?.trim() === this.selectedProvince);
-    }
-    if (this.selectedCity) {
-      result = result.filter(item => item.cityMunicipality?.trim() === this.selectedCity);
-    }
-    if (this.selectedBarangay) {
-      result = result.filter(item => item.barangay?.trim() === this.selectedBarangay);
-    }
-    if (this.activeDate) {
-      result = result.filter(item => item.validationDate?.trim() === this.activeDate);
-    }
-    if (this.activePeriod) {
-      result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
-    }
-    if (this.activeProvider) {
-      result = result.filter(item =>
-        item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase()
-      );
-    }
+    if (this.selectedProvince) result = result.filter(item => item.province?.trim() === this.selectedProvince);
+    if (this.selectedCity)     result = result.filter(item => item.cityMunicipality?.trim() === this.selectedCity);
+    if (this.selectedBarangay) result = result.filter(item => item.barangay?.trim() === this.selectedBarangay);
+    if (this.activeDate)       result = result.filter(item => item.validationDate?.trim() === this.activeDate);
+    if (this.activePeriod)     result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
+    if (this.activeProvider)   result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
 
     const term = this.searchTerm.toLowerCase().trim();
     if (term) {
       result = result.filter(item =>
-        Object.values(item).some(val =>
-          String(val ?? '').toLowerCase().includes(term)
-        )
+        Object.values(item).some(val => String(val ?? '').toLowerCase().includes(term))
       );
     }
 
@@ -547,11 +580,9 @@ export class ValidationPageComponent implements OnInit {
       result.sort((a, b) => {
         const aVal = String(a[col] ?? '').trim();
         const bVal = String(b[col] ?? '').trim();
-        const aNum = parseFloat(aVal);
-        const bNum = parseFloat(bVal);
+        const aNum = parseFloat(aVal); const bNum = parseFloat(bVal);
         if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-        if (!aVal && bVal) return 1;
-        if (aVal && !bVal) return -1;
+        if (!aVal && bVal) return 1; if (aVal && !bVal) return -1;
         return aVal.localeCompare(bVal) * dir;
       });
     }
@@ -577,28 +608,22 @@ export class ValidationPageComponent implements OnInit {
   onServiceProviderClick(): void {
     this.activeProviderIndex++;
     if (this.activeProviderIndex >= this.providerList.length) this.activeProviderIndex = -1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
 
   onValidationDateClick(): void {
     this.activeDateIndex++;
     if (this.activeDateIndex >= this.dateList.length) this.activeDateIndex = -1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
 
   onValidationTimeClick(): void {
     this.activePeriodIndex++;
     if (this.activePeriodIndex >= this.periodList.length) this.activePeriodIndex = -1;
-    this.currentPage = 1;
-    this.applyFilterAndSort();
+    this.currentPage = 1; this.applyFilterAndSort();
   }
 
-  sortBy(column: keyof ConnectivityData): void {
-    this.sortByDynamic(column as string);
-  }
-
+  sortBy(column: keyof ConnectivityData): void { this.sortByDynamic(column as string); }
   getColSort(column: keyof ConnectivityData): 'asc' | 'desc' | null {
     return this.dynamicSortColumn === (column as string) ? this.dynamicSortDirection : null;
   }
@@ -616,26 +641,14 @@ export class ValidationPageComponent implements OnInit {
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.applyPagination();
+    this.currentPage = page; this.applyPagination();
   }
-
-  onPageSizeChange(): void {
-    this.pageSize    = Number(this.pageSize);
-    this.currentPage = 1;
-    this.applyPagination();
-  }
-
-  get pageStart(): number {
-    return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
-  }
-  get pageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredData.length);
-  }
+  onPageSizeChange(): void { this.pageSize = Number(this.pageSize); this.currentPage = 1; this.applyPagination(); }
+  get pageStart(): number { return this.filteredData.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1; }
+  get pageEnd():   number { return Math.min(this.currentPage * this.pageSize, this.filteredData.length); }
 
   get pageNumbers(): number[] {
-    const total   = this.totalPages;
-    const current = this.currentPage;
+    const total = this.totalPages; const current = this.currentPage;
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
     const pages: number[] = [1];
     if (current > 3) pages.push(-1);

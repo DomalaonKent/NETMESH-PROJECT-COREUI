@@ -1,0 +1,84 @@
+<div class="ecu-panel">
+  <div class="ecu-section-title">UPLOAD EXCEL FILE</div>
+  
+  <div
+    class="ecu-dropzone"
+    [class.dragging]="dragging()"
+    [class.has-result]="!!lastResult()"
+    [class.has-error]="!!errorMsg()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    (click)="browseFile()"
+  >
+
+    <ng-container *ngIf="loading()">
+      <div class="ecu-spinner"></div>
+      <span class="ecu-drop-label">Reading file…</span>
+    </ng-container>
+
+    <ng-container *ngIf="!loading() && lastResult()">
+      <div class="ecu-state-icon success">✓</div>
+      <span class="ecu-drop-label success">{{ lastResult()!.points.length }} points plotted</span>
+      <span class="ecu-drop-sub">Click to upload a different file</span>
+    </ng-container>
+
+    <ng-container *ngIf="!loading() && !lastResult() && errorMsg()">
+      <div class="ecu-state-icon error">✕</div>
+      <span class="ecu-drop-label error">{{ errorMsg() }}</span>
+      <span class="ecu-drop-sub">Click to try again</span>
+    </ng-container>
+
+    <ng-container *ngIf="!loading() && !lastResult() && !errorMsg()">
+      <div class="ecu-upload-svg">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="22" cy="20" r="11" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.5"/>
+          <path d="M22 26V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M17 19L22 14L27 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 32H30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="ecu-drop-label">
+        Drop Excel file here or<br><strong>click to browse</strong>
+      </span>
+      <span class="ecu-drop-sub">Supports .xlsx, .xls, .csv files<br>with lat/lng columns</span>
+    </ng-container>
+  </div>
+
+  <button class="ecu-clear-btn" *ngIf="lastResult()" (click)="onClear($event)">
+    ✕ Clear markers
+  </button>
+
+  <div class="ecu-badge success-badge" *ngIf="lastResult()">
+    <span class="badge-icon success">✓</span>
+    <div class="badge-body">
+      <span class="badge-title">Columns detected</span>
+      <div class="badge-pills">
+        <span class="col-pill lat">LAT: {{ lastResult()!.meta.latCol }}</span>
+        <span class="col-pill lng">LNG: {{ lastResult()!.meta.lngCol }}</span>
+        <span
+          *ngIf="lastResult()!.meta.totalRows - lastResult()!.points.length > 0"
+          class="col-pill skip">
+          {{ lastResult()!.meta.totalRows - lastResult()!.points.length }} skipped
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ecu-badge error-badge" *ngIf="errorMsg() && !lastResult()">
+    <span class="badge-icon error">!</span>
+    <div class="badge-body">
+      <span class="badge-title">{{ errorMsg() }}</span>
+    </div>
+  </div>
+
+  <div class="ecu-format-box">
+    <div class="format-title">EXPECTED EXCEL FORMAT</div>
+    <ul class="format-list">
+      <li>Column with <code class="c-lat">lat</code> or <code class="c-lat">latitude</code></li>
+      <li>Column with <code class="c-lng">lng</code>, <code class="c-lng">long</code>, or <code class="c-lng">longitude</code></li>
+      <li>Optional: <code class="c-opt">name</code>, <code class="c-opt">address</code> for labels</li>
+    </ul>
+  </div>
+
+</div>

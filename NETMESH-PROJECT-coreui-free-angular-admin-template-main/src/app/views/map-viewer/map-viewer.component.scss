@@ -24,7 +24,7 @@
   border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 10px;
   padding: 12px 14px;
-  min-width: 190px;
+  min-width: 200px;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
@@ -42,10 +42,7 @@
 
 .kml-layer-item {
   margin-bottom: 8px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  &:last-child { margin-bottom: 0; }
 }
 
 .kml-toggle {
@@ -72,9 +69,7 @@
   flex-shrink: 0;
 }
 
-.kml-name {
-  flex: 1;
-}
+.kml-name { flex: 1; }
 
 .kml-hint {
   font-size: 11px;
@@ -93,4 +88,221 @@
   font-size: 9px;
   color: #64748b;
   font-style: normal;
+}
+
+.kml-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.15);
+  margin: 10px 0;
+}
+
+/* ── Marker count row ────────────────────────────────────────────────────────── */
+
+.kml-marker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kml-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 1.5px solid #dc2626;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+
+.kml-marker-label {
+  font-size: 12px;
+  color: #e2e8f0;
+  flex: 1;
+}
+
+/* ── Detected column info ────────────────────────────────────────────────────── */
+
+.kml-col-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  border-radius: 7px;
+  padding: 7px 9px;
+  margin-bottom: 8px;
+}
+
+.kml-col-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.kml-col-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+
+  &.kml-col-lat {
+    background: rgba(52, 211, 153, 0.18);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+
+  &.kml-col-lng {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.28);
+  }
+}
+
+.kml-col-name {
+  font-size: 11px;
+  color: #cbd5e1;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
+}
+
+/* ── Skipped rows warning ────────────────────────────────────────────────────── */
+
+.kml-skipped-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  background: rgba(251, 191, 36, 0.07);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+}
+
+.kml-skipped-icon {
+  font-size: 11px;
+  color: #fbbf24;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.kml-skipped-label {
+  font-size: 10.5px;
+  color: #fbbf24;
+  line-height: 1.4;
+}
+
+/* ── Clear button ────────────────────────────────────────────────────────────── */
+
+.kml-clear-markers {
+  width: 100%;
+  padding: 5px 0;
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  &:hover { background: rgba(248, 113, 113, 0.2); border-color: #f87171; }
+}
+
+/* ─── Custom location.png marker ────────────────────────────────────────────── */
+
+:host ::ng-deep {
+
+  .custom-pin-icon {
+    transform-origin: 50% 100%;
+    transition: transform 0.18s ease, filter 0.18s ease;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
+    overflow: visible !important;
+
+    &:hover {
+      transform: scale(1.2) translateY(-3px);
+      filter:
+        drop-shadow(0 5px 8px rgba(0, 0, 0, 0.65))
+        drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scale(0.4);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.45);
+      animation: pinPulse 2.4s ease-out infinite;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scale(0.4);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.25);
+      animation: pinPulse 2.4s ease-out 1.2s infinite;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes pinPulse {
+    0%   { transform: translateX(-50%) scale(0.4); opacity: 1; }
+    70%  { transform: translateX(-50%) scale(2.8); opacity: 0; }
+    100% { transform: translateX(-50%) scale(2.8); opacity: 0; }
+  }
+
+  /* ── Dark glass popup ──────────────────────────────────────────────────────── */
+  .leaflet-popup-content-wrapper {
+    background: rgba(10, 15, 30, 0.95) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 10px !important;
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(14px);
+    padding: 0 !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 10px 14px !important;
+    color: #e2e8f0 !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    font-family: inherit !important;
+    min-width: 120px;
+  }
+
+  .leaflet-popup-tip-container {
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35));
+  }
+
+  .leaflet-popup-tip {
+    background: rgba(10, 15, 30, 0.95) !important;
+  }
+
+  .leaflet-popup-close-button {
+    color: #4e6880 !important;
+    font-size: 15px !important;
+    top: 5px !important;
+    right: 8px !important;
+    transition: color 0.15s;
+    &:hover { color: #38bdf8 !important; background: transparent !important; }
+  }
 }

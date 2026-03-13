@@ -12,6 +12,41 @@
       </label>
     </div>
     <div class="kml-hint" *ngIf="isLoading">Loading...</div>
+
+    <ng-container *ngIf="markerCount > 0">
+      <div class="kml-divider"></div>
+
+      <div class="kml-panel-title">Plotted Markers</div>
+
+      <!-- Marker count row -->
+      <div class="kml-marker-row">
+        <span class="kml-marker-dot"></span>
+        <span class="kml-marker-label">
+          {{ markerCount }} coordinate{{ markerCount === 1 ? '' : 's' }} plotted
+        </span>
+      </div>
+
+      <!-- Detected columns -->
+      <div class="kml-col-info" *ngIf="detectedLatCol || detectedLngCol">
+        <div class="kml-col-row">
+          <span class="kml-col-badge kml-col-lat">LAT</span>
+          <span class="kml-col-name">{{ detectedLatCol || '—' }}</span>
+        </div>
+        <div class="kml-col-row">
+          <span class="kml-col-badge kml-col-lng">LNG</span>
+          <span class="kml-col-name">{{ detectedLngCol || '—' }}</span>
+        </div>
+      </div>
+
+      <!-- Skipped rows warning -->
+      <div class="kml-skipped-row" *ngIf="skippedCount > 0">
+        <span class="kml-skipped-icon">⚠</span>
+        <span class="kml-skipped-label">{{ skippedCount }} row{{ skippedCount === 1 ? '' : 's' }} skipped (invalid coords)</span>
+      </div>
+
+      <button class="kml-clear-markers" (click)="onClearMarkers()">&#x2715; Clear markers</button>
+    </ng-container>
+
   </div>
   <div #mapContainer class="map-container"></div>
 </div>
