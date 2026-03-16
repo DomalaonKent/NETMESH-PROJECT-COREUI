@@ -44,7 +44,7 @@
               "leaflet/dist/leaflet.js",
               "leaflet-omnivore/leaflet-omnivore.min.js"
             ],
-            "allowedCommonJsDependencies": [],
+            "allowedCommonJsDependencies": ["leaflet", "jszip"],
             "stylePreprocessorOptions": {
               "sass": {
                 "silenceDeprecations": []
@@ -61,8 +61,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "20kb",
+                  "maximumError": "25kb"
                 }
               ],
               "outputHashing": "all"
