@@ -1,0 +1,104 @@
+{
+  "info": {
+    "name": "Validation Data REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "base", "value": "http://127.0.0.1:8000" }],
+  "item": [
+    {
+      "name": "1 · Check",
+      "request": { "method": "GET", "url": "{{base}}/" }
+    },
+    {
+      "name": "2 · GET All Records",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base}}/validations?limit=50",
+          "host": ["{{base}}"], "path": ["validations"],
+          "query": [
+            { "key": "limit", "value": "50" },
+            { "key": "province", "value": "", "disabled": true },
+            { "key": "service_provider", "value": "", "disabled": true },
+            { "key": "technology", "value": "", "disabled": true }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3 · GET Filter → Globe",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/validations?service_provider=Globe",
+          "host": ["{{base}}"], "path": ["validations"],
+          "query": [{ "key": "service_provider", "value": "Globe" }] }
+      }
+    },
+    {
+      "name": "4 · GET Filter → Smart",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/validations?service_provider=Smart",
+          "host": ["{{base}}"], "path": ["validations"],
+          "query": [{ "key": "service_provider", "value": "Smart" }] }
+      }
+    },
+    {
+      "name": "5 · GET Filter → DITO",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/validations?service_provider=DITO",
+          "host": ["{{base}}"], "path": ["validations"],
+          "query": [{ "key": "service_provider", "value": "DITO" }] }
+      }
+    },
+    {
+      "name": "6 · GET One Record by ID",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/validations/18439"
+      }
+    },
+    {
+      "name": "7 · GET Summary Stats",
+      "request": { "method": "GET", "url": "{{base}}/validations/stats/summary" }
+    },
+    {
+      "name": "8 · GET Stats by Provider",
+      "request": { "method": "GET", "url": "{{base}}/validations/stats/by-provider" }
+    },
+    {
+      "name": "9 · POST Create Record",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/validations",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 99001,\n  \"province\": \"Cavite\",\n  \"city_municipality\": \"Indang\",\n  \"barangay\": \"Poblacion I\",\n  \"location\": \"Municipal Hall\",\n  \"validation_date\": \"2026-03-17\",\n  \"validation_time\": \"09:00\",\n  \"technology\": \"LTE\",\n  \"service_provider\": \"Globe\",\n  \"upload\": 15.5,\n  \"download\": 45.2,\n  \"signal_strength\": null,\n  \"remarks\": null\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      }
+    },
+    {
+      "name": "10 · PUT Update Record",
+      "request": {
+        "method": "PUT",
+        "url": "{{base}}/validations/99001",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 99001,\n  \"province\": \"Cavite\",\n  \"city_municipality\": \"Indang\",\n  \"barangay\": \"Poblacion I\",\n  \"location\": \"Municipal Hall\",\n  \"validation_date\": \"2026-03-17\",\n  \"validation_time\": \"10:00\",\n  \"technology\": \"5G\",\n  \"service_provider\": \"Smart\",\n  \"upload\": 80.0,\n  \"download\": 200.0,\n  \"signal_strength\": null,\n  \"remarks\": \"Updated\"\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      }
+    },
+    {
+      "name": "11 · DELETE Record",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base}}/validations/99001"
+      }
+    }
+  ]
+}
