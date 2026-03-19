@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, ViewChild, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ValidationPageService, ConnectivityData } from './validation-page.service';
+import { ValidationPageService, ConnectivityData, getProvincesForRegion } from './validation-page.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 import { readExcelFile, pickExcelFile, readExcelFromUrl, readExcelFileWithSummary, readExcelFromUrlWithSummary, FailedRow } from '../../helpers/excel-upload.helper';
 import { REGION_PROVINCE_MAP, MapCenter } from '../../helpers/coordinate.helper';
@@ -34,6 +34,26 @@ interface CoordPoint {
   label?: string;
 }
 
+const ALL_REGIONS: string[] = [
+  'NCR - Metro Manila',
+  'CAR - Cordillera',
+  'Region I - Ilocos Region',
+  'Region II - Cagayan Valley',
+  'Region III - Central Luzon',
+  'Region IV-A - CALABARZON',
+  'Region IV-B - MIMAROPA',
+  'Region V - Bicol Region',
+  'Region VI - Western Visayas',
+  'Region VII - Central Visayas',
+  'Region VIII - Eastern Visayas',
+  'Region IX - Zamboanga Peninsula',
+  'Region X - Northern Mindanao',
+  'Region XI - Davao Region',
+  'Region XII - SOCCSKSARGEN',
+  'Region XIII - Caraga',
+  'BARMM',
+];
+
 @Component({
   selector: 'app-validation-page',
   standalone: true,
@@ -59,7 +79,8 @@ export class ValidationPageComponent implements OnInit {
   selectedCity: string = '';
   selectedBarangay: string = '';
 
-  regionList: string[] = Object.keys(REGION_PROVINCE_MAP);
+  regionList: string[] = ALL_REGIONS;
+
   provinceList: string[] = [];
   cityList: string[] = [];
   barangayList: string[] = [];
@@ -220,17 +241,232 @@ export class ValidationPageComponent implements OnInit {
   }
 
   loadData(): void {
-    this.validationPageService.getData().subscribe({
+    this.validationPageService.getData({}).subscribe({
       next: (data: ConnectivityData[]) => {
         this.allData = data;
         this.buildDynamicColumns();
-        this.buildDropdownLists();
+        this.buildAllDropdownLists();
         this.buildDateList();
         this.buildProviderList();
         this.applyFilterAndSort();
       },
       error: (err: unknown) => console.error('Failed to load data:', err)
     });
+  }
+
+  private buildAllDropdownLists(): void {
+    const provinces = new Set<string>();
+    const cities    = new Set<string>();
+    const barangays = new Set<string>();
+
+    for (const item of this.allData) {
+      if (item.province?.trim())         provinces.add(item.province.trim());
+      if (item.cityMunicipality?.trim()) cities.add(item.cityMunicipality.trim());
+      if (item.barangay?.trim())         barangays.add(item.barangay.trim());
+    }
+
+    this.provinceList = Array.from(provinces).sort();
+    this.cityList     = Array.from(cities).sort();
+    this.barangayList = Array.from(barangays).sort();
+
+    this.cascadeDropdowns();
+  }
+
+  buildDropdownLists(): void {
+    this.buildAllDropdownLists();
+  }
+
+  private cascadeDropdowns(): void {
+    if (this.selectedRegion) {
+      const provincesForRegion = getProvincesForRegion(this.selectedRegion);
+      this.filteredProvinceList = this.provinceList.filter(p =>
+        provincesForRegion.some(rp => rp.toLowerCase() === p.toLowerCase())
+      );
+    } else {
+      this.filteredProvinceList = [...this.provinceList];
+    }
+
+    if (this.selectedProvince) {
+      const cities = new Set<string>();
+      for (const item of this.allData) {
+        if (
+          item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() &&
+          item.cityMunicipality?.trim()
+        ) {
+          cities.add(item.cityMunicipality.trim());
+        }
+      }
+      this.filteredCityList = Array.from(cities).sort();
+    } else if (this.selectedRegion) {
+      const provincesForRegion = getProvincesForRegion(this.selectedRegion).map(p => p.toLowerCase());
+      const cities = new Set<string>();
+      for (const item of this.allData) {
+        if (
+          provincesForRegion.includes(item.province?.trim().toLowerCase() ?? '') &&
+          item.cityMunicipality?.trim()
+        ) {
+          cities.add(item.cityMunicipality.trim());
+        }
+      }
+      this.filteredCityList = Array.from(cities).sort();
+    } else {
+      this.filteredCityList = [...this.cityList];
+    }
+
+    if (this.selectedCity) {
+      const barangays = new Set<string>();
+      for (const item of this.allData) {
+        if (
+          item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase() &&
+          item.barangay?.trim()
+        ) {
+          barangays.add(item.barangay.trim());
+        }
+      }
+      this.filteredBarangayList = Array.from(barangays).sort();
+    } else if (this.selectedProvince) {
+      const barangays = new Set<string>();
+      for (const item of this.allData) {
+        if (
+          item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() &&
+          item.barangay?.trim()
+        ) {
+          barangays.add(item.barangay.trim());
+        }
+      }
+      this.filteredBarangayList = Array.from(barangays).sort();
+    } else {
+      this.filteredBarangayList = [...this.barangayList];
+    }
+  }
+
+  onRegionChange(): void {
+    this.selectedProvince  = '';
+    this.selectedCity      = '';
+    this.selectedBarangay  = '';
+
+    if (this.selectedRegion) {
+      const regionsLayer = this.kmlLayers.find(l => l.name === 'Regions');
+      if (regionsLayer && !regionsLayer.enabled) {
+        regionsLayer.enabled = true;
+        this.mapViewer?.toggleLayer(regionsLayer);
+      }
+    }
+
+    this.cascadeDropdowns();
+    this.currentPage = 1;
+    this.applyFilterAndSort();
+    this.zoomMap();
+  }
+
+  onProvinceChange(): void {
+    this.selectedCity     = '';
+    this.selectedBarangay = '';
+
+    if (this.selectedProvince) {
+      const provincesLayer = this.kmlLayers.find(l => l.name === 'Provinces');
+      if (provincesLayer && !provincesLayer.enabled) {
+        provincesLayer.enabled = true;
+        this.mapViewer?.toggleLayer(provincesLayer);
+      }
+    }
+
+    this.cascadeDropdowns();
+    this.currentPage = 1;
+    this.applyFilterAndSort();
+    this.zoomMap();
+  }
+
+  onCityChange(): void {
+    this.selectedBarangay = '';
+
+    if (this.selectedCity) {
+      const municipalitiesLayer = this.kmlLayers.find(l => l.name === 'Municipalities');
+      if (municipalitiesLayer && !municipalitiesLayer.enabled) {
+        municipalitiesLayer.enabled = true;
+        this.mapViewer?.toggleLayer(municipalitiesLayer);
+      }
+    }
+
+    this.cascadeDropdowns();
+    this.currentPage = 1;
+    this.applyFilterAndSort();
+    this.zoomMap();
+  }
+
+  onBarangayChange(): void {
+    this.currentPage = 1;
+    this.applyFilterAndSort();
+
+    if (!this.mapViewer) return;
+    if (this.selectedBarangay) {
+      const row = this.filteredData.find(d =>
+        d.barangay?.trim() === this.selectedBarangay && (d as any).latitude && (d as any).longitude
+      );
+      if (row) {
+        const lat = parseFloat((row as any).latitude);
+        const lng = parseFloat((row as any).longitude);
+        if (isFinite(lat) && isFinite(lng)) { this.mapViewer.flyTo([lat, lng], 14); return; }
+      }
+    }
+    this.zoomMap();
+  }
+
+  private applyFilterAndSort(): void {
+    let result = [...this.allData] as any[];
+
+    if (this.selectedRegion) {
+      const provincesForRegion = getProvincesForRegion(this.selectedRegion).map(p => p.toLowerCase());
+      result = result.filter(item =>
+        provincesForRegion.includes(item.province?.trim().toLowerCase() ?? '')
+      );
+    }
+
+    if (this.selectedProvince) {
+      result = result.filter(item =>
+        item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase()
+      );
+    }
+
+    if (this.selectedCity) {
+      result = result.filter(item =>
+        item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase()
+      );
+    }
+
+    if (this.selectedBarangay) {
+      result = result.filter(item =>
+        item.barangay?.trim().toLowerCase() === this.selectedBarangay.toLowerCase()
+      );
+    }
+
+    if (this.activeDate)     result = result.filter(item => item.validationDate?.trim() === this.activeDate);
+    if (this.activePeriod)   result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
+    if (this.activeProvider) result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
+
+    const term = this.searchTerm.toLowerCase().trim();
+    if (term) {
+      result = result.filter(item =>
+        Object.values(item).some(val => String(val ?? '').toLowerCase().includes(term))
+      );
+    }
+
+    if (this.dynamicSortColumn && this.dynamicSortDirection) {
+      const col = this.dynamicSortColumn;
+      const dir = this.dynamicSortDirection === 'asc' ? 1 : -1;
+      result.sort((a, b) => {
+        const aVal = String(a[col] ?? '').trim();
+        const bVal = String(b[col] ?? '').trim();
+        const aNum = parseFloat(aVal); const bNum = parseFloat(bVal);
+        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
+        if (!aVal && bVal) return 1; if (aVal && !bVal) return -1;
+        return aVal.localeCompare(bVal) * dir;
+      });
+    }
+
+    this.filteredData = result as ConnectivityData[];
+    this.applyPagination();
+    this.computeStats();
   }
 
   private extractCoordPoints(rows: Record<string, any>[]): CoordPoint[] {
@@ -308,7 +544,7 @@ export class ValidationPageComponent implements OnInit {
       this.urlErrorMessage = 'Please enter a valid URL.';
       return;
     }
-    
+
     this.isLoadingFromUrl = true;
     this.urlErrorMessage  = '';
 
@@ -374,7 +610,7 @@ export class ValidationPageComponent implements OnInit {
 
   private refreshTable(): void {
     this.buildDynamicColumns();
-    this.buildDropdownLists();
+    this.buildAllDropdownLists();
     this.buildDateList();
     this.buildProviderList();
     this.applyFilterAndSort();
@@ -408,127 +644,6 @@ export class ValidationPageComponent implements OnInit {
     this.providerList = ordered;
   }
 
-  buildDropdownLists(): void {
-    const provinces = new Set<string>();
-    const cities    = new Set<string>();
-    const barangays = new Set<string>();
-
-    for (const item of this.allData) {
-      if (item.province?.trim())         provinces.add(item.province.trim());
-      if (item.cityMunicipality?.trim()) cities.add(item.cityMunicipality.trim());
-      if (item.barangay?.trim())         barangays.add(item.barangay.trim());
-    }
-
-    this.provinceList = Array.from(provinces).sort();
-    this.cityList     = Array.from(cities).sort();
-    this.barangayList = Array.from(barangays).sort();
-
-    this.filteredProvinceList = [...this.provinceList];
-    this.filteredCityList     = [...this.cityList];
-    this.filteredBarangayList = [...this.barangayList];
-  }
-
-  private zoomMap(): void {
-    if (!this.mapViewer) return;
-    const [lat, lng, zoom] = MapCenter(this.selectedCity, this.selectedProvince, this.selectedRegion);
-    this.mapViewer.flyTo([lat, lng], zoom);
-  }
-
-  onRegionChange(): void {
-    this.selectedProvince  = '';
-    this.selectedCity      = '';
-    this.selectedBarangay  = '';
-    this.filteredCityList     = [];
-    this.filteredBarangayList = [];
-
-    if (this.selectedRegion) {
-      const regionsLayer = this.kmlLayers.find(l => l.name === 'Regions');
-      if (regionsLayer && !regionsLayer.enabled) { regionsLayer.enabled = true; this.mapViewer?.toggleLayer(regionsLayer); }
-    }
-
-    if (this.selectedRegion) {
-      const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
-      this.filteredProvinceList = this.provinceList.filter(p => allowed.includes(p));
-
-      const inRegion = this.allData.filter(d => allowed.includes(d.province?.trim() ?? ''));
-      this.filteredCityList     = [...new Set(inRegion.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
-      this.filteredBarangayList = [...new Set(inRegion.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
-    } else {
-      this.filteredProvinceList = [...this.provinceList];
-      this.filteredCityList     = [...this.cityList];
-      this.filteredBarangayList = [...this.barangayList];
-    }
-
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
-  }
-
-  onProvinceChange(): void {
-    this.selectedCity     = '';
-    this.selectedBarangay = '';
-
-    if (this.selectedProvince) {
-      const provincesLayer = this.kmlLayers.find(l => l.name === 'Provinces');
-      if (provincesLayer && !provincesLayer.enabled) { provincesLayer.enabled = true; this.mapViewer?.toggleLayer(provincesLayer); }
-    }
-
-    const base = this.allData.filter(d =>
-      (!this.selectedRegion || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? ''))
-    );
-
-    if (this.selectedProvince) {
-      const inProv = base.filter(d => d.province?.trim() === this.selectedProvince);
-      this.filteredCityList     = [...new Set(inProv.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
-      this.filteredBarangayList = [...new Set(inProv.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
-    } else {
-      this.filteredCityList     = [...new Set(base.map(d => d.cityMunicipality?.trim()).filter(Boolean) as string[])].sort();
-      this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
-    }
-
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
-  }
-
-  onCityChange(): void {
-    this.selectedBarangay = '';
-
-    if (this.selectedCity) {
-      const municipalitiesLayer = this.kmlLayers.find(l => l.name === 'Municipalities');
-      if (municipalitiesLayer && !municipalitiesLayer.enabled) { municipalitiesLayer.enabled = true; this.mapViewer?.toggleLayer(municipalitiesLayer); }
-    }
-
-    const base = this.allData.filter(d => {
-      const regionOk   = !this.selectedRegion   || (REGION_PROVINCE_MAP[this.selectedRegion] ?? []).includes(d.province?.trim() ?? '');
-      const provinceOk = !this.selectedProvince || d.province?.trim()         === this.selectedProvince;
-      const cityOk     = !this.selectedCity     || d.cityMunicipality?.trim() === this.selectedCity;
-      return regionOk && provinceOk && cityOk;
-    });
-
-    this.filteredBarangayList = [...new Set(base.map(d => d.barangay?.trim()).filter(Boolean) as string[])].sort();
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
-  }
-
-  onBarangayChange(): void {
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    if (!this.mapViewer) return;
-    if (this.selectedBarangay) {
-      const row = this.filteredData.find(d =>
-        d.barangay?.trim() === this.selectedBarangay && (d as any).latitude && (d as any).longitude
-      );
-      if (row) {
-        const lat = parseFloat((row as any).latitude);
-        const lng = parseFloat((row as any).longitude);
-        if (isFinite(lat) && isFinite(lng)) { this.mapViewer.flyTo([lat, lng], 14); return; }
-      }
-    }
-    this.zoomMap();
-  }
-
   hasActiveFilters(): boolean {
     return !!(this.selectedRegion || this.selectedProvince || this.selectedCity || this.selectedBarangay || this.searchTerm);
   }
@@ -539,11 +654,8 @@ export class ValidationPageComponent implements OnInit {
     this.selectedCity      = '';
     this.selectedBarangay  = '';
     this.searchTerm        = '';
-    this.filteredProvinceList = [...this.provinceList];
-    this.filteredCityList     = [...this.cityList];
-    this.filteredBarangayList = [...this.barangayList];
+    this.cascadeDropdowns();
     this.currentPage = 1;
-    this.applyFilterAndSort();
 
     this.kmlLayers.forEach(layer => {
       if (layer.enabled) { layer.enabled = false; this.mapViewer?.toggleLayer(layer); }
@@ -551,45 +663,14 @@ export class ValidationPageComponent implements OnInit {
 
     if (this.mapViewer) this.mapViewer.flyTo([12.8797, 121.7740], 6);
     this.mapViewer?.clearMarkers();
+
+    this.applyFilterAndSort();
   }
 
-  private applyFilterAndSort(): void {
-    let result = [...this.allData] as any[];
-
-    if (this.selectedRegion) {
-      const allowed = REGION_PROVINCE_MAP[this.selectedRegion] ?? [];
-      result = result.filter(item => allowed.includes(item.province?.trim() ?? ''));
-    }
-    if (this.selectedProvince) result = result.filter(item => item.province?.trim() === this.selectedProvince);
-    if (this.selectedCity)     result = result.filter(item => item.cityMunicipality?.trim() === this.selectedCity);
-    if (this.selectedBarangay) result = result.filter(item => item.barangay?.trim() === this.selectedBarangay);
-    if (this.activeDate)       result = result.filter(item => item.validationDate?.trim() === this.activeDate);
-    if (this.activePeriod)     result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
-    if (this.activeProvider)   result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
-
-    const term = this.searchTerm.toLowerCase().trim();
-    if (term) {
-      result = result.filter(item =>
-        Object.values(item).some(val => String(val ?? '').toLowerCase().includes(term))
-      );
-    }
-
-    if (this.dynamicSortColumn && this.dynamicSortDirection) {
-      const col = this.dynamicSortColumn;
-      const dir = this.dynamicSortDirection === 'asc' ? 1 : -1;
-      result.sort((a, b) => {
-        const aVal = String(a[col] ?? '').trim();
-        const bVal = String(b[col] ?? '').trim();
-        const aNum = parseFloat(aVal); const bNum = parseFloat(bVal);
-        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-        if (!aVal && bVal) return 1; if (aVal && !bVal) return -1;
-        return aVal.localeCompare(bVal) * dir;
-      });
-    }
-
-    this.filteredData = result as ConnectivityData[];
-    this.applyPagination();
-    this.computeStats();
+  private zoomMap(): void {
+    if (!this.mapViewer) return;
+    const [lat, lng, zoom] = MapCenter(this.selectedCity, this.selectedProvince, this.selectedRegion);
+    this.mapViewer.flyTo([lat, lng], zoom);
   }
 
   private extractPeriod(timeStr: string): string {
