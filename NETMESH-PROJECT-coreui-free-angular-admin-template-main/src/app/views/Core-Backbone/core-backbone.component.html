@@ -28,7 +28,6 @@
           </div>
         </div>
 
-        <button class="btn-add" (click)="onAddNew()">Add New</button>
         <button class="btn-back" (click)="goBack()">Back</button>
       </div>
 
@@ -138,12 +137,10 @@
 
   <div *ngIf="showMap" class="map-section">
     <div class="coord-jump-panel">
-      <input type="text" class="search-input coord-input"
-        placeholder="Latitude (e.g. 13.62)" [(ngModel)]="coordLat" />
-      <input type="text" class="search-input coord-input"
-        placeholder="Longitude (e.g. 123.18)" [(ngModel)]="coordLng" />
+      <input type="text" class="search-input coord-input" placeholder="Latitude (e.g. 13.62)" [(ngModel)]="coordLat" />
+      <input type="text" class="search-input coord-input" placeholder="Longitude (e.g. 123.18)" [(ngModel)]="coordLng" />
       <button class="btn-add" (click)="flyToInputCoordinates()">Go to Coordinates</button>
-
+      
       <button class="btn-excel-coord-toggle" (click)="toggleCoordUpload()">
         {{ showCoordUpload ? '▴ Hide Excel Upload' : '▾ Plot Excel Coordinates' }}
       </button>
@@ -153,19 +150,9 @@
     </div>
 
     <div class="excel-coord-panel" *ngIf="showCoordUpload">
-      <app-excel-coord-upload
-        (plotPoints)="onExcelCoordPlot($event)"
-        (clearPoints)="onExcelCoordClear()">
-      </app-excel-coord-upload>
+      <app-excel-coord-upload (plotPoints)="onExcelCoordPlot($event)" (clearPoints)="onExcelCoordClear()"></app-excel-coord-upload>
     </div>
-
-    <app-map-viewer
-      #mapViewer
-      [kmlLayers]="kmlLayers"
-      [center]="[12.8797, 121.7740]"
-      [zoom]="6"
-      (markersCleared)="onExcelCoordClear()">
-    </app-map-viewer>
+    <app-map-viewer #mapViewer [kmlLayers]="kmlLayers" [center]="[12.8797, 121.7740]" [zoom]="6" (markersCleared)="onExcelCoordClear()"></app-map-viewer>
   </div>
 
   <div class="filter-bar">
@@ -200,10 +187,9 @@
       </select>
       <span class="select-arrow">▾</span>
     </div>
-
-    <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">
-      ✕ Clear
-    </button>
+    <button class="btn-clear-filters" *ngIf="hasActiveFilters()" (click)="clearFilters()">✕ Clear</button>
+    <div class="filter-bar-spacer"></div>
+    <button class="btn-filter-add-new" (click)="openAddForm()">+ Add New Record</button>
   </div>
 
   <div class="table-container">
@@ -280,6 +266,7 @@
               <svg *ngIf="getColSort('aggregatedOpticalSignalLoss')==='desc'" class="caret-active" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span></span>
           </th>
+          <th class="col-actions-header"><span class="th-inner">Actions</span></th>
         </tr>
       </thead>
       <tbody>
@@ -308,9 +295,14 @@
           <td>{{ item.packetLoss ?? '—' }}</td>
           <td>{{ item.latency ?? '—' }}</td>
           <td>{{ item.aggregatedOpticalSignalLoss ?? '—' }}</td>
+          <td class="col-actions-cell">
+            <button class="btn-edit-icon" (click)="openEditForm(item)" title="Edit record">
+              <img src="assets/images/edit.png" alt="Edit" class="edit-icon-img" />
+            </button>
+          </td>
         </tr>
         <tr *ngIf="pagedData.length === 0">
-          <td colspan="10" class="empty-cell">No records found.</td>
+          <td colspan="11" class="empty-cell">No records found.</td>
         </tr>
       </tbody>
     </table>
@@ -376,5 +368,134 @@
     <div class="upload-summary-footer">
       <button class="btn-add" (click)="closeUploadSummary()">OK</button>
     </div>
+  </div>
+</div>
+
+<div class="detail-form-overlay" *ngIf="showDetailForm" (click)="cancelForm()">
+  <div class="detail-form-modal" (click)="$event.stopPropagation()">
+
+    <div class="detail-form-header">
+      <span class="detail-form-title">
+        <span *ngIf="isEditMode" class="form-title-icon">&#9998;</span>
+        <span *ngIf="!isEditMode" class="form-title-icon">&#43;</span>
+        {{ isEditMode ? 'Edit Record #' + selectedItem?.id : 'Add New Record' }}
+      </span>
+      <button class="detail-form-close" (click)="cancelForm()">✕</button>
+    </div>
+
+    <div class="detail-form-body">
+      <div class="detail-form-grid">
+
+        <div class="detail-form-section-label section-location">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 1 — Location Details</span>
+        </div>
+
+        <div class="detail-form-group">
+          <label class="detail-form-label">Location</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.location" placeholder="Enter location" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Barangay</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.barangay" placeholder="Enter barangay" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">City / Municipality</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.cityMunicipality" placeholder="Enter city or municipality" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Province</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.province" placeholder="Enter province" />
+        </div>
+
+        <div class="detail-form-section-label section-schedule">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 2 — Validation Schedule</span>
+        </div>
+
+        <div class="detail-form-group">
+          <label class="detail-form-label">Validation Date</label>
+          <input type="date" class="detail-form-input" [(ngModel)]="formData.validationDate" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Validation Time</label>
+          <input type="time" class="detail-form-input" [(ngModel)]="formData.validationTime" />
+        </div>
+
+        <div class="detail-form-section-label section-network">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 3 — Network Information</span>
+        </div>
+
+        <div class="detail-form-group">
+          <label class="detail-form-label">Technology</label>
+          <div class="detail-form-select-wrap">
+            <select class="detail-form-input detail-form-select" [(ngModel)]="formData.technology">
+              <option value="">Select Technology</option>
+              <option value="Fiber">Fiber</option>
+              <option value="LTE">LTE</option>
+              <option value="5G">5G</option>
+              <option value="MPLS">MPLS</option>
+              <option value="SDH">SDH</option>
+            </select>
+          </div>
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Service Provider <span class="required-star">*</span></label>
+          <div class="detail-form-select-wrap">
+            <select class="detail-form-input detail-form-select" [(ngModel)]="formData.serviceProvider">
+              <option value="">Select Provider</option>
+              <option value="Smart">Smart</option>
+              <option value="Globe">Globe</option>
+              <option value="DITO">DITO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="detail-form-section-label section-speed">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 4 — Performance Data</span>
+        </div>
+
+        <div class="detail-form-group">
+          <label class="detail-form-label">Uptime (%)</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.uptime" placeholder="e.g. 99.9%" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Packet Loss (%)</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.packetLoss" placeholder="e.g. 0.05%" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Latency</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.latency" placeholder="e.g. 5ms" />
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Aggregated Optical Signal Loss</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.aggregatedOpticalSignalLoss" placeholder="e.g. -8.2 dBm" />
+        </div>
+
+        <div class="detail-form-group"></div>
+        <div class="detail-form-section-label section-collected">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 5 — Collected By</span>
+        </div>
+        <div class="detail-form-group">
+          <label class="detail-form-label">Name</label>
+          <input type="text" class="detail-form-input" [(ngModel)]="formData.collectedBy" placeholder="Enter name" />
+        </div>
+        <div class="detail-form-group"></div>
+
+      </div>
+      <div class="detail-form-error" *ngIf="formErrorMessage">{{ formErrorMessage }}</div>
+    </div>
+
+    <div class="detail-form-footer">
+      <button class="btn-form-cancel" (click)="cancelForm()">Cancel</button>
+      <button class="btn-form-save" (click)="saveForm()" [disabled]="isSavingForm">
+        <span *ngIf="isSavingForm">Saving...</span>
+        <span *ngIf="!isSavingForm">{{ isEditMode ? 'Update' : 'Save' }}</span>
+      </button>
+    </div>
+
   </div>
 </div>

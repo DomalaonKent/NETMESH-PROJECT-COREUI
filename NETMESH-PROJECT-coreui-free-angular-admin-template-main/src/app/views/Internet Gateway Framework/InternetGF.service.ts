@@ -42,7 +42,7 @@ export class InternetGFService {
         packetLoss:                  item.PacketLoss                  ?? item.packetLoss                  ?? null,
         latency:                     item.Latency                     ?? item.latency                     ?? null,
         aggregatedOpticalSignalLoss: item.AggregatedOpticalSignalLoss ?? item.aggregatedOpticalSignalLoss ?? null,
-        collectedBy:                 item.CollectedBy                 ?? item.collectedBy                 ?? 'Unknown'
+        collectedBy:                 item.CollectedBy                 ?? item.collectedBy                 ?? 'Unknown',
       })))
     );
   }

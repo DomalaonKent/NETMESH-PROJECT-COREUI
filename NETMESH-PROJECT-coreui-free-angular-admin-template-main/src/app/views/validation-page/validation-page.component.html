@@ -528,7 +528,7 @@
     </div>
 
     <div class="upload-summary-body" *ngIf="uploadSummary">
-
+      
       <div class="upload-summary-stats">
         <div class="upload-stat-item upload-stat-total">
           <span class="upload-stat-number">{{ uploadSummary.totalRows }}</span>
@@ -548,7 +548,7 @@
         <span class="upload-success-icon">✓</span>
         All records were uploaded successfully.
       </div>
-      
+
       <div class="upload-failed-section" *ngIf="uploadSummary.failedCount > 0">
         <div class="upload-failed-heading">Failed Records</div>
         <div class="upload-failed-list">
@@ -572,12 +572,8 @@
 
     <div class="detail-form-header">
       <span class="detail-form-title">
-        <svg *ngIf="isEditMode" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
-        </svg>
-        <svg *ngIf="!isEditMode" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-        </svg>
+        <span *ngIf="isEditMode" class="form-title-icon">&#9998;</span>
+        <span *ngIf="!isEditMode" class="form-title-icon">&#43;</span>
         {{ isEditMode ? 'Edit Record #' + selectedItem?.id : 'Add New Record' }}
       </span>
       <button class="detail-form-close" (click)="cancelForm()">✕</button>
@@ -585,6 +581,11 @@
 
     <div class="detail-form-body">
       <div class="detail-form-grid">
+
+        <div class="detail-form-section-label section-location">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 1 — Location Details</span>
+        </div>
 
         <div class="detail-form-group">
           <label class="detail-form-label">Location</label>
@@ -606,35 +607,54 @@
           <input type="text" class="detail-form-input" [(ngModel)]="formData.province" placeholder="Enter province" />
         </div>
 
+        <div class="detail-form-section-label section-schedule">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 2 — Validation Schedule</span>
+        </div>
+
         <div class="detail-form-group">
           <label class="detail-form-label">Validation Date</label>
-          <input type="date" class="detail-form-input" [(ngModel)]="formData.validationDate" placeholder="dd/mm/yyyy" />
+          <input type="date" class="detail-form-input" [(ngModel)]="formData.validationDate" />
         </div>
- 
+
         <div class="detail-form-group">
           <label class="detail-form-label">Validation Time</label>
           <input type="time" class="detail-form-input" [(ngModel)]="formData.validationTime" />
         </div>
 
+        <div class="detail-form-section-label section-network">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 3 — Network Information</span>
+        </div>
+
         <div class="detail-form-group">
           <label class="detail-form-label">Technology</label>
-          <select class="detail-form-input detail-form-select" [(ngModel)]="formData.technology">
-            <option value="">Select Technology</option>
-            <option value="LTE">LTE</option>
-            <option value="5G">5G</option>
-            <option value="3G">3G</option>
-            <option value="WiFi">WiFi</option>
-          </select>
+          <div class="detail-form-select-wrap">
+            <select class="detail-form-input detail-form-select" [(ngModel)]="formData.technology">
+              <option value="">Select Technology</option>
+              <option value="LTE">LTE</option>
+              <option value="5G">5G</option>
+              <option value="3G">3G</option>
+              <option value="WiFi">WiFi</option>
+            </select>
+          </div>
         </div>
 
         <div class="detail-form-group">
           <label class="detail-form-label">Service Provider <span class="required-star">*</span></label>
-          <select class="detail-form-input detail-form-select" [(ngModel)]="formData.serviceProvider">
-            <option value="">Select Provider</option>
-            <option value="Smart">Smart</option>
-            <option value="Globe">Globe</option>
-            <option value="DITO">DITO</option>
-          </select>
+          <div class="detail-form-select-wrap">
+            <select class="detail-form-input detail-form-select" [(ngModel)]="formData.serviceProvider">
+              <option value="">Select Provider</option>
+              <option value="Smart">Smart</option>
+              <option value="Globe">Globe</option>
+              <option value="DITO">DITO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="detail-form-section-label section-speed">
+          <span class="section-bar"></span>
+          <span class="section-text">Step 4 — Speed &amp; Signal Data</span>
         </div>
 
         <div class="detail-form-group">
@@ -662,15 +682,22 @@
           <input type="number" class="detail-form-input" [(ngModel)]="formData.downloadDataSize" placeholder="0.00" min="0" step="0.01" />
         </div>
 
+        <div class="detail-form-group"></div>
+          <div class="detail-form-section-label section-collected">
+            <span class="section-bar"></span>
+            <span class="section-text">Step 5 — Collected By</span>
+          </div>
+
         <div class="detail-form-group">
-          <label class="detail-form-label">Collected By</label>
+          <label class="detail-form-label">Name</label>
           <input type="text" class="detail-form-input" [(ngModel)]="formData.collectedBy" placeholder="Enter name" />
         </div>
 
-      </div>
+        <div class="detail-form-group"></div>
 
+      </div>
       <div class="detail-form-error" *ngIf="formErrorMessage">
-         {{ formErrorMessage }}
+        {{ formErrorMessage }}
       </div>
     </div>
 
