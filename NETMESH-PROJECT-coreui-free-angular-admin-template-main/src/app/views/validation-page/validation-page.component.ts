@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, ViewChild, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ValidationPageService, ConnectivityData, getProvincesForRegion } from './validation-page.service';
+import { ValidationPageService, ConnectivityData, getProvincesForRegion, toInputDate, toInputTime } from './validation-page.service';
 import { MapViewerComponent, KmlLayerConfig } from '../map-viewer/map-viewer.component';
 import { readExcelFile, pickExcelFile, readExcelFromUrl, readExcelFileWithSummary, readExcelFromUrlWithSummary, FailedRow } from '../../helpers/excel-upload.helper';
 import { REGION_PROVINCE_MAP, MapCenter } from '../../helpers/coordinate.helper';
@@ -32,6 +32,23 @@ interface CoordPoint {
   lat: number;
   lng: number;
   label?: string;
+}
+
+interface ValidationFormData {
+  location: string;
+  barangay: string;
+  cityMunicipality: string;
+  province: string;
+  validationDate: string;   
+  validationTime: string;   
+  technology: string;
+  serviceProvider: string;
+  upload: number | null;
+  download: number | null;
+  signalStrength: string;
+  uploadDataSize: number | null;
+  downloadDataSize: number | null;
+  collectedBy: string;
 }
 
 const ALL_REGIONS: string[] = [
@@ -149,6 +166,13 @@ export class ValidationPageComponent implements OnInit {
 
   showCoordUpload: boolean = false;
 
+  showDetailForm: boolean = false;
+  isEditMode: boolean = false;
+  selectedItem: ConnectivityData | null = null;
+  isSavingForm: boolean = false;
+  formErrorMessage: string = '';
+  formData: ValidationFormData = this.emptyFormData();
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -199,6 +223,55 @@ export class ValidationPageComponent implements OnInit {
 
   emptyStats(): ProviderStats {
     return { totalTests: 0, avgUpload: 0, avgDownload: 0, noSignal: 0, weakSignal: 0 };
+  }
+
+  private emptyFormData(): ValidationFormData {
+    return {
+      location: '',
+      barangay: '',
+      cityMunicipality: '',
+      province: '',
+      validationDate: '',  
+      validationTime: '',  
+      technology: '',
+      serviceProvider: '',
+      upload: null,
+      download: null,
+      signalStrength: '',
+      uploadDataSize: null,
+      downloadDataSize: null,
+      collectedBy: '',
+    };
+  }
+
+  private toInputDate(dateStr: string): string {
+    return toInputDate(dateStr);
+  }
+
+  private toInputTime(timeStr: string): string {
+    return toInputTime(timeStr);
+  }
+
+  private toDisplayDate(dateStr: string): string {
+    if (!dateStr) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split('-');
+      return `${m}/${d}/${y}`;
+    }
+    return dateStr;
+  }
+
+  private toDisplayTime(timeStr: string): string {
+    if (!timeStr) return '';
+    if (/^\d{2}:\d{2}$/.test(timeStr)) {
+      const [hStr, min] = timeStr.split(':');
+      let hour = parseInt(hStr, 10);
+      const period = hour >= 12 ? 'PM' : 'AM';
+      if (hour === 0) hour = 12;
+      else if (hour > 12) hour -= 12;
+      return `${hour}:${min} ${period}`;
+    }
+    return timeStr;
   }
 
   private calcStats(rows: ConnectivityData[]): ProviderStats {
@@ -272,9 +345,7 @@ export class ValidationPageComponent implements OnInit {
     this.cascadeDropdowns();
   }
 
-  buildDropdownLists(): void {
-    this.buildAllDropdownLists();
-  }
+  buildDropdownLists(): void { this.buildAllDropdownLists(); }
 
   private cascadeDropdowns(): void {
     if (this.selectedRegion) {
@@ -289,24 +360,18 @@ export class ValidationPageComponent implements OnInit {
     if (this.selectedProvince) {
       const cities = new Set<string>();
       for (const item of this.allData) {
-        if (
-          item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() &&
-          item.cityMunicipality?.trim()
-        ) {
+        if (item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() && item.cityMunicipality?.trim())
           cities.add(item.cityMunicipality.trim());
-        }
+
       }
       this.filteredCityList = Array.from(cities).sort();
     } else if (this.selectedRegion) {
       const provincesForRegion = getProvincesForRegion(this.selectedRegion).map(p => p.toLowerCase());
       const cities = new Set<string>();
       for (const item of this.allData) {
-        if (
-          provincesForRegion.includes(item.province?.trim().toLowerCase() ?? '') &&
-          item.cityMunicipality?.trim()
-        ) {
+        if (provincesForRegion.includes(item.province?.trim().toLowerCase() ?? '') && item.cityMunicipality?.trim())
           cities.add(item.cityMunicipality.trim());
-        }
+
       }
       this.filteredCityList = Array.from(cities).sort();
     } else {
@@ -316,23 +381,17 @@ export class ValidationPageComponent implements OnInit {
     if (this.selectedCity) {
       const barangays = new Set<string>();
       for (const item of this.allData) {
-        if (
-          item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase() &&
-          item.barangay?.trim()
-        ) {
+        if (item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase() && item.barangay?.trim())
           barangays.add(item.barangay.trim());
-        }
+
       }
       this.filteredBarangayList = Array.from(barangays).sort();
     } else if (this.selectedProvince) {
       const barangays = new Set<string>();
       for (const item of this.allData) {
-        if (
-          item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() &&
-          item.barangay?.trim()
-        ) {
+        if (item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase() && item.barangay?.trim())
           barangays.add(item.barangay.trim());
-        }
+
       }
       this.filteredBarangayList = Array.from(barangays).sort();
     } else {
@@ -341,40 +400,21 @@ export class ValidationPageComponent implements OnInit {
   }
 
   onRegionChange(): void {
-    this.selectedProvince  = '';
-    this.selectedCity      = '';
-    this.selectedBarangay  = '';
-
+    this.selectedProvince = ''; this.selectedCity = ''; this.selectedBarangay = '';
     if (this.selectedRegion) {
       const regionsLayer = this.kmlLayers.find(l => l.name === 'Regions');
-      if (regionsLayer && !regionsLayer.enabled) {
-        regionsLayer.enabled = true;
-        this.mapViewer?.toggleLayer(regionsLayer);
-      }
+      if (regionsLayer && !regionsLayer.enabled) { regionsLayer.enabled = true; this.mapViewer?.toggleLayer(regionsLayer); }
     }
-
-    this.cascadeDropdowns();
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
+    this.cascadeDropdowns(); this.currentPage = 1; this.applyFilterAndSort(); this.zoomMap();
   }
 
   onProvinceChange(): void {
-    this.selectedCity     = '';
-    this.selectedBarangay = '';
-
+    this.selectedCity = ''; this.selectedBarangay = '';
     if (this.selectedProvince) {
       const provincesLayer = this.kmlLayers.find(l => l.name === 'Provinces');
-      if (provincesLayer && !provincesLayer.enabled) {
-        provincesLayer.enabled = true;
-        this.mapViewer?.toggleLayer(provincesLayer);
-      }
+      if (provincesLayer && !provincesLayer.enabled) { provincesLayer.enabled = true; this.mapViewer?.toggleLayer(provincesLayer); }
     }
-
-    this.cascadeDropdowns();
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
+    this.cascadeDropdowns(); this.currentPage = 1; this.applyFilterAndSort(); this.zoomMap();
   }
 
   onCityChange(): void {
@@ -382,22 +422,13 @@ export class ValidationPageComponent implements OnInit {
 
     if (this.selectedCity) {
       const municipalitiesLayer = this.kmlLayers.find(l => l.name === 'Municipalities');
-      if (municipalitiesLayer && !municipalitiesLayer.enabled) {
-        municipalitiesLayer.enabled = true;
-        this.mapViewer?.toggleLayer(municipalitiesLayer);
-      }
+      if (municipalitiesLayer && !municipalitiesLayer.enabled) { municipalitiesLayer.enabled = true; this.mapViewer?.toggleLayer(municipalitiesLayer); }
     }
-
-    this.cascadeDropdowns();
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-    this.zoomMap();
+    this.cascadeDropdowns(); this.currentPage = 1; this.applyFilterAndSort(); this.zoomMap();
   }
 
   onBarangayChange(): void {
-    this.currentPage = 1;
-    this.applyFilterAndSort();
-
+    this.currentPage = 1; this.applyFilterAndSort();
     if (!this.mapViewer) return;
     if (this.selectedBarangay) {
       const row = this.filteredData.find(d =>
@@ -414,36 +445,23 @@ export class ValidationPageComponent implements OnInit {
 
   private applyFilterAndSort(): void {
     let result = [...this.allData] as any[];
-
+    
     if (this.selectedRegion) {
       const provincesForRegion = getProvincesForRegion(this.selectedRegion).map(p => p.toLowerCase());
-      result = result.filter(item =>
-        provincesForRegion.includes(item.province?.trim().toLowerCase() ?? '')
-      );
+      result = result.filter(item => provincesForRegion.includes(item.province?.trim().toLowerCase() ?? ''));
     }
-
-    if (this.selectedProvince) {
-      result = result.filter(item =>
-        item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase()
-      );
-    }
-
-    if (this.selectedCity) {
-      result = result.filter(item =>
-        item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase()
-      );
-    }
-
-    if (this.selectedBarangay) {
-      result = result.filter(item =>
-        item.barangay?.trim().toLowerCase() === this.selectedBarangay.toLowerCase()
-      );
-    }
-
-    if (this.activeDate)     result = result.filter(item => item.validationDate?.trim() === this.activeDate);
-    if (this.activePeriod)   result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
-    if (this.activeProvider) result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
-
+    if (this.selectedProvince)
+      result = result.filter(item => item.province?.trim().toLowerCase() === this.selectedProvince.toLowerCase());
+    if (this.selectedCity)
+      result = result.filter(item => item.cityMunicipality?.trim().toLowerCase() === this.selectedCity.toLowerCase());
+    if (this.selectedBarangay)
+      result = result.filter(item => item.barangay?.trim().toLowerCase() === this.selectedBarangay.toLowerCase());
+    if (this.activeDate)
+      result = result.filter(item => item.validationDate?.trim() === this.activeDate);
+    if (this.activePeriod)
+      result = result.filter(item => this.extractPeriod(item.validationTime) === this.activePeriod);
+    if (this.activeProvider)
+      result = result.filter(item => item.serviceProvider?.trim().toLowerCase() === this.activeProvider!.toLowerCase());
     const term = this.searchTerm.toLowerCase().trim();
     if (term) {
       result = result.filter(item =>
@@ -463,7 +481,7 @@ export class ValidationPageComponent implements OnInit {
         return aVal.localeCompare(bVal) * dir;
       });
     }
-
+    
     this.filteredData = result as ConnectivityData[];
     this.applyPagination();
     this.computeStats();
@@ -479,14 +497,10 @@ export class ValidationPageComponent implements OnInit {
     for (const row of rows) {
       const lat = parseFloat(row[latKey]);
       const lng = parseFloat(row[lngKey]);
-      if (isNaN(lat) || isNaN(lng))  continue;
-      if (lat < -90  || lat > 90)    continue;
-      if (lng < -180 || lng > 180)   continue;
+      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
       const label: string | undefined =
-        row['barangay'] || row['Barangay'] ||
-        row['location'] || row['Location'] ||
-        row['name']     || row['Name']     ||
-        row['cityMunicipality'] || undefined;
+        row['barangay'] || row['Barangay'] || row['location'] || row['Location'] ||
+        row['name'] || row['Name'] || row['cityMunicipality'] || undefined;
       points.push({ lat, lng, label });
     }
     return points;
@@ -496,10 +510,7 @@ export class ValidationPageComponent implements OnInit {
     const points = this.extractCoordPoints(rows);
     if (!points.length) return;
     this.showMap = true;
-    setTimeout(() => {
-      this.mapViewer?.plotMarkers(points);
-      this.cdr.detectChanges();
-    }, 350);
+    setTimeout(() => { this.mapViewer?.plotMarkers(points); this.cdr.detectChanges(); }, 350);
   }
 
   async uploadFromLocalFile(): Promise<void> {
@@ -512,57 +523,42 @@ export class ValidationPageComponent implements OnInit {
     this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
     this.uploadSummary = {
-      totalRows:    result.successRows.length + result.failedRows.length,
+      totalRows: result.successRows.length + result.failedRows.length,
       successCount: result.successRows.length,
-      failedCount:  result.failedRows.length,
-      failedRows:   result.failedRows,
+      failedCount: result.failedRows.length,
+      failedRows: result.failedRows,
     };
     this.showUploadSummary = true;
     this.cdr.detectChanges();
   }
 
-  toggleUrlInput(): void {
-    this.showUrlInput    = !this.showUrlInput;
-    this.excelUrl        = '';
-    this.urlErrorMessage = '';
-  }
+  toggleUrlInput(): void { this.showUrlInput = !this.showUrlInput; this.excelUrl = ''; this.urlErrorMessage = ''; }
 
   private convertToDirectDownloadUrl(url: string): string {
     const googleSheetsMatch = url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-    if (googleSheetsMatch) {
-      return `https://docs.google.com/spreadsheets/d/${googleSheetsMatch[1]}/export?format=xlsx`;
-    }
+    if (googleSheetsMatch) return `https://docs.google.com/spreadsheets/d/${googleSheetsMatch[1]}/export?format=xlsx`;
     const googleDriveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (googleDriveMatch) {
-      return `https://drive.google.com/uc?export=download&id=${googleDriveMatch[1]}`;
-    }
+    if (googleDriveMatch) return `https://drive.google.com/uc?export=download&id=${googleDriveMatch[1]}`;
     return url;
   }
 
   async uploadFromUrl(): Promise<void> {
-    if (!this.excelUrl.trim()) {
-      this.urlErrorMessage = 'Please enter a valid URL.';
-      return;
-    }
-
-    this.isLoadingFromUrl = true;
-    this.urlErrorMessage  = '';
-
+    if (!this.excelUrl.trim()) { this.urlErrorMessage = 'Please enter a valid URL.'; return; }
+    this.isLoadingFromUrl = true; this.urlErrorMessage = '';
     try {
       const downloadUrl = this.convertToDirectDownloadUrl(this.excelUrl.trim());
       const result = await readExcelFromUrlWithSummary<ConnectivityData>(downloadUrl);
       this.allData = [...result.successRows, ...this.allData];
       this.refreshTable();
-      this.showUrlInput = false;
-      this.excelUrl     = '';
+      this.showUrlInput = false; this.excelUrl = '';
       this.plotUploadedCoords(result.successRows as Record<string, any>[]);
 
       this.isLoadingFromUrl = false;
       this.uploadSummary = {
-        totalRows:    result.successRows.length + result.failedRows.length,
+        totalRows: result.successRows.length + result.failedRows.length,
         successCount: result.successRows.length,
-        failedCount:  result.failedRows.length,
-        failedRows:   result.failedRows,
+        failedCount: result.failedRows.length,
+        failedRows: result.failedRows,
       };
       this.showUploadSummary = true;
       this.cdr.detectChanges();
@@ -575,14 +571,10 @@ export class ValidationPageComponent implements OnInit {
     }
   }
 
-  closeUploadSummary(): void {
-    this.showUploadSummary = false;
-    this.uploadSummary = null;
-  }
+  closeUploadSummary(): void { this.showUploadSummary = false; this.uploadSummary = null; }
 
   flyToInputCoordinates(): void {
-    this.coordErrorMessage   = '';
-    this.coordSuccessMessage = '';
+    this.coordErrorMessage = ''; this.coordSuccessMessage = '';
     const result = this.mapViewer?.flyToCoordinates(this.coordLat.trim(), this.coordLng.trim());
     if (!result || !result.success) {
       this.coordErrorMessage = result?.error ?? 'Unable to navigate. Please enter valid decimal coordinates.';
@@ -592,21 +584,14 @@ export class ValidationPageComponent implements OnInit {
     }
   }
 
-  toggleCoordUpload(): void {
-    this.showCoordUpload = !this.showCoordUpload;
-  }
+  toggleCoordUpload(): void { this.showCoordUpload = !this.showCoordUpload; }
 
   onExcelCoordPlot(result: PlotResult): void {
     this.showMap = true;
-    setTimeout(() => {
-      this.mapViewer?.plotMarkers(result.points, result.meta);
-      this.cdr.detectChanges();
-    }, 350);
+    setTimeout(() => { this.mapViewer?.plotMarkers(result.points, result.meta); this.cdr.detectChanges(); }, 350);
   }
 
-  onExcelCoordClear(): void {
-    this.mapViewer?.clearMarkers();
-  }
+  onExcelCoordClear(): void { this.mapViewer?.clearMarkers(); }
 
   private refreshTable(): void {
     this.buildDynamicColumns();
@@ -649,18 +634,9 @@ export class ValidationPageComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.selectedRegion    = '';
-    this.selectedProvince  = '';
-    this.selectedCity      = '';
-    this.selectedBarangay  = '';
-    this.searchTerm        = '';
-    this.cascadeDropdowns();
-    this.currentPage = 1;
-
-    this.kmlLayers.forEach(layer => {
-      if (layer.enabled) { layer.enabled = false; this.mapViewer?.toggleLayer(layer); }
-    });
-
+    this.selectedRegion = ''; this.selectedProvince = ''; this.selectedCity = ''; this.selectedBarangay = ''; this.searchTerm = '';
+    this.cascadeDropdowns(); this.currentPage = 1;
+    this.kmlLayers.forEach(layer => { if (layer.enabled) { layer.enabled = false; this.mapViewer?.toggleLayer(layer); } });
     if (this.mapViewer) this.mapViewer.flyTo([12.8797, 121.7740], 6);
     this.mapViewer?.clearMarkers();
 
@@ -741,7 +717,167 @@ export class ValidationPageComponent implements OnInit {
 
   onSearch(): void { this.currentPage = 1; this.applyFilterAndSort(); }
   goBack(): void   { this.router.navigate(['/connectivity-dashboard']); }
-  onAddNew(): void { console.log('Add New clicked'); }
+  onAddNew(): void { this.openAddForm(); }
+
+  openAddForm(): void {
+    this.isEditMode = false;
+    this.selectedItem = null;
+    this.formData = this.emptyFormData();
+    this.formErrorMessage = '';
+    this.showDetailForm = true;
+  }
+
+  openEditForm(item: ConnectivityData): void {
+    this.isEditMode = true;
+    this.selectedItem = item;
+    this.formData = {
+      location:         item.location         ?? '',
+      barangay:         item.barangay         ?? '',
+      cityMunicipality: item.cityMunicipality ?? '',
+      province:         item.province         ?? '',
+
+      validationDate:   this.toInputDate(item.validationDate  ?? ''),  
+      validationTime:   this.toInputTime(item.validationTime  ?? ''),   
+      technology:       item.technology       ?? '',
+      serviceProvider:  item.serviceProvider  ?? '',
+      upload:           item.upload           ?? null,
+      download:         item.download         ?? null,
+      signalStrength:   item.signalStrength   ?? '',
+      uploadDataSize:   item.uploadDataSize   ?? null,
+      downloadDataSize: item.downloadDataSize ?? null,
+      collectedBy:      item.collectedBy      ?? '',
+    };
+    this.formErrorMessage = '';
+    this.showDetailForm = true;
+  }
+
+  cancelForm(): void {
+    this.showDetailForm = false;
+    this.formData = this.emptyFormData();
+    this.formErrorMessage = '';
+    this.selectedItem = null;
+  }
+
+  saveForm(): void {
+    if (!this.formData.serviceProvider) {
+      this.formErrorMessage = 'Service Provider is required.';
+      return;
+    }
+
+    this.isSavingForm = true;
+    this.formErrorMessage = '';
+
+    const payload: Partial<ConnectivityData> = {
+      location:         this.formData.location,
+      barangay:         this.formData.barangay,
+      cityMunicipality: this.formData.cityMunicipality,
+      province:         this.formData.province,
+      validationDate:   this.formData.validationDate,   
+      validationTime:   this.formData.validationTime,   
+      technology:       this.formData.technology,
+      serviceProvider:  this.formData.serviceProvider,
+      upload:           this.formData.upload   ?? 0,
+      download:         this.formData.download ?? 0,
+      signalStrength:   this.formData.signalStrength,
+      uploadDataSize:   this.formData.uploadDataSize   ?? 0,
+      downloadDataSize: this.formData.downloadDataSize ?? 0,
+      collectedBy:      this.formData.collectedBy,
+    };
+
+    if (this.isEditMode && this.selectedItem) {
+      this.validationPageService.update(this.selectedItem.id, payload).subscribe({
+        next: () => {
+          console.log(' Record updated in database');
+          const idx = this.allData.findIndex(d => d.id === this.selectedItem!.id);
+          if (idx !== -1) {
+            this.allData[idx] = {
+              ...this.allData[idx],
+              ...payload,
+              validationDate: this.toDisplayDate(this.formData.validationDate),
+              validationTime: this.toDisplayTime(this.formData.validationTime),
+            };
+          }
+          this.buildAllDropdownLists();
+          this.buildDateList();
+          this.buildProviderList();
+          this.applyFilterAndSort();
+          this.isSavingForm = false;
+          this.showDetailForm = false;
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          const status  = err?.status ?? 0;
+          const detail  = err?.error?.detail ?? err?.error?.message ?? err?.message ?? JSON.stringify(err?.error ?? err);
+          const msg     = `❌ Update failed (HTTP ${status}): ${detail}`;
+          console.error(msg, err);
+          this.formErrorMessage = msg;
+          this.isSavingForm = false;
+          this.cdr.detectChanges();
+        }
+      });
+
+    } else {
+      this.validationPageService.create(payload).subscribe({
+        next: (created: any) => {
+          console.log('✅ Record saved to database! ID:', created?.id);
+          const newRecord: ConnectivityData = {
+            id:               created?.id            ?? Date.now(),
+            region:           this.formData.province ?? '',
+            province:         this.formData.province,
+            cityMunicipality: this.formData.cityMunicipality,
+            barangay:         this.formData.barangay,
+            location:         this.formData.location,
+            validationDate:   this.toDisplayDate(this.formData.validationDate),
+            validationTime:   this.toDisplayTime(this.formData.validationTime),
+            technology:       this.formData.technology,
+            serviceProvider:  this.formData.serviceProvider,
+            upload:           this.formData.upload   ?? 0,
+            download:         this.formData.download ?? 0,
+            signalStrength:   this.formData.signalStrength,
+            uploadDataSize:   this.formData.uploadDataSize   ?? 0,
+            downloadDataSize: this.formData.downloadDataSize ?? 0,
+            collectedBy:      this.formData.collectedBy,
+          } as ConnectivityData;
+          this.allData = [newRecord, ...this.allData];
+          this.buildAllDropdownLists();
+          this.buildDateList();
+          this.buildProviderList();
+          this.applyFilterAndSort();
+          this.isSavingForm = false;
+          this.showDetailForm = false;
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          const status = err?.status ?? 0;
+          let detail: string;
+          if (err?.error?.detail) {
+            if (Array.isArray(err.error.detail)) {
+              detail = err.error.detail
+                .map((e: any) => `[${(e.loc ?? []).join('→')}] ${e.msg ?? e.type}`)
+                .join(' | ');
+            } else {
+              detail = typeof err.error.detail === 'string'
+                ? err.error.detail
+                : JSON.stringify(err.error.detail);
+            }
+          } else if (err?.error?.message) {
+            detail = err.error.message;
+          } else if (typeof err?.error === 'string') {
+            detail = err.error;
+          } else if (err?.message) {
+            detail = err.message;
+          } else {
+            detail = JSON.stringify(err?.error ?? err);
+          }
+          const msg = `Save failed (HTTP ${status}): ${detail}`;
+          console.error('❌ Create error:', msg, err);
+          this.formErrorMessage = msg;
+          this.isSavingForm = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
 }
 
 class LinkedSet<T> {

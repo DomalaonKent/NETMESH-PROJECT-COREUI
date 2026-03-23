@@ -95,7 +95,6 @@ function getRegionFromProvince(province: string): string {
   for (const key of Object.keys(PROVINCE_TO_REGION)) {
     if (key.toLowerCase() === lower) return PROVINCE_TO_REGION[key];
   }
-  
 
   for (const key of Object.keys(PROVINCE_TO_REGION)) {
     if (lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) return PROVINCE_TO_REGION[key];
@@ -108,30 +107,58 @@ function formatDate(dateStr: string | null): string {
   if (!dateStr) return '';
   if (dateStr.includes('/')) return dateStr;
   const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
   return `${parts[1]}/${parts[2]}/${parts[0]}`;
 }
 
 function formatTime(timeStr: string | null): string {
   if (!timeStr) return '';
-  if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
-  const hour = parseInt(timeStr.split(':')[0]);
-  const minute = timeStr.split(':')[1];
+  if (/AM|PM/i.test(timeStr)) return timeStr;
+  const [hStr, mStr] = timeStr.split(':');
+  const hour = parseInt(hStr, 10);
+  const minute = mStr ?? '00';
   const period = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
   return `${displayHour}:${minute} ${period}`;
 }
 
+export function toInputDate(dateStr: string): string {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const [m, d, y] = parts;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  return '';
+}
+
+export function toInputTime(timeStr: string): string {
+  if (!timeStr) return '';
+  if (/^\d{2}:\d{2}$/.test(timeStr)) return timeStr;
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (match) {
+    let hour = parseInt(match[1], 10);
+    const min  = match[2];
+    const period = match[3].toUpperCase();
+    if (period === 'AM' && hour === 12) hour = 0;
+    if (period === 'PM' && hour !== 12) hour += 12;
+    return `${String(hour).padStart(2, '0')}:${min}`;
+  }
+  return '';
+}
+
 @Injectable({ providedIn: 'root' })
 export class ValidationPageService {
-  private readonly API_URL = 'http://localhost:8001';
+  private readonly API_URL = 'http://localhost:8002';
 
   constructor(private http: HttpClient) {}
 
   getData(filters?: {
-    region?: string;            
+    region?: string;
     province?: string;
-    city_municipality?: string;   
-    barangay?: string;        
+    city_municipality?: string;
+    barangay?: string;
     service_provider?: string;
     technology?: string;
     limit?: number;
@@ -140,10 +167,7 @@ export class ValidationPageService {
     let params = new HttpParams();
 
     if (filters?.region && filters.region !== 'All Regions') {
-      const provinces = getProvincesForRegion(filters.region);
-      if (provinces.length > 0) {
-        params = params.set('region', filters.region);
-      }
+      params = params.set('region', filters.region);
     }
 
     if (filters?.province && filters.province !== 'All Provinces') {
@@ -166,7 +190,7 @@ export class ValidationPageService {
       params = params.set('technology', filters.technology);
     }
 
-    params = params.set('limit', (filters?.limit ?? 1000).toString());
+    params = params.set('limit', (filters?.limit ?? 5000).toString());
 
     return this.http.get<any[]>(`${this.API_URL}/validations`, { params }).pipe(
       map(data => data.map(item => {
@@ -180,19 +204,19 @@ export class ValidationPageService {
           id:               item.id,
           region,
           province,
-          cityMunicipality: item.city_municipality ?? '',
-          barangay:         item.barangay          ?? '',
-          location:         item.location          ?? '',
+          cityMunicipality: item.city_municipality  ?? '',
+          barangay:         item.barangay            ?? '',
+          location:         item.location            ?? '',
           validationDate:   formatDate(item.validation_date),
           validationTime:   formatTime(item.validation_time),
-          technology:       item.technology        ?? '',
-          serviceProvider:  item.service_provider  ?? '',
-          upload:           item.upload            ?? 0,
-          download:         item.download          ?? 0,
-          signalStrength:   item.signal_strength   ?? null,
-          uploadDataSize:   item.upload_data_size   ?? null,
-          downloadDataSize: item.download_data_size ?? null,
-          collectedBy:      item.collected_by       ?? 'Unknown',
+          technology:       item.technology          ?? '',
+          serviceProvider:  item.service_provider    ?? '',
+          upload:           item.upload              ?? 0,
+          download:         item.download            ?? 0,
+          signalStrength:   item.signal_strength     ?? null,
+          uploadDataSize:   item.upload_data_size     ?? null,
+          downloadDataSize: item.download_data_size   ?? null,
+          collectedBy:      item.collected_by         ?? 'Unknown',
         } as ConnectivityData;
       }))
     );
@@ -217,12 +241,47 @@ export class ValidationPageService {
   }
 
   create(record: Partial<ConnectivityData>): Observable<any> {
-    const payload = this.toApiPayload(record);
-    return this.http.post(`${this.API_URL}/validations`, payload);
+    const payload = this.toCreatePayload(record);
+    console.log('📤 POST /validations payload:', JSON.stringify(payload, null, 2));
+    return this.http.post(
+      `${this.API_URL}/validations`,
+      payload,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  getById(id: number): Observable<ConnectivityData> {
+    return this.http.get<any>(`${this.API_URL}/validations/${id}`).pipe(
+      map(item => {
+        const province       = item.province ?? '';
+        const regionFromJson = item.region   ?? '';
+        const region = regionFromJson.trim()
+          ? regionFromJson.trim()
+          : getRegionFromProvince(province);
+        return {
+          id:               item.id,
+          region,
+          province,
+          cityMunicipality: item.city_municipality  ?? '',
+          barangay:         item.barangay            ?? '',
+          location:         item.location            ?? '',
+          validationDate:   formatDate(item.validation_date),
+          validationTime:   formatTime(item.validation_time),
+          technology:       item.technology          ?? '',
+          serviceProvider:  item.service_provider    ?? '',
+          upload:           item.upload              ?? 0,
+          download:         item.download            ?? 0,
+          signalStrength:   item.signal_strength     ?? null,
+          uploadDataSize:   item.upload_data_size     ?? null,
+          downloadDataSize: item.download_data_size   ?? null,
+          collectedBy:      item.collected_by         ?? 'Unknown',
+        } as ConnectivityData;
+      })
+    );
   }
 
   update(id: number, record: Partial<ConnectivityData>): Observable<any> {
-    const payload = this.toApiPayload(record);
+    const payload = this.toUpdatePayload(record);
     return this.http.put(`${this.API_URL}/validations/${id}`, payload);
   }
 
@@ -234,21 +293,49 @@ export class ValidationPageService {
     return this.http.get<any[]>(`${this.API_URL}/validations/stats/by-provider`);
   }
 
-  private toApiPayload(record: Partial<ConnectivityData>): any {
+  private toCreatePayload(record: Partial<ConnectivityData>): any {
     return {
-      id:                record.id,
-      province:          record.province,
-      city_municipality: record.cityMunicipality,
-      barangay:          record.barangay,
-      location:          record.location,
-      validation_date:   record.validationDate,
-      validation_time:   record.validationTime,
-      technology:        record.technology,
-      service_provider:  record.serviceProvider,
-      upload:            record.upload,
-      download:          record.download,
-      signal_strength:   record.signalStrength,
+      province:          record.province         ?? null,
+      city_municipality: record.cityMunicipality ?? null,
+      barangay:          record.barangay         ?? null,
+      location:          record.location         ?? null,
+      validation_date:   record.validationDate   ?? null,
+      validation_time:   this.normalizeTime(record.validationTime),
+      technology:        record.technology       ?? null,
+      service_provider:  record.serviceProvider  ?? null,
+      upload:            record.upload           ?? 0,
+      download:          record.download         ?? 0,
+      signal_strength:   record.signalStrength   ?? null,
       remarks:           null,
     };
+  }
+
+  private toUpdatePayload(record: Partial<ConnectivityData>): any {
+    return {
+      province:          record.province         ?? null,
+      city_municipality: record.cityMunicipality ?? null,
+      barangay:          record.barangay         ?? null,
+      location:          record.location         ?? null,
+      validation_date:   record.validationDate   ?? null,
+      validation_time:   this.normalizeTime(record.validationTime),
+      technology:        record.technology       ?? null,
+      service_provider:  record.serviceProvider  ?? null,
+      upload:            record.upload           ?? 0,
+      download:          record.download         ?? 0,
+      signal_strength:   record.signalStrength   ?? null,
+      remarks:           null,
+    };
+  }
+
+  private normalizeTime(timeStr: string | null | undefined): string | null {
+    if (!timeStr) return null;
+    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!match) return timeStr;
+    let h = parseInt(match[1], 10);
+    const m = match[2];
+    const p = (match[3] ?? '').toUpperCase();
+    if (p === 'AM' && h === 12) h = 0;
+    if (p === 'PM' && h !== 12) h += 12;
+    return `${String(h).padStart(2, '0')}:${m}`;
   }
 }
