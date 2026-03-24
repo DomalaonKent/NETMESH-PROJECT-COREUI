@@ -667,6 +667,9 @@
 
     <div class="detail-form-footer">
       <button class="btn-form-cancel" (click)="cancelForm()">Cancel</button>
+      <button class="btn-form-delete" *ngIf="isEditMode" (click)="deleteFromForm()" [disabled]="isSavingForm">
+        Delete
+      </button>
       <button class="btn-form-save" (click)="saveForm()" [disabled]="isSavingForm">
         <span *ngIf="isSavingForm">Saving...</span>
         <span *ngIf="!isSavingForm">{{ isEditMode ? 'Update' : 'Save' }}</span>

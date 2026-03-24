@@ -1137,6 +1137,21 @@ td.provider-dito  { color: #fb923c !important; font-weight: 700; }
   &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 }
 
+.btn-form-delete {
+  padding: 0 20px;
+  height: 38px;
+  background: transparent;
+  color: #f87171;
+  border: 1.5px solid rgba(248,113,113,0.35);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  &:hover { color: #fff; background: rgba(239,68,68,0.2); border-color: #ef4444; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
 @media (max-width: 768px) {
   .detail-form-grid { grid-template-columns: 1fr; }
   .btn-filter-add-new { width: 100%; justify-content: center; }
